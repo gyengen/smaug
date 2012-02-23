@@ -1,0 +1,74 @@
+//ozttest
+__device__ __host__
+void init_user_MODID (real *w, struct params *p,int *ii) {
+                    
+                    //real b0=1.0/sqrt(4.0*PI);
+                    real b0=1.0;
+                    //real ptot=5.0/(12.0*PI);
+                    real ptot=5.0/3.0;
+                    real rrho=1.0;
+                    real rgamm1;
+                    real e1,e2,xp,yp;
+                    real qv,width,dv,k1,sigma;
+  int i,j,k;
+  i=ii[0];
+  j=ii[1];
+
+			qv=0.645;
+			width=0.05;
+			dv=0.01;
+			k1=6.2831853;
+			sigma=0.2;
+	#ifdef USE_SAC
+                    b0=1.0;
+                    ptot=1.0;
+		    w[fencode3_i(p,ii,rhob)]=1.0;
+                    //w[fencode3_i(p,ii,rhob)]=25.0/9.0;
+
+                    rgamm1=1.0/((p->gamma)-1);
+		    
+		    w[fencode3_i(p,ii,b2)]=0.0;
+		    w[fencode3_i(p,ii,b1)]=0.129;
+		    //w[fencode3_i(p,ii,b2)]=-b0*sin((1.0*p->dx[1])*j);
+		    //w[fencode3_i(p,ii,b1)]=b0*sin(2.0*(p->dx[0])*i);
+
+                    //vx=-sin(2pi y)
+                    //vy=sin(2pi x)
+		    //w[fencode3_i(p,ii,mom1)]=-w[fencode3_i(p,ii,rhob)]*sin(2.0*PI*j*(p->dx[1]));
+                    //w[fencode3_i(p,ii,mom2)]=w[fencode3_i(p,ii,rhob)]*sin(2.0*PI*j*(p->dx[0]));
+                    xp=(p->xmin[0])+ii[0]*(p->dx[0]);
+                    yp=(p->xmin[1])+ii[1]*(p->dx[1]);
+		    w[fencode3_i(p,ii,mom2)]=dv*sin(k1*xp)*exp(-(yp*yp)/(sigma*sigma));
+
+                    w[fencode3_i(p,ii,mom1)]=qv*tanh(yp/width);
+		    //w[fencode3_i(p,ii,mom1)]=-w[fencode3_i(p,ii,rho)]*sin(1.0*i*(p->dx[1]));
+                    //w[fencode3_i(p,ii,mom2)]=w[fencode3_i(p,ii,rho)]*sin(1.0*j*(p->dx[0]));
+
+//gives agreement with vac ozt
+//w[fencode3_i(p,ii,energy)]=-sin(1.0*i*(p->dx[0]));
+                    //w[fencode3_i(p,ii,energy)]=ptot+(0.5*((p->gamma)-1)*(w[fencode3_i(p,ii,mom1)]*w[fencode3_i(p,ii,mom1)]+w[fencode3_i(p,ii,mom2)]*w[fencode3_i(p,ii,mom2)])/rrho);
+e1=ptot*rgamm1+(0.5*(w[fencode3_i(p,ii,mom1)]*w[fencode3_i(p,ii,mom1)]+w[fencode3_i(p,ii,mom2)]*w[fencode3_i(p,ii,mom2)])/rrho);
+                    //w[fencode3_i(p,ii,energy)]+=0.5*((p->gamma)-2)*(w[fencode3_i(p,ii,b1)]*w[fencode3_i(p,ii,b1)]+w[fencode3_i(p,ii,b2)]*w[fencode3_i(p,ii,b2)]);
+
+                   e2=0.5*(w[fencode3_i(p,ii,b1)]*w[fencode3_i(p,ii,b1)]+w[fencode3_i(p,ii,b2)]*w[fencode3_i(p,ii,b2)]);
+                    //w[fencode3_i(p,ii,energy)]*=rgamm1;
+                    w[fencode3_i(p,ii,energyb)]=(e1+e2);
+
+                   w[fencode3_i(p,ii,energy)]=w[fencode3_i(p,ii,energyb)];
+                   w[fencode3_i(p,ii,energyb)]=0.0;
+
+                   w[fencode3_i(p,ii,rho)]=w[fencode3_i(p,ii,rhob)];
+                   w[fencode3_i(p,ii,rhob)]=0.0;
+                   //w[fencode3_i(p,ii,rho)]=0.0;
+
+
+
+
+       #endif
+
+
+
+
+
+}
+

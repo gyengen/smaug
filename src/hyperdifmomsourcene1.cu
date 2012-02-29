@@ -72,7 +72,8 @@ int shift=order*NVAR*dimp;
 
  
                            //  wmod[fencode3_hdmne1(p,iia,energy)+(ordero*NVAR*dimp)]=wmod[fencode3_hdmne1(p,iia,energy)+(ordero*NVAR*dimp)]+dt*dwn1[fencode3_hdmne1(p,iia,energy)];
-
+    //if(i==127 && j==252)
+    //  p->test=dt*dwn1[fencode3_hdmne1(p,iia,mom1+ii0)];
 
                          }
               //  }	
@@ -150,6 +151,11 @@ int shift=order*NVAR*dimp;
  
                              wmod[fencode3_hdmne1(p,iia,energy)+(ordero*NVAR*dimp)]=wmod[fencode3_hdmne1(p,iia,energy)+(ordero*NVAR*dimp)]+dt*dwn1[fencode3_hdmne1(p,iia,energy)];
 
+   // if(i==127 && j==252)
+   //   p->test=dt*dwn1[fencode3_hdmne1(p,iia,energy)];
+
+   // if(i==127 && j==252)
+   //   p->test=wmod[fencode3_hdmne1(p,iia,energy)+(ordero*NVAR*dimp)];
 
                          }
               //  }	
@@ -301,7 +307,9 @@ int shift=order*NVAR*dimp;
      #endif
 
      dwn1[fencode3_hdmne1(p,iia,energy)]=(grad13n_hdmne1(wtemp,wd,p,iia,tmp8,ii));
-
+     //dwn1[fencode3_hdmne1(p,iia,energy)]=-2.9e-4;
+    //if(i==127 && j==252)
+    //  p->test=(p->dt)*dwn1[fencode3_hdmne1(p,iia,energy)];
 
 
 
@@ -372,7 +380,8 @@ int shift=order*NVAR*dimp;
 
      wtemp[fencode3_hdmne1(p,iia,tmp8)]=wtemp[fencode3_hdmne1(p,iia,tmp6)]*wmod[(shift)+fencode3_hdmne1(p,iia,mom1+ii0)];
 
-
+  //  if(i==127 && j==252)
+  //    p->test=wtemp[fencode3_hdmne1(p,iia,tmp7)];
 
 
 
@@ -451,7 +460,14 @@ int shift=order*NVAR*dimp;
      //wtemp[fencode3_hdmne1(p,iia,tmp6)]=wtemp[fencode3_hdmne1(p,iia,tmp5)]*((wd[fencode3_hdmne1(p,iia,hdnur)]+wd[fencode3_hdmne1(p,iia,hdnul)]+2.0*wd[fencode3_hdmne1(p,iia,nushk1+dim)]))/4.0;
      //wtemp[fencode3_hdmne1(p,iia,tmp6)]=1.0;
      // wtemp[fencode3_hdmne1(p,iia,tmp6)]=-1.0e-41*((wd[fencode3_hdmne1(p,iia,hdnur)]+wd[fencode3_hdmne1(p,iia,hdnul)]+2.0*wd[fencode3_hdmne1(p,iia,nushk1+dim)]))/4.0;
-     wtemp[fencode3_hdmne1(p,iia,tmp6)]=wtemp[fencode3_hdmne1(p,iia,tmp5)]*((wd[fencode3_hdmne1(p,iia,hdnur)]+wd[fencode3_hdmne1(p,iia,hdnul)]+2.0*wd[fencode3_hdmne1(p,iia,nushk1+dim)]))/4.0;
+    wtemp[fencode3_hdmne1(p,iia,tmp6)]=wtemp[fencode3_hdmne1(p,iia,tmp5)]*((wd[fencode3_hdmne1(p,iia,hdnur)]+wd[fencode3_hdmne1(p,iia,hdnul)]+2.0*wd[fencode3_hdmne1(p,iia,nushk1+dim)]))/4.0;
+
+
+ //wtemp[fencode3_hdmne1(p,iia,tmp6)]=wtemp[fencode3_hdmne1(p,iia,tmp5)]*((1.4e-4))/4.0;
+  //  if(i==127 && j==252)
+  //    p->test=((wd[fencode3_hdmne1(p,iia,hdnur)]+wd[fencode3_hdmne1(p,iia,hdnul)]+2.0*wd[fencode3_hdmne1(p,iia,nushk1+dim)]))/4.0;
+;//   if(i==127 && j==252)
+;//      p->test=((wtemp[fencode3_hdmne1(p,iia,tmp5)]));
 
 
    }
@@ -537,7 +553,9 @@ int shift=order*NVAR*dimp;
      #endif
   //if(i>0 && j >0 && i<((p->n[0])-1) && j<((p->n[1])-1))
       wtemp[fencode3_hdmne1(p,iia,tmp5)]=(grad13n_hdmne1(wtemp,wd,p,iia,tmp4,dim));
-      
+        // if(i==127 && j==252)
+        //       p->test=wtemp[fencode3_hdmne1(p,iia,tmp5)];
+
 
 
 //__syncthreads();
@@ -703,6 +721,11 @@ int cuhyperdifmomsourcene1(struct params **p, struct params **d_p, real **d_wmod
      cudaThreadSynchronize();
      hyperdifmomsourcene3_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod, *d_dwn1,  *d_wd, order,ordero,*d_wtemp, field, dim,ii,ii0,dt);
      cudaThreadSynchronize();
+
+
+
+
+
      hyperdifmomsourcene4_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod, *d_dwn1,  *d_wd, order,ordero,*d_wtemp, field, dim,ii,ii0,dt);
      cudaThreadSynchronize();
      hyperdifmomsourcene5_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod, *d_dwn1,  *d_wd, order,ordero,*d_wtemp, field, dim,ii,ii0,dt);
@@ -714,8 +737,9 @@ int cuhyperdifmomsourcene1(struct params **p, struct params **d_p, real **d_wmod
      cudaThreadSynchronize();
      hyperdifmomsourcene6a_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod, *d_dwn1,  *d_wd, order,ordero,*d_wtemp, field, dim,ii,ii0,dt);
      cudaThreadSynchronize();
-
 cudaMemcpy(*p, *d_p, sizeof(struct params), cudaMemcpyDeviceToHost);
+//printf("tmp2 %d %d %10.20g\n",ii,dim,(*p)->test);
+//cudaMemcpy(*p, *d_p, sizeof(struct params), cudaMemcpyDeviceToHost);
 ////printf("test %g\n",(*p)->test);
 
 }

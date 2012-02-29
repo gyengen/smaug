@@ -756,8 +756,8 @@ __global__ void hyperdifvisc1al_parallel(struct params *p,real *wmod,
 #endif  
 
 int shift=order*NVAR*dimp;
-  __shared__ real wts[512];
-  __shared__ real wms[512];
+  //__shared__ real wts[512];
+  //__shared__ real wms[512];
 
 
 
@@ -877,8 +877,8 @@ int bfac1,bfac2,bfac3;
 //int bfac2= (field==rho || field>mom2);
 //int bfac3=(field>rho && field<energy);
 int shift=order*NVAR*dimp;
-  __shared__ real wts[512];
-  __shared__ real wms[512];
+ // __shared__ real wts[512];
+ // __shared__ real wms[512];
 
 
 

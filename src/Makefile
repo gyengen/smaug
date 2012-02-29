@@ -19,7 +19,7 @@ include make_inputs
 #	../../../IoSimulation/soapClient.o
 	
 ALLOBJS	=	$(obj)/$(BASICEXOBJS)
-ALLBIN	=	$(Bin)/iosac
+ALLBIN	=	$(Bin)/smaug
 
 
 
@@ -115,20 +115,20 @@ clean:	cleanobjs cleanbin
 
 cleanall:	cleanobjs cleanbin
 
-all: allsac
-	$(CC) -g $(LIBS)  $(incDirs) -o $(Bin)/iosac $(ALLOBJS) $(MYLIBS)
+all: smaug
+	$(CC) -g $(LIBS)  $(incDirs) -o $(Bin)/smaug $(ALLOBJS) $(MYLIBS)
 
 allsac:$(ALLOBJS)
-	$(NVCC) -g $(LIBS)  $(incDirs) -o $(Bin)/iosac $(ALLOBJS) $(MYLIBS)
+	$(NVCC) -g $(LIBS)  $(incDirs) -o $(Bin)/smaug $(ALLOBJS) $(MYLIBS)
 #@# Dependency rules follow -----------------------------
 
 
 #ioshalloww:$(BASICEXOBJS)
 #	$(NVCC) --allow-multiple-defintion -g $(LIBS)  $(incDirs) -o $(Bin)/ioshalloww $(BASICEXOBJS) $(MYLIBS)
-sac:$(BASICEXOBJS)
+smaug:$(BASICEXOBJS)
 	rm iosac2.5d.o
 	$(CC) $(C_FLAGS) $(CCFLAGS) $(incDirs) $(LINKFLAGS)  -o ../obj/iosac2.5d.o -c iosac2.5d.cpp
-	$(CC) -g $(LIBS)  $(incDirs) -o $(Bin)/iosac $(ALLOBJS) $(MYLIBS)
+	$(CC) -g $(LIBS)  $(incDirs) -o $(Bin)/smaug $(ALLOBJS) $(MYLIBS)
 
 
 

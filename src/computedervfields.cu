@@ -1741,19 +1741,22 @@ int cucomputemaxc(struct params **p,  struct params **d_p, real **d_wmod,  real 
 cudaMemcpy(*wd, *d_wd, NDERV*dimp*sizeof(real), cudaMemcpyDeviceToHost);
 cudaMemcpy(*d_wtemp, ((*wd)+(cfast*dimp)), dimp*sizeof(real), cudaMemcpyHostToDevice);
  
-int s=1;
+/*int s=1;
+
+   myreduction0computemaxc_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,  *d_wd, order, dir, *d_wtemp,ndimp,s);
+   cudaThreadSynchronize();
 while(((s*=2)<=((ndimp/2)-1)) ) 
 {
    myreduction0computemaxc_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,  *d_wd, order, dir, *d_wtemp,ndimp,s);
    cudaThreadSynchronize();
-}
+}*/
 
 
 //reduction0computemaxcfast_parallel<<<numBlocks, numThreadsPerBlock,smemSize>>>(*d_p, *d_wmod,  *d_wd, order, dir);
 //myreduction0computemaxcfast_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,  *d_wd,*d_wtemp, order, dir);
 
  //reductiona0computemaxc_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,  *d_wd, order, dir);
-  // computemaxc_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,  *d_wd, order, dir);
+   computemaxc_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,  *d_wd, order, dir);
     // fastcomputemaxc_parallel<<<numBlocks, numThreadsPerBlock,smemSize>>>(*d_p, *d_wmod,  *d_wd, order, dir);
 cudaThreadSynchronize();
 
@@ -1837,6 +1840,8 @@ cudaMemcpy(*wd, *d_wd, NDERV*dimp*sizeof(real), cudaMemcpyDeviceToHost);
 cudaMemcpy(*d_wtemp, ((*wd)+(cfast*dimp)), dimp*sizeof(real), cudaMemcpyHostToDevice);
  zeropadmaxcourant_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,  *d_wd, order, dir, *d_wtemp,ndimp);
 int s=1;
+myreduction0computemaxcourant_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,  *d_wd, order, dir, *d_wtemp,ndimp,s);
+cudaThreadSynchronize();
 while(((s*=2)<=((ndimp/2)-1)) ) 
 {
    myreduction0computemaxcourant_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,  *d_wd, order, dir, *d_wtemp,ndimp,s);

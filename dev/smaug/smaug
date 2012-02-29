@@ -25,9 +25,9 @@ fi
 
 if [ $# -gt 1 ]; then
 #  iogs readsimulation simfile.xml 0 $IOME_WSPORT localhost
-  bin/iosac $IOME_SIMNAME $SIMFILE
+  bin/smaug $IOME_SIMNAME $SIMFILE
 else
-  bin/iosac $IOME_SIMNAME
+  bin/smaug $IOME_SIMNAME
 fi
 
 #iome the following lines comment using ##

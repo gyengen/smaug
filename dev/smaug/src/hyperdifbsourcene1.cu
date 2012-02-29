@@ -71,9 +71,9 @@ int shift=order*NVAR*dimp;
   //if(i<((p->n[0])) && j<((p->n[1])))
 	{		               
 
-dwn1[fencode3_hdbne1(p,iia,energy)]=sb*wtemp[fencode3_hdbne1(p,iia,tmp6)];
+//dwn1[fencode3_hdbne1(p,iia,energy)]=sb*wtemp[fencode3_hdbne1(p,iia,tmp6)];
 
-//dwn1[fencode3_hdbne1(p,iia,b1+ii0)]=sb*wtemp[fencode3_hdbne1(p,iia,tmp4)];
+dwn1[fencode3_hdbne1(p,iia,b1+ii0)]=sb*wtemp[fencode3_hdbne1(p,iia,tmp4)];
 
 
    }
@@ -108,6 +108,8 @@ dwn1[fencode3_hdbne1(p,iia,energy)]=sb*wtemp[fencode3_hdbne1(p,iia,tmp6)];
   //__syncthreads();  
   
 }
+
+
 
 
 __global__ void hyperdifbsourcene6a_parallel(struct params *p,  real *wmod, 
@@ -196,6 +198,12 @@ dwn1[fencode3_hdbne1(p,iia,energy)]=sb*wtemp[fencode3_hdbne1(p,iia,tmp6)];
                               //                                                                                  - sign here same as vac maybe a +
                               //wmod[fencode3_hdbne1(p,iia,b1+ii0)+(ordero*NVAR*dimp)]=wmod[fencode3_hdbne1(p,iia,b1+ii0)+(ordero*NVAR*dimp)]+dt*dwn1[fencode3_hdbne1(p,iia,b1+ii0)]; 
                              wmod[fencode3_hdbne1(p,iia,energy)+(ordero*NVAR*dimp)]=wmod[fencode3_hdbne1(p,iia,energy)+(ordero*NVAR*dimp)]+dt*dwn1[fencode3_hdbne1(p,iia,energy)]; 
+
+
+  //  if(i==127 && j==252)
+  //    p->test=wmod[fencode3_hdbne1(p,iia,energy)+(ordero*NVAR*dimp)];
+
+
 
                          }
               //  }	
@@ -407,6 +415,10 @@ int shift=order*NVAR*dimp;
 
  wtemp[fencode3_hdbne1(p,iia,tmp4)]=grad13n_hdbne1(wtemp,wd,p,iia,tmp3,mm);
 
+   // if(i==252 && j==127)
+   //   p->test=wtemp[fencode3_hdbne1(p,iia,tmp3)];
+
+
    }
 
 
@@ -426,20 +438,22 @@ int shift=order*NVAR*dimp;
 
 
 
+
+
 __global__ void hyperdifbsourcene2_parallel(struct params *p,  real *wmod, 
     real *dwn1, real *wd, int order,int ordero, real *wtemp, int field, int dim, int jj, int ii0,int mm,real sb)
 {
   int iindex = blockIdx.x * blockDim.x + threadIdx.x;
-  int i,j;
+  int i,j,k;
   int m,ii1;
-  real fip,fim1,tmpc;
-  int index,k;
+  //real fip,fim1,tmpc;
+  //int index,k;
   int ni=p->n[0];
   int nj=p->n[1];
 
-  real dt=p->dt;
-  real dy=p->dx[1];
-  real dx=p->dx[0];
+  //real dt=p->dt;
+  //real dy=p->dx[1];
+  //real dx=p->dx[0];
 
    int ip,jp;
   int iia[NDIM];
@@ -485,6 +499,13 @@ int shift=order*NVAR*dimp;
 
       wtemp[fencode3_hdbne1(p,iia,tmp3)]=wtemp[fencode3_hdbne1(p,iia,tmp2)]*(wd[fencode3_hdbne1(p,iia,hdnul)]+wd[fencode3_hdbne1(p,iia,hdnur)])/2;
 
+ //wtemp[fencode3_hdbne1(p,iia,tmp3)]=wtemp[fencode3_hdbne1(p,iia,tmp2)]*3.75;
+
+    //if(i==127 && j==252)
+    //  p->test=wtemp[fencode3_hdbne1(p,iia,tmp2)];
+   // if(i==127 && j==252)
+   //   p->test=wtemp[fencode3_hdbne1(p,iia,tmp3)];
+
      }
 
 
@@ -497,20 +518,20 @@ int shift=order*NVAR*dimp;
 
 
 
-__global__ void hyperdifbsourcene1a_parallel(struct params *p,  real *wmod, 
+__global__ void hyperdifbsourcene1b_parallel(struct params *p,  real *wmod, 
     real *dwn1, real *wd, int order,int ordero, real *wtemp, int field, int dim, int jj, int ii0,int mm,real sb)
 {
   int iindex = blockIdx.x * blockDim.x + threadIdx.x;
-  int i,j;
+  int i,j,k;
   int m,ii1;
-  real fip,fim1,tmpc;
-  int index,k;
+  //real fip,fim1,tmpc;
+  //int index,k;
   int ni=p->n[0];
   int nj=p->n[1];
 
-  real dt=p->dt;
-  real dy=p->dx[1];
-  real dx=p->dx[0];
+  //real dt=p->dt;
+  //real dy=p->dx[1];
+  //real dx=p->dx[0];
 
 
    int ip,jp;
@@ -556,9 +577,14 @@ int shift=order*NVAR*dimp;
 
 
        wtemp[fencode3_hdbne1(p,iia,tmp2)]=/*0.25**/grad13n_hdbne1(wtemp,wd,p,iia,tmp1,dim);
-
-
-
+   //   wtemp[fencode3_hdbne1(p,iia,tmp2)]=/*0.25**/grad13n_hdbne1(wmod+shift,wd,p,iia,b1+field,dim);
+//wmod[(shift)+fencode3_hdbne1(p,iia,b1+field)]
+    //if(i==127 && j==252)
+    //  p->test=grad13n_hdbne1(wtemp,wd,p,iia,tmp2,dim);
+    //if(i==127 && j==252)
+    //  p->test=grad13n_hdbne1(wmod+shift,wd,p,iia,b1+field,dim);
+//if(i==127 && j==252)
+//    p->test=wtemp[fencode3_hdbne1(p,iia,tmp2)];
    }
 
 
@@ -570,21 +596,104 @@ int shift=order*NVAR*dimp;
 }
 
 
+__global__ void hyperdifbsourcene1a_parallel(struct params *p,  real *wmod, 
+    real *dwn1, real *wd, int order,int ordero, real *wtemp, int field, int dim, int jj, int ii0,int mm,real sb)
+{
+
+  int iindex = blockIdx.x * blockDim.x + threadIdx.x;
+  int i,j,k;
+  int m,ii1;
+  //real fip,fim1,tmpc;
+  //int index,k;
+  int ni=p->n[0];
+  int nj=p->n[1];
+
+  //real dt=p->dt;
+  //real dy=p->dx[1];
+  //real dx=p->dx[0];
+   int ip,jp;
+  int iia[NDIM];
+  int dimp=((p->n[0]))*((p->n[1]));
+ #ifdef USE_SAC_3D
+   int kp;
+   real dz=p->dx[2];
+   dimp=((p->n[0]))*((p->n[1]))*((p->n[2]));
+#endif  
+   //int ip,jp,ipg,jpg;
+
+  #ifdef USE_SAC_3D
+   kp=iindex/(nj*ni);
+   jp=(iindex-(kp*(nj*ni)))/ni;
+   ip=iindex-(kp*nj*ni)-(jp*ni);
+#else
+    jp=iindex/ni;
+   ip=iindex-(jp*ni);
+#endif  
+
+
+int shift=order*NVAR*dimp;
+
+
+   
+
+     iia[0]=ip;
+     iia[1]=jp;
+     i=iia[0];
+     j=iia[1];
+     k=0;
+     #ifdef USE_SAC_3D
+	   iia[2]=kp;
+           k=iia[2];
+     #endif
+
+ 
+
+
+
+     #ifdef USE_SAC_3D
+      if(i<((p->n[0])) && j<((p->n[1])) && k<((p->n[2])))
+     #else
+      if(i<((p->n[0])) && j<((p->n[1])))
+     #endif
+  //if( i<((p->n[0])) && j<((p->n[1])))
+  {
+
+wtemp[fencode3_hdbne1(p,iia,tmp1)]=wmod[(shift)+fencode3_hdbne1(p,iia,b1+field)];
+
+//wtemp[fencode3_hdbne1(p,iia,tmp1)]=wmod[fencode3_hdbne1(p,iia,b1+field)];
+
+
+  //  if(i==127 && j==127)
+  //    p->test=wmod[shift+fencode3_hdbne1(p,iia,b1+field)];
+
+
+   }
+
+
+//__syncthreads();
+
+
+
+}
+
+
+
+
 __global__ void hyperdifbsourcene1_parallel(struct params *p,  real *wmod, 
     real *dwn1, real *wd, int order,int ordero, real *wtemp, int field, int dim, int jj, int ii0,int mm,real sb)
 {
 
   int iindex = blockIdx.x * blockDim.x + threadIdx.x;
-  int i,j;
+  int i,j,k;
   int m,ii1;
-  real fip,fim1,tmpc;
-  int index,k;
+  //real fip,fim1,tmpc;
+  //int index,k;
   int ni=p->n[0];
   int nj=p->n[1];
 
-  real dt=p->dt;
-  real dy=p->dx[1];
-  real dx=p->dx[0];
+  //real dt=p->dt;
+  //real dy=p->dx[1];
+  //real dx=p->dx[0];
    int ip,jp;
   int iia[NDIM];
   int dimp=((p->n[0]))*((p->n[1]));
@@ -640,36 +749,6 @@ int shift=order*NVAR*dimp;
 
 
 
-   
-
-     iia[0]=ip;
-     iia[1]=jp;
-     i=iia[0];
-     j=iia[1];
-     k=0;
-     #ifdef USE_SAC_3D
-	   iia[2]=kp;
-           k=iia[2];
-     #endif
-
-     #ifdef USE_SAC_3D
-      if(i<((p->n[0])) && j<((p->n[1])) && k<((p->n[2])))
-     #else
-      if(i<((p->n[0])) && j<((p->n[1])))
-     #endif
-  //if( i<((p->n[0])) && j<((p->n[1])))
-  {
-
-wtemp[fencode3_hdbne1(p,iia,tmp1)]=wmod[(shift)+fencode3_hdbne1(p,iia,b1+field)];
-
-
-
-   }
-
-
-//__syncthreads();
-
-
 
 }
 
@@ -704,6 +783,7 @@ void checkErrors_hdbne1(char *label)
 
 
 
+
 int cuhyperdifbsourcene1(struct params **p,  struct params **d_p,   real **d_wmod, real **d_dwn1, real **d_wd, int order,int ordero, real **d_wtemp, int field, int dim, int jj, int ii0,int mm,real sb,real dt)
 {
   int dimp=(((*p)->n[0]))*(((*p)->n[1]));
@@ -720,6 +800,10 @@ int cuhyperdifbsourcene1(struct params **p,  struct params **d_p,   real **d_wmo
     cudaThreadSynchronize();
      hyperdifbsourcene1a_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod, *d_dwn1,  *d_wd, order,ordero,*d_wtemp, field, dim,jj,ii0,mm,sb);
     cudaThreadSynchronize();
+
+     hyperdifbsourcene1b_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod, *d_dwn1,  *d_wd, order,ordero,*d_wtemp, field, dim,jj,ii0,mm,sb);
+    cudaThreadSynchronize();
+
      hyperdifbsourcene2_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod, *d_dwn1,  *d_wd, order,ordero,*d_wtemp, field, dim,jj,ii0,mm,sb);
     cudaThreadSynchronize();
      hyperdifbsourcene3_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod, *d_dwn1,  *d_wd, order,ordero,*d_wtemp, field, dim,jj,ii0,mm,sb);
@@ -733,7 +817,8 @@ int cuhyperdifbsourcene1(struct params **p,  struct params **d_p,   real **d_wmo
      hyperdifbsourcene6a_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod, *d_dwn1,  *d_wd, order,ordero,*d_wtemp, field, dim,jj,ii0,mm,sb,dt);
     cudaThreadSynchronize(); 
 
-
+cudaMemcpy(*p, *d_p, sizeof(struct params), cudaMemcpyDeviceToHost);
+printf("e %d  %10.20g\n",mm,(*p)->test);
 }
 
 

@@ -818,7 +818,7 @@ int cuhyperdifbsourcene1(struct params **p,  struct params **d_p,   real **d_wmo
     cudaThreadSynchronize(); 
 
 cudaMemcpy(*p, *d_p, sizeof(struct params), cudaMemcpyDeviceToHost);
-printf("e %d  %10.20g\n",mm,(*p)->test);
+//printf("e %d  %10.20g\n",mm,(*p)->test);
 }
 
 

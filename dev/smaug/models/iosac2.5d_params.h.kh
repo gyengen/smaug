@@ -22,13 +22,13 @@ int ngk=2;
 #ifdef USE_SAC
 //vac ozt
 int ni;
-ni=96;    //OZT tests
+ni=396;    //OZT tests
 //ni=796; //BW tests
 ni=ni+2*ngi;
 //ni=512;
 //real xmax = 6.2831853;  
-real xmax=1.0;
-real xmin=0.0;
+real xmax=0.5;
+real xmin=-0.5;
 //real dx = xmax/(ni-4);
 real dx = (xmax-xmin)/(ni);
 #endif
@@ -39,7 +39,7 @@ real dx = (xmax-xmin)/(ni);
 
 #ifdef USE_SAC
 
-int nj = 196; 
+int nj = 396; 
 //int nj=2;  //BW test
 nj=nj+2*ngj;
 //nj=512;
@@ -71,9 +71,9 @@ int steeringenabled=1;
 int finishsteering=0;
 char configfile[300];
 //char *cfgfile="zero1.ini";
-char *cfgfile="zero1_BW.ini";
+char *cfgfile="zero1_kh_asc.ini";
 //char *cfgfile="zero1_BW_bin.ini";
-char *cfgout="zeroOT";
+char *cfgout="out/zeroKH";
 
 
 struct params *d_p;
@@ -89,7 +89,7 @@ dt=0.0002985;  //ADIABHYDRO
 //dt=0.15;
 
 #ifdef USE_SAC
-dt=0.000095;  //OZT test
+dt=0.0001;  //OZT test
 //dt=6.5/10000000.0; //BW test
 //dt=0.00000065;  //BW tests
 //dt=0.000000493;  //BW tests
@@ -150,7 +150,7 @@ p->adiab=1.0;
 #else
 
 //ozt test
-p->gamma=5.0/3.0;  //OZ test
+//p->gamma=5.0/3.0;  //OZ test
 p->gamma=1.4;
 //p->gamma=2.0;  //BW test
 //p->gamma=5.0/3.0;  //BACH3D
@@ -172,14 +172,14 @@ p->g[2]=0.0;
 #endif
 //p->cmax=1.0;
 p->cmax=0.02;
-p->courant=0.01;
+p->courant=0.2;
 p->rkon=0.0;
-p->sodifon=1.0;
+p->sodifon=0.0;
 p->moddton=0.0;
 p->divbon=0.0;
 p->divbfix=0.0;
 p->hyperdifmom=1.0;
-p->readini=0.0;
+p->readini=1.0;
 p->cfgsavefrequency=1;
 
 
@@ -237,8 +237,8 @@ for(int idir=0; idir<NDIM; idir++)
    (p->boundtype[ii][idir])=0;  //period=0 mpi=1 mpiperiod=2  cont=3 contcd4=4 fixed=5 symm=6 asymm=7
 }
 
-for(int ii=0; ii<NVAR; ii++)
-   (p->boundtype[ii][1])=3;  //period=0 mpi=1 mpiperiod=2  cont=3 contcd4=4 fixed=5 symm=6 asymm=7
+//for(int ii=0; ii<NVAR; ii++)
+//   (p->boundtype[ii][1])=3;  //period=0 mpi=1 mpiperiod=2  cont=3 contcd4=4 fixed=5 symm=6 asymm=7
 
 
 

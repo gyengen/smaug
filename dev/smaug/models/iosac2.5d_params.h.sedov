@@ -82,9 +82,9 @@ int finishsteering=0;
 char configfile[300];
 //char *cfgfile="zero1.ini";
 //char *cfgfile="zero1_BW.ini";
-char *cfgfile="zero1_asc.ini";
+char *cfgfile="zero1_3d_asc.ini";
 //char *cfgfile="zero1_BW_bin.ini";
-char *cfgout="zeroOT";
+char *cfgout="zeroSEDOV";
 
 
 struct params *d_p;
@@ -99,7 +99,7 @@ dt=5.0e10;  //bach test
 #endif
 
 #ifdef USE_SAC_3D
-dt=5.0e6;  //BACH3D
+dt=5.0e10;  //BACH3D
 #endif
 
 
@@ -120,7 +120,7 @@ int nt=(int)((tmax)/dt);
 //nt=3000;
 //nt=5000;
 //nt=200000;
-nt=100;
+nt=2010;
 //nt=100;
 real *t=(real *)calloc(nt,sizeof(real));
 printf("runsim 1%d \n",nt);
@@ -167,10 +167,10 @@ p->adiab=1.0;
 
 //ozt test
 //p->gamma=5.0/3.0;  //OZ test
-p->gamma=2.0;  //BW test
+p->gamma=1.4;  //BW test
 //p->gamma=5.0/3.0;  //BACH3D
 //alfven test
-p->gamma=2.0;
+p->gamma=1.4;
 
 #endif
 
@@ -195,7 +195,7 @@ p->divbon=0.0;
 p->divbfix=0.0;
 p->hyperdifmom=1.0;
 p->readini=1.0;
-p->cfgsavefrequency=20;
+p->cfgsavefrequency=10;
 
 
 p->xmax[0]=xmax;

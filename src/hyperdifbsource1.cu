@@ -125,9 +125,9 @@ __global__ void hyperdifbsource3_parallel(struct params *p, real *wmod,
 #endif  
 
 #ifdef USE_SAC_3D
-  real rdx=(((p->dx[0])*(dim==0))+(p->dx[1])*(dim==1)+(p->dx[2])*(dim==2));
+  real rdx=(((wd[encode3_hdb1(p,i,j,k,delx1)])*(dim==0))+(wd[encode3_hdb1(p,i,j,k,delx2)])*(dim==1)+(wd[encode3_hdb1(p,i,j,k,delx3)])*(dim==2));
 #else
-  real rdx=(((p->dx[0])*(dim==0))+  (p->dx[1])*(dim==1)  );
+  real rdx=(((wd[encode3_hdb1(p,i,j,k,delx1)])*(dim==0))+  (wd[encode3_hdb1(p,i,j,k,delx2)])*(dim==1)  );
 #endif
 
 int shift=order*NVAR*dimp;
@@ -157,6 +157,15 @@ dwn1[fencode3_hdb1(p,iia,b1+ii0)]=sb*(wtemp[fencode3_hdb1(p,iia,tmp5)]*wd[fencod
 
 dwn1[fencode3_hdb1(p,iia,energy)]=sb*(wtemp[fencode3_hdb1(p,iia,tmp3)]*wtemp[fencode3_hdb1(p,iia,tmp5)]*wd[fencode3_hdb1(p,iia,hdnur)]-wtemp[fencode3_hdb1(p,iia,tmp2)]*wtemp[fencode3_hdb1(p,iia,tmp4)]*wd[fencode3_hdb1(p,iia,hdnul)])/rdx;
 
+//if(i==0 && j==139)
+//           printf("b1 e %d %10.20g %10.20g\n",ii0,dwn1[fencode3_hdb1(p,iia,b1+ii0)],dwn1[fencode3_hdb1(p,iia,energy)]);
+
+
+
+//    if(i==127 && j==2)
+//           printf("tmpL R %10.20g %10.20g\n",wtemp[fencode3_hdb1(p,iia,tmp4)]*wd[fencode3_hdb1(p,iia,hdnul)],wtemp[fencode3_hdb1(p,iia,tmp5)]*wd[fencode3_hdb1(p,iia,hdnur)]);
+//    if(i==127 && j==2)
+//           printf("nuL R %10.20g %10.20g\n",wd[fencode3_hdb1(p,iia,hdnul)],wd[fencode3_hdb1(p,iia,hdnur)]);
 
    }
 
@@ -221,9 +230,11 @@ int shift=order*NVAR*dimp;
      #endif
 
      #ifdef USE_SAC_3D
-     if(i<((p->n[0])) && j<((p->n[1])) && k<((p->n[2])))
+     //if(i<((p->n[0])) && j<((p->n[1])) && k<((p->n[2])))
+     if(i>0 && j >0 && k>0 && i<((p->n[0])-1) && j<((p->n[1])-1)  && k < ((p->n[2])-1))
      #else
-    if(i<((p->n[0])) && j<((p->n[1])))
+    //if(i<((p->n[0])) && j<((p->n[1])))
+    if(i>0 && j >0 && i<((p->n[0])-1) && j<((p->n[1])-1))
      #endif
  // if(i>0 && j >0 && i<((p->n[0])-1) && j<((p->n[1])-1))
 	{		               
@@ -232,13 +243,15 @@ int shift=order*NVAR*dimp;
 //wtemp[fencode3_hdb1(p,iia,tmp5)]=grad1r3n_hdb1(wtemp,wd,p,iia,tmp1,dim);
 
 
-wtemp[fencode3_hdb1(p,iia,tmp4)]=grad1l3_hdb1(wtemp,p,iia,tmp1,dim);
-wtemp[fencode3_hdb1(p,iia,tmp5)]=grad1r3_hdb1(wtemp,p,iia,tmp1,dim);
+wtemp[fencode3_hdb1(p,iia,tmp4)]=grad1l3n_hdb1(wtemp,wd,p,iia,tmp1,dim);
+wtemp[fencode3_hdb1(p,iia,tmp5)]=grad1r3n_hdb1(wtemp,wd,p,iia,tmp1,dim);
 
    }
 
  //__syncthreads();   
 
+  //   if(i==127 && j==2)
+  //         printf("L R %d %10.20g %10.20g\n",dim,wtemp[fencode3_hdb1(p,iia,tmp4)],wtemp[fencode3_hdb1(p,iia,tmp5)]);
 
 
    
@@ -346,6 +359,9 @@ int shift=order*NVAR*dimp;
        wtemp[fencode3_hdb1(p,iia,tmp3)]=(wmod[shift+fencode3_hdb1(p,iia,b1+jj)]+wmod[shift+encode3_hdb1(p,i+(dim==0),j+(dim==1),k,b1+jj)])/2;
      #endif
      wtemp[fencode3_hdb1(p,iia,tmp1)]=wmod[shift+fencode3_hdb1(p,iia,b1+field)];
+
+     //if(i==127 && j==2)
+     //      printf("tmp1 %d %10.20g\n",field,wmod[shift+fencode3_hdb1(p,iia,b1+field)]);
 
    }
 

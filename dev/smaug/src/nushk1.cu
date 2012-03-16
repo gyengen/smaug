@@ -73,6 +73,37 @@ __global__ void zeropadmaxdtvisc_parallel(struct params *p,   real *wmod, real *
 }
 
 
+__global__ void newreduction0computemaxdtvisc_parallel(real *cmax, real *temp,int ndimp)
+{
+  //real *cmax, real *temp, int ndimp
+
+  int iindex = blockIdx.x * blockDim.x + threadIdx.x;
+  unsigned int tid = threadIdx.x;
+  extern __shared__ double partialResult[];
+
+  int i;
+   partialResult[tid]=0.0;
+   if(iindex<ndimp)
+              partialResult[tid]=temp[iindex];
+  __syncthreads();
+
+
+for(unsigned int s=1; s < blockDim.x; s *= 2) {
+        if ((tid % (2*s)) == 0) {
+            if(partialResult[tid+s]>partialResult[tid])
+                 partialResult[tid]=partialResult[tid + s];
+        }
+        __syncthreads();
+    }
+
+    __syncthreads();
+    if(tid==0)
+    {
+      cmax[blockIdx.x]=partialResult[0];
+      temp[blockIdx.x]=partialResult[0];
+     }
+    __syncthreads();
+}
 
 
 
@@ -627,6 +658,11 @@ int cugetdtvisc1(struct params **p,  struct params **d_p,   real **d_wmod,  real
 
   int dimp=(((*p)->n[0]))*(((*p)->n[1]));
 
+  double *d_cmax;
+  double *d_bmax;
+  int i;
+
+
      real fn,fractn,in;
   int ndimp;
 ////cudaSetDevice(selectedDevice);
@@ -648,11 +684,22 @@ int cugetdtvisc1(struct params **p,  struct params **d_p,   real **d_wmod,  real
      else
        ndimp=dimp;
 
+       int NTPB=512;
+  int numBlocks = (ndimp+NTPB-1) / NTPB;
+
+  int smemSize = NTPB * sizeof(double);
+ double *h_cmax = (double*)malloc(numBlocks*sizeof(double));
+
+  cudaMalloc((void**)&d_cmax, numBlocks*sizeof(double)); 
+  cudaMalloc((void**)&d_bmax, numBlocks*sizeof(double)); 
+
+
+
 
 // dim3 dimBlock(dimblock, 1);
  
  //   dim3 dimGrid(((*p)->n[0])/dimBlock.x,((*p)->n[1])/dimBlock.y);
-   int numBlocks = (dimp+numThreadsPerBlock-1) / numThreadsPerBlock;
+ //  int numBlocks = (dimp+numThreadsPerBlock-1) / numThreadsPerBlock;
    
            /*for(int dim=0; dim<=(NDIM-1); dim++)
         {
@@ -663,6 +710,9 @@ int cugetdtvisc1(struct params **p,  struct params **d_p,   real **d_wmod,  real
 
     cudaMemcpy(*d_p, *p, sizeof(struct params), cudaMemcpyHostToDevice);
 
+ (*p)->dtdiffvisc=0.0000001;
+
+
      for(int dir=0;dir<NDIM;dir++)
      {
 
@@ -671,13 +721,54 @@ int cugetdtvisc1(struct params **p,  struct params **d_p,   real **d_wmod,  real
       cudaThreadSynchronize();
 	cudaMemcpy(*wd, *d_wd, NDERV*dimp*sizeof(real), cudaMemcpyDeviceToHost);
 	cudaMemcpy(*d_wtemp, ((*wd)+(hdnur*dimp)), dimp*sizeof(real), cudaMemcpyHostToDevice);
- 
-	int s=1;
+
+   for(i=0;i<numBlocks;i++)
+                h_cmax[i]=0;
+  cudaMemcpy(d_bmax, h_cmax, numBlocks*sizeof(double), cudaMemcpyHostToDevice);
+
+  newreduction0computemaxdtvisc_parallel<<<numBlocks,NTPB,smemSize>>>(d_bmax,*d_wtemp,ndimp);
+  cudaThreadSynchronize();
+  cudaMemcpy(h_cmax, d_bmax, numBlocks*sizeof(double), cudaMemcpyDeviceToHost);
+
+  int oldnumBlocks,newnumBlocks;
+  newnumBlocks=numBlocks;
+
+  while(newnumBlocks>1)
+  {
+        for(i=0;i<numBlocks;i++)
+                h_cmax[i]=0;
+        cudaMemcpy(d_bmax, h_cmax, numBlocks*sizeof(double), cudaMemcpyHostToDevice);
+
+       oldnumBlocks=newnumBlocks;
+  	newnumBlocks = (newnumBlocks+NTPB-1) / NTPB;
+
+  	newreduction0computemaxdtvisc_parallel<<<newnumBlocks,NTPB,smemSize>>>(d_bmax,*d_wtemp,oldnumBlocks);
+       cudaThreadSynchronize();
+       cudaMemcpy(h_cmax, d_bmax, newnumBlocks*sizeof(double), cudaMemcpyDeviceToHost);
+
+  /*for (i=0; i<numBlocks; i++)
+    {
+      fprintf(stdout,"cmax# %d %f\n",i, h_cmax[i]);
+    }
+       fprintf(stdout,"\n");*/
+
+
+  }
+
+if(h_cmax[0]>((*p)->dtdiffvisc))
+          (*p)->dtdiffvisc=h_cmax[0];
+
+
+
+
+
+
+	/*int s=1;
 	while(((s*=2)<=((ndimp/2)-1)) ) 
 	{
 	   myreduction0computemaxdtvisc_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,  *d_wd, order, dir, *d_wtemp,ndimp,s);
 	   cudaThreadSynchronize();
-	}
+	}*/
 
 
 
@@ -693,6 +784,9 @@ int cugetdtvisc1(struct params **p,  struct params **d_p,   real **d_wmod,  real
      }
      
 
+   free(h_cmax);
+  cudaFree(d_bmax);
+  cudaFree(d_cmax);
 
 
 }

@@ -1786,12 +1786,25 @@ int cucomputemaxc(struct params **p,  struct params **d_p, real **d_wmod,  real 
 
 cudaMemcpy(*wd, *d_wd, NDERV*dimp*sizeof(real), cudaMemcpyDeviceToHost);
 
-
-
+//real *h_wtemp=(real *)malloc(dimp*sizeof(real));
 cudaMemcpy(*d_wtemp, ((*wd)+(cfast*dimp)), dimp*sizeof(real), cudaMemcpyHostToDevice);
+//cudaMemcpy(h_wtemp, *d_wtemp, dimp*sizeof(real), cudaMemcpyDeviceToHost);
+
 //cudaMemcpy(*d_wtemp, ((*wd)+fencode_cdf(*p,0,0,cfast)), dimp*sizeof(real), cudaMemcpyHostToDevice);
 
 int i=0;
+
+/*for(i=0; i<dimp; i++)
+   if(h_wtemp[i]>((*p)->cmax))  ((*p)->cmax)=h_wtemp[i];
+
+cudaMemcpy(*d_wtemp, ((*wd)+(soundspeed*dimp)), dimp*sizeof(real), cudaMemcpyHostToDevice);
+cudaMemcpy(h_wtemp, *d_wtemp, dimp*sizeof(real), cudaMemcpyDeviceToHost);*/
+
+/*for(i=0; i<dimp; i++)
+   if(h_wtemp[i]>((*p)->cmax))  ((*p)->cmax)=h_wtemp[i];*/
+
+
+//free(h_wtemp);
 //real *mywd=*wd;
 //for(i=0;i<ndimp;i++)
 //  printf("d_wtemp %g %g %d %d\n",mywd[i+fencode_cdf(*p,0,0,cfast)],h_temp[i+0] ,ndimp,dimp );
@@ -1812,20 +1825,37 @@ while(((s*=2)<=((ndimp/2)-1)) )
 
 
 
-  for(i=0;i<numBlocks;i++)
+ for(i=0;i<numBlocks;i++)
                 h_cmax[i]=0;
   cudaMemcpy(d_bmax, h_cmax, numBlocks*sizeof(double), cudaMemcpyHostToDevice);
 
   newreduction0computemax_parallel<<<numBlocks,NTPB,smemSize>>>(d_bmax,*d_wtemp,ndimp);
   cudaThreadSynchronize();
-  //cudaMemcpy(h_cmax, d_bmax, numBlocks*sizeof(double), cudaMemcpyDeviceToHost);
+  cudaMemcpy(h_cmax, d_bmax, numBlocks*sizeof(double), cudaMemcpyDeviceToHost);
+
+  for( i=0;i<numBlocks;i++)          		
+                if(h_cmax[i]>((*p)->cmax)) ((*p)->cmax)=h_cmax[i];
 
 
+ cudaMemcpy(*d_wtemp, ((*wd)+(soundspeed*dimp)), dimp*sizeof(real), cudaMemcpyHostToDevice);
+ zeropadmaxc_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,  *d_wd, order, dir, *d_wtemp,ndimp);
+ for(i=0;i<numBlocks;i++)
+                h_cmax[i]=0;
+  cudaMemcpy(d_bmax, h_cmax, numBlocks*sizeof(double), cudaMemcpyHostToDevice);
+
+  newreduction0computemax_parallel<<<numBlocks,NTPB,smemSize>>>(d_bmax,*d_wtemp,ndimp);
+  cudaThreadSynchronize();
+  cudaMemcpy(h_cmax, d_bmax, numBlocks*sizeof(double), cudaMemcpyDeviceToHost);
+
+  for( i=0;i<numBlocks;i++)          		
+                if(h_cmax[i]>((*p)->cmax)) ((*p)->cmax)=h_cmax[i];
+
+ 
   int oldnumBlocks,newnumBlocks;
   newnumBlocks=numBlocks;
 
   //printf("loop over blocks %d\n\n\n",newnumBlocks);
-  while(newnumBlocks>1)
+  /*while(newnumBlocks>1)
   {
 
       
@@ -1855,7 +1885,7 @@ while(((s*=2)<=((ndimp/2)-1)) )
   	newreduction0computemax_parallel<<<newnumBlocks,NTPB,smemSize>>>(d_bmax,*d_wtemp,oldnumBlocks);
        cudaThreadSynchronize();
        cudaMemcpy(h_cmax, d_bmax, oldnumBlocks*sizeof(double), cudaMemcpyDeviceToHost);
-     //cudaMemcpy(h_cmax, d_wtemp, oldnumBlocks*sizeof(double), cudaMemcpyDeviceToHost);
+     //cudaMemcpy(h_cmax, d_wtemp, oldnumBlocks*sizeof(double), cudaMemcpyDeviceToHost);*/
   /*for (i=0; i<oldnumBlocks; i++)
     {
       fprintf(stdout,"cmax# %d %f\n",i, h_cmax[i]);
@@ -1863,10 +1893,10 @@ while(((s*=2)<=((ndimp/2)-1)) )
        fprintf(stdout,"\n");*/
 
 
-  }
+  //}
 
 
-(*p)->cmax=h_cmax[0];
+//(*p)->cmax=h_cmax[0];
 
 
 //printf("cmax fast=%g\n",h_cmax[0]);
@@ -1891,15 +1921,16 @@ cudaMemcpy(*d_p, *p, sizeof(struct params), cudaMemcpyHostToDevice);
 //cudaMemcpy(*p, *d_p, sizeof(struct params), cudaMemcpyDeviceToHost);
 
 //printf("cmax on device %.8f\n",(*p)->cmax);
-//(*p)->cmax=0.0;
-//cudaMemcpy(*wd, *d_wd, NDERV*dimp*sizeof(real), cudaMemcpyDeviceToHost);
-/*for(int i=0; i<dimp;i++)
+/*(*p)->cmax=0.0;
+cudaMemcpy(*wd, *d_wd, NDERV*dimp*sizeof(real), cudaMemcpyDeviceToHost);
+for(int i=0; i<dimp;i++)
 {
-
+if(((*wd)[i+(soundspeed*dimp)])>((*p)->cmax))
+                    (*p)->cmax=(*wd)[i+(soundspeed*dimp)];
 if(((*wd)[i+(cfast*dimp)])>((*p)->cmax))
                     (*p)->cmax=(*wd)[i+(cfast*dimp)];
-}
-printf("cmax on cpu %.8f\n",(*p)->cmax);*/
+}*/
+/*printf("cmax on cpu %.8f\n",(*p)->cmax);*/
 //cudaMemcpy(*d_p, *p, sizeof(struct params), cudaMemcpyHostToDevice);
  /*for(int i=0; i<nit;i++)
 {

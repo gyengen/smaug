@@ -61,7 +61,7 @@ __global__ void zeropadmaxdtvisc_parallel(struct params *p,   real *wmod, real *
 	   ii[2]=kp;
      #endif
     //int s=1;
-
+    temp[iindex]=0.0;
      #ifdef USE_SAC_3D
        if(ii[0]<p->n[0] && ii[1]<p->n[1] && ii[2]<p->n[2])
      #else
@@ -103,6 +103,8 @@ for(unsigned int s=1; s < blockDim.x; s *= 2) {
       temp[blockIdx.x]=partialResult[0];
      }
     __syncthreads();
+
+
 }
 
 
@@ -710,7 +712,7 @@ int cugetdtvisc1(struct params **p,  struct params **d_p,   real **d_wmod,  real
 
     cudaMemcpy(*d_p, *p, sizeof(struct params), cudaMemcpyHostToDevice);
 
- (*p)->dtdiffvisc=0.0000001;
+ (*p)->dtdiffvisc=0.0000000001;
 
 
      for(int dir=0;dir<NDIM;dir++)
@@ -720,10 +722,10 @@ int cugetdtvisc1(struct params **p,  struct params **d_p,   real **d_wmod,  real
      zeropadmaxdtvisc_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,  *d_wd, order, dir, *d_wtemp,ndimp);
       cudaThreadSynchronize();
 	cudaMemcpy(*wd, *d_wd, NDERV*dimp*sizeof(real), cudaMemcpyDeviceToHost);
-	cudaMemcpy(*d_wtemp, ((*wd)+(hdnur*dimp)), dimp*sizeof(real), cudaMemcpyHostToDevice);
+	//cudaMemcpy(*d_wtemp, ((*wd)+(hdnur*dimp)), dimp*sizeof(real), cudaMemcpyHostToDevice);
 
-   for(i=0;i<numBlocks;i++)
-                h_cmax[i]=0;
+  for(i=0;i<numBlocks;i++)
+               h_cmax[i]=0;
   cudaMemcpy(d_bmax, h_cmax, numBlocks*sizeof(double), cudaMemcpyHostToDevice);
 
   newreduction0computemaxdtvisc_parallel<<<numBlocks,NTPB,smemSize>>>(d_bmax,*d_wtemp,ndimp);
@@ -733,7 +735,7 @@ int cugetdtvisc1(struct params **p,  struct params **d_p,   real **d_wmod,  real
   int oldnumBlocks,newnumBlocks;
   newnumBlocks=numBlocks;
 
-  while(newnumBlocks>1)
+  /*while(newnumBlocks>1)
   {
         for(i=0;i<numBlocks;i++)
                 h_cmax[i]=0;
@@ -744,7 +746,7 @@ int cugetdtvisc1(struct params **p,  struct params **d_p,   real **d_wmod,  real
 
   	newreduction0computemaxdtvisc_parallel<<<newnumBlocks,NTPB,smemSize>>>(d_bmax,*d_wtemp,oldnumBlocks);
        cudaThreadSynchronize();
-       cudaMemcpy(h_cmax, d_bmax, newnumBlocks*sizeof(double), cudaMemcpyDeviceToHost);
+       cudaMemcpy(h_cmax, d_bmax, newnumBlocks*sizeof(double), cudaMemcpyDeviceToHost);*/
 
   /*for (i=0; i<numBlocks; i++)
     {
@@ -753,10 +755,12 @@ int cugetdtvisc1(struct params **p,  struct params **d_p,   real **d_wmod,  real
        fprintf(stdout,"\n");*/
 
 
-  }
-
-if(h_cmax[0]>((*p)->dtdiffvisc))
-          (*p)->dtdiffvisc=h_cmax[0];
+ // }
+  for( i=0;i<numBlocks;i++)          		
+                if(h_cmax[i]>((*p)->dtdiffvisc)) ((*p)->dtdiffvisc)=h_cmax[i];
+  ((*p)->dtdiffvisc)=0.25/((*p)->dtdiffvisc);
+;//if(h_cmax[0]>((*p)->dtdiffvisc))
+        ;//  (*p)->dtdiffvisc=h_cmax[0];
 
 
 
@@ -776,10 +780,11 @@ if(h_cmax[0]>((*p)->dtdiffvisc))
 
          //getdtvisc_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,   *d_wd, order, *d_wtemp,*d_wtemp1,*d_wtemp2, dir);
          cudaThreadSynchronize();
-         cudaMemcpy(*p, *d_p, sizeof(struct params), cudaMemcpyDeviceToHost);
-         if(((*p)->dtdiffvisc)>1.0e-8 && ((*p)->dt)>((*p)->dtdiffvisc) )
-                                      (*p)->dt=(*p)->dtdiffvisc;
+         //cudaMemcpy(*p, *d_p, sizeof(struct params), cudaMemcpyDeviceToHost);
          
+         ;//if( ((*p)->dtdiffvisc)>1.0e-8 && ((*p)->dt)>((*p)->dtdiffvisc ))
+         ;//                             (*p)->dt=(*p)->dtdiffvisc;
+         cudaMemcpy(*d_p, *p, sizeof(struct params), cudaMemcpyHostToDevice);
          
      }
      

@@ -1267,7 +1267,9 @@ __global__ void zeropadmaxcourant_parallel(struct params *p,   real *wmod, real 
    ip=iindex-(jp*ni);
 #endif
 
-    
+    //if(iindex<ndimp)
+    //  temp[iindex]=0.0;
+  
 //int numBlocks = (dimp+tnumThreadsPerBlock-1) / tnumThreadsPerBlock;
   //real temp[dimp];
     // perform first level of reduction,
@@ -1289,6 +1291,8 @@ __global__ void zeropadmaxcourant_parallel(struct params *p,   real *wmod, real 
        if(ii[0]<p->n[0] && ii[1]<p->n[1])
      #endif
              temp[iindex]=temp[iindex]/(wd[fencode3_cdf(p,ii,delx1+dir)]);
+       else
+            temp[index]=0.0;
 
 
 
@@ -1684,7 +1688,7 @@ int cucomputedervfields(struct params **p,  struct params **d_p, real **d_wmod, 
    // dim3 dimGrid(((*p)->n[0])/dimBlock.x,((*p)->n[1])/dimBlock.y);
    int numBlocks = (dimp+numThreadsPerBlock-1) / numThreadsPerBlock;
 
-
+cudaMemcpy(*d_p, *p, sizeof(struct params), cudaMemcpyHostToDevice);
      computedervfields_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,  *d_wd, order);
 
      cudaThreadSynchronize();
@@ -1992,7 +1996,7 @@ int cucomputemaxcourant(struct params **p,  struct params **d_p, real **d_wmod, 
   cudaMalloc((void**)&d_bmax, numBlocks*sizeof(double)); 
 
 
-
+   ((*p)->maxcourant)=0;
    //(*p)->maxcourant=0.0;
    // int smemSize = numThreadsPerBlock * sizeof(real);
   cudaMemcpy(*d_p, *p, sizeof(struct params), cudaMemcpyHostToDevice);
@@ -2024,7 +2028,7 @@ cudaMemcpy(*d_wtemp, ((*wd)+(cfast*dimp)), dimp*sizeof(real), cudaMemcpyHostToDe
   int oldnumBlocks,newnumBlocks;
   newnumBlocks=numBlocks;
 
-  while(newnumBlocks>1)
+  /*while(newnumBlocks>1)
   {
         for(i=0;i<numBlocks;i++)
                 h_cmax[i]=0;
@@ -2040,7 +2044,7 @@ cudaMemcpy(*d_wtemp, ((*wd)+(cfast*dimp)), dimp*sizeof(real), cudaMemcpyHostToDe
 
   	newreduction0computemax_parallel<<<newnumBlocks,NTPB,smemSize>>>(d_bmax,*d_wtemp,oldnumBlocks);
        cudaThreadSynchronize();
-       cudaMemcpy(h_cmax, d_bmax, newnumBlocks*sizeof(double), cudaMemcpyDeviceToHost);
+       cudaMemcpy(h_cmax, d_bmax, newnumBlocks*sizeof(double), cudaMemcpyDeviceToHost);*/
 
   /*for (i=0; i<numBlocks; i++)
     {
@@ -2049,10 +2053,19 @@ cudaMemcpy(*d_wtemp, ((*wd)+(cfast*dimp)), dimp*sizeof(real), cudaMemcpyHostToDe
        fprintf(stdout,"\n");*/
 
 
-  }
+  //}
+  cudaMemcpy(h_cmax, d_bmax, numBlocks*sizeof(double), cudaMemcpyDeviceToHost);
+
+  for( i=0;i<numBlocks;i++)          		
+                if(h_cmax[i]>((*p)->maxcourant)) ((*p)->maxcourant)=h_cmax[i];
 
 
-(*p)->maxcourant=h_cmax[0];
+
+
+
+
+
+//(*p)->maxcourant=h_cmax[0];
 cudaMemcpy(*d_p, *p, sizeof(struct params), cudaMemcpyHostToDevice);
 
 

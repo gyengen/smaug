@@ -131,7 +131,37 @@ __global__ void zeropadmaxviscl_parallel(struct params *p,   real *wmod, real *w
 
 }
 
+__global__ void newreduction0computemaxviscl_parallel(real *cmax, real *temp,int ndimp)
+{
 
+  int iindex = blockIdx.x * blockDim.x + threadIdx.x;
+  unsigned int tid = threadIdx.x;
+  extern __shared__ double partialResult[];
+
+  int i;
+   partialResult[tid]=0.0;
+   if(iindex<ndimp)
+              partialResult[tid]=temp[iindex];
+  __syncthreads();
+
+
+for(unsigned int s=1; s < blockDim.x; s *= 2) {
+        if ((tid % (2*s)) == 0) {
+            if(partialResult[tid+s]>partialResult[tid])
+                 partialResult[tid]=partialResult[tid + s];
+        }
+        __syncthreads();
+    }
+
+    __syncthreads();
+    if(tid==0)
+    {
+      cmax[blockIdx.x]=partialResult[0];
+      temp[blockIdx.x]=partialResult[0];
+     }
+    __syncthreads();
+
+}
 
 __global__ void myreduction0computemaxviscl_parallel(struct params *p,   real *wmod, real *wd, int order, int dir, real *temp,int ndimp,int s)
 {
@@ -1116,16 +1146,22 @@ int cuhyperdifvisc1l(struct params **p,  struct params **d_p,   real **d_wmod, r
 {
 
   int dimp=(((*p)->n[0]))*(((*p)->n[1]));
-   
+     double *d_cmax;
+  double *d_bmax;
   real fn,fractn,in;
   int ndimp;
+  int i;
 ////cudaSetDevice(selectedDevice);
    int nit=100;
+double *h_cmax;
  #ifdef USE_SAC_3D
    
   dimp=(((*p)->n[0]))*(((*p)->n[1]))*(((*p)->n[2]));
 #endif 
 
+       int NTPB=512;
+   
+  int smemSize = NTPB * sizeof(double);
     fn=log(dimp)/log(2.0);
     fractn=modf(fn,&in);
     
@@ -1164,26 +1200,48 @@ int cuhyperdifvisc1l(struct params **p,  struct params **d_p,   real **d_wmod, r
     {
      // hyperdifvisc5l_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,   *d_wd, order, *d_wtemp,*d_wtemp1,*d_wtemp2, field, dim);
     // cudaThreadSynchronize();
+numBlocks = (ndimp+NTPB-1) / NTPB;
+    h_cmax = (double*)malloc(numBlocks*sizeof(double));
+
+  cudaMalloc((void**)&d_cmax, numBlocks*sizeof(double)); 
+  cudaMalloc((void**)&d_bmax, numBlocks*sizeof(double)); 
 
      maxviscoef=(*p)->maxviscoef;
      zeropadmaxviscl_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,  *d_wd, order, dim, *d_wtemp,ndimp);
       cudaThreadSynchronize();
 	cudaMemcpy(*wd, *d_wd, NDERV*dimp*sizeof(real), cudaMemcpyDeviceToHost);
 	cudaMemcpy(*d_wtemp, ((*wd)+(hdnul*dimp)), dimp*sizeof(real), cudaMemcpyHostToDevice);
- 
-	int s=1;
+
+
+	  for(i=0;i<numBlocks;i++)
+		       h_cmax[i]=0;
+	  cudaMemcpy(d_bmax, h_cmax, numBlocks*sizeof(double), cudaMemcpyHostToDevice);
+
+	  newreduction0computemaxviscl_parallel<<<numBlocks,NTPB,smemSize>>>(d_bmax,*d_wtemp,ndimp);
+	  cudaThreadSynchronize();
+	  cudaMemcpy(h_cmax, d_bmax, numBlocks*sizeof(double), cudaMemcpyDeviceToHost);
+
+   for( i=0;i<numBlocks;i++)          		
+                if(h_cmax[i]>maxviscoef) maxviscoef=h_cmax[i];
+	/*int s=1;
 	while(((s*=2)<=((ndimp/2)-1)) ) 
 	{
 	   myreduction0computemaxviscl_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,  *d_wd, order, dim, *d_wtemp,ndimp,s);
 	   cudaThreadSynchronize();
-	}
+	}*/
        if((*p)->maxviscoef<maxviscoef)
               (*p)->maxviscoef=maxviscoef;
+
+     free(h_cmax);
+     cudaFree(d_bmax);
+     cudaFree(d_cmax);
+
     }
+    cudaMemcpy(*d_p, *p, sizeof(struct params), cudaMemcpyHostToDevice);
 
-    cudaMemcpy(*p, *d_p, sizeof(struct params), cudaMemcpyDeviceToHost);
+    //cudaMemcpy(*p, *d_p, sizeof(struct params), cudaMemcpyDeviceToHost);
 
-  
+
     //printf("field left hdmean hdmax %d %8.8g %8.8g \n",field, (*p)->hdmean, (*p)->hdmax);
 }
 

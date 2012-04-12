@@ -170,7 +170,7 @@ wd=(real *)calloc(ni*nj*NDERV,sizeof(real ));
 //set initial time step to a large value
 if(p->moddton==1.0)
 {
-	p->dt=1.0e50;
+	p->dt=1.0e-8;
 }
 
 if((p->readini)==0)
@@ -180,7 +180,7 @@ else
 
 printf("after read\n");
 p->it=0;
-
+printf("before %g\n",p->dt);
 //writeasciivacconfig(cfgout,*p, meta , w,hlines,*state);
 //writevacconfig(cfgout,0,*p, meta , w,*state);
   /*   for( j1=2;j1<5;j1++)
@@ -299,6 +299,7 @@ real time=0.0;
    state->t=0;
    state->dt=p->dt;
 
+
 //printf("dx dy%f %f",dx,dy);
 for( n=1;n<=nt;n++)
 //for( n=0;n<1;n++)
@@ -329,7 +330,7 @@ for( n=1;n<=nt;n++)
         cucomputec(&p,&d_p,&d_wmod, &d_wd,order,dim);
         cucomputemaxc(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
         cucomputemaxcourant(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
-        //printf("maxcourant %d %16.10g  %16.10g  %16.10g\n",dim,p->maxcourant,p->cmax,p->dx[dim]);
+        printf("maxcourant %d %16.10g  %16.10g  %16.10g\n",dim,p->maxcourant,p->cmax,p->dx[dim]);
         }
         
         //courantmax=0.0;
@@ -340,18 +341,18 @@ for( n=1;n<=nt;n++)
              printf("%d %16.10g\n",dim,courantmax);
            //  printf("cmax %g ",cmax[dim]);
         }*/
-        
+        //printf(" %16.10g   %16.10g  %16.10g  %16.10g\n",p->maxcourant,p->cmax,p->courant,p->dt);
         //printf("old dt is %g ",p->dt);
         //if(courantmax>smalldouble) dt=min(dt,courantpar/courantmax)
 
         //if(((p->maxcourant)>1.0e-8) && (p->dt)>(((p->courant)/(p->maxcourant))   ))
-        if( (p->dt)>1.0e-8 && (p->dt)>  ((  (p->courant)/(p->maxcourant)  ))   )
+        if(     ((  (p->courant)/(p->maxcourant)  ))>1.0e-8  )
                p->dt=(p->courant)/(p->maxcourant);
-        //printf("new dt is %g %g\n",(p->courant)/(p->maxcourant),p->dt);
+        printf("new dt is %g %g\n",(p->courant)/(p->maxcourant),p->dt);
 
 
- 
-        cugetdtvisc1(&p,&d_p,&d_wmod, &wd,&d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2);
+        if(n>1)
+           cugetdtvisc1(&p,&d_p,&d_wmod, &wd,&d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2);
           #ifdef USE_MPI
               mpiallreduce(&(p->maxviscoef), MPI_MAX);
           #endif
@@ -364,10 +365,10 @@ for( n=1;n<=nt;n++)
                                       p->dt=dtdiffvisc;
         }*/
 
-         // printf("dtdiffvisc %20.10g  %20.10g\n",p->maxviscoef,p->dtdiffvisc);
-         if(1/(p->dtdiffvisc)>1.0e-8 && (p->dt)>(1/(p->dtdiffvisc)) )
+          printf("dtdiffvisc %20.10g  %20.10g\n",p->maxviscoef,p->dtdiffvisc);
+         if(1/(p->dtdiffvisc)>1.0e-8 && (p->dt)>((p->dtdiffvisc)) )
          //   if( (p->dt)>dtdiffvisc )
-                                      p->dt=(1/p->dtdiffvisc);
+                                      p->dt=(p->dtdiffvisc);
         //cugetdtvisc1(&p,&d_p,&d_wmod, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2);
         printf(" modified dt is %20.10g \n",p->dt);
 

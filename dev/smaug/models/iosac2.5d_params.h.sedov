@@ -1,6 +1,7 @@
 
 
 
+
 real g  = 9.81;
 real u0 = 0;                               
 real v0 = 0;
@@ -16,54 +17,43 @@ int ngk=2;
 
 
 
-//Domain definition
-// Define the x domain
 
 
-//#ifdef USE_SAC
+#ifdef USE_SAC
+//vac ozt
 int ni;
-ni=124; //BW tests
-//ni=252;//2d model
+ni=396;    //OZT tests
+//ni=796; //BW tests
 ni=ni+2*ngi;
 //ni=512;
 //real xmax = 6.2831853;  
-
-real xmax=15.4285e15;
-real xmin=-15.4285e15;
+real xmax=0.5;
+real xmin=-0.5;
+//real dx = xmax/(ni-4);
 real dx = (xmax-xmin)/(ni);
-//#endif
+#endif
 
 
 
 // Define the y domain
 
+#ifdef USE_SAC
 
-
-int nj=124;  //BW test
-//nj=252;//2d model
+int nj = 396; 
+//int nj=2;  //BW test
 nj=nj+2*ngj;
 //nj=512;
 //real ymax = 6.2831853; 
-real ymax=15.4285e15;
-real ymin=-15.4285e15;
-//real dx = xmax/(ni-4);
-real dy = (ymax-ymin)/(nj);  
+real ymax = 0.5;
+real ymin=-0.5;   
+//real dy = ymax/(nj-4);
+real dy = (ymax-ymin)/(nj);    
 //nj=41;
+#endif
 
+             
 
-               
-
-#ifdef USE_SAC_3D
-
-int nk;
-nk=124;    //BW tests
-
-nk=nk+2*ngk;
-real zmax=15.4285e15;
-real zmin=-15.4285e15;
-//real dx = xmax/(ni-4);
-real dz = (zmax-zmin)/(nk);
-#endif     
+ 
 real *x=(real *)calloc(ni,sizeof(real));
 for(i=0;i<ni;i++)
 		x[i]=i*dx;
@@ -81,10 +71,9 @@ int steeringenabled=1;
 int finishsteering=0;
 char configfile[300];
 //char *cfgfile="zero1.ini";
-//char *cfgfile="zero1_BW.ini";
-char *cfgfile="zero1_3d_asc.ini";
+char *cfgfile="zero1_kh_asc.ini";
 //char *cfgfile="zero1_BW_bin.ini";
-char *cfgout="zeroSEDOV";
+char *cfgout="out/zeroKHBG";
 
 
 struct params *d_p;
@@ -93,35 +82,31 @@ struct params *p=(struct params *)malloc(sizeof(struct params));
 struct state *d_state;
 struct state *state=(struct state *)malloc(sizeof(struct state));
 
+
+#ifdef ADIABHYDRO
+dt=0.0002985;  //ADIABHYDRO
+#endif
+//dt=0.15;
+
 #ifdef USE_SAC
-dt=5.0e10;  //bach test
-//dt=5.0e16;  //bach test
-#endif
-
-#ifdef USE_SAC_3D
-dt=5.0e10;  //BACH3D
-#endif
-
-
-/*//dt=0.15;
-
-//#ifdef USE_SAC
-//dt=0.00065;  //OZT test
+dt=0.0001;  //OZT test
 //dt=6.5/10000000.0; //BW test
 //dt=0.00000065;  //BW tests
-dt=0.000000493;  //BW tests
+//dt=0.000000493;  //BW tests
 //dt=0.005;
 //dt=0.000139;
 //dt=3.0/10000000.0; //BW test
-//#endif*/
+#endif
 
-
+#ifdef USE_SAC_3D
+dt=3.5e24;;  //BACH3D
+#endif
 int nt=(int)((tmax)/dt);
 //nt=3000;
 //nt=5000;
 //nt=200000;
-nt=2010;
-//nt=100;
+//nt=150000;
+nt=200000;
 real *t=(real *)calloc(nt,sizeof(real));
 printf("runsim 1%d \n",nt);
 //t = [0:dt:tdomain];
@@ -134,15 +119,14 @@ p->n[0]=ni;
 p->n[1]=nj;
 p->ng[0]=ngi;
 p->ng[1]=ngj;
-
+#ifdef ADIABHYDRO
 p->npgp[0]=1;
 p->npgp[1]=1;
-
-#ifdef USE_SAC_3D
-p->n[2]=nk;
-p->ng[2]=ngk;
-p->npgp[2]=1;
+#else
+p->npgp[0]=1;
+p->npgp[1]=1;
 #endif
+
 
 p->dt=dt;
 p->dx[0]=dx;
@@ -167,10 +151,11 @@ p->adiab=1.0;
 
 //ozt test
 //p->gamma=5.0/3.0;  //OZ test
-p->gamma=1.4;  //BW test
+p->gamma=1.4;
+//p->gamma=2.0;  //BW test
 //p->gamma=5.0/3.0;  //BACH3D
 //alfven test
-p->gamma=1.4;
+//p->gamma=1.4;
 
 #endif
 
@@ -187,7 +172,7 @@ p->g[2]=0.0;
 #endif
 //p->cmax=1.0;
 p->cmax=0.02;
-
+p->courant=0.2;
 p->rkon=0.0;
 p->sodifon=0.0;
 p->moddton=0.0;
@@ -195,18 +180,13 @@ p->divbon=0.0;
 p->divbfix=0.0;
 p->hyperdifmom=1.0;
 p->readini=1.0;
-p->cfgsavefrequency=10;
+p->cfgsavefrequency=400;
 
 
 p->xmax[0]=xmax;
-p->xmax[1]=ymax;
 p->xmin[0]=xmin;
+p->xmax[1]=ymax;
 p->xmin[1]=ymin;
-#ifdef USE_SAC_3D
-p->xmax[2]=zmax;
-p->xmin[2]=zmin;
-#endif
-
 p->nt=nt;
 p->tmax=tmax;
 
@@ -243,23 +223,22 @@ p->chyp[b1]=0.02;
 p->chyp[b2]=0.02;
 p->chyp[mom1]=0.4;
 p->chyp[mom2]=0.4;
-#ifdef USE_SAC_3D
-p->chyp[mom3]=0.4;
-p->chyp[b3]=0.02;
-#endif
+
 
 
 
 iome elist;
 meta meta;
 
-
 //set boundary types
 for(int ii=0; ii<NVAR; ii++)
 for(int idir=0; idir<NDIM; idir++)
 {
-   (p->boundtype[ii][idir])=4;  //period=0 mpi=1 mpiperiod=2  cont=3 contcd4=4 fixed=5 symm=6 asymm=7
+   (p->boundtype[ii][idir])=0;  //period=0 mpi=1 mpiperiod=2  cont=3 contcd4=4 fixed=5 symm=6 asymm=7
 }
+
+//for(int ii=0; ii<NVAR; ii++)
+//   (p->boundtype[ii][1])=3;  //period=0 mpi=1 mpiperiod=2  cont=3 contcd4=4 fixed=5 symm=6 asymm=7
 
 
 

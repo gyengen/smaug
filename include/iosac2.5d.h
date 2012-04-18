@@ -39,6 +39,12 @@ mikeg@photon0.freeserve.co.uk
 --------------------------------------------------------------------------------
 */
 
+
+
+
+
+
+
 #ifdef USE_IOME
 	#include <iome/simulation/IoInitialiser.h>
 	//#include <iome/simulation/soapH.h>
@@ -77,7 +83,33 @@ mikeg@photon0.freeserve.co.uk
 #include "dxroutines.h"
 #include "initialisation.h"
 
+/*----------------------*/ 
+real second()
+{
 
+   /*REAL secs;
+   clock_t Time;
+   Time = clock();
+
+   secs = (real) Time / (real) CLOCKS_PER_SEC;
+   return secs;*/
+   real retval;
+	static long zsec=0;
+	static long zusec=0;
+	real esec;
+	
+	struct timeval tp;
+	struct timezone tzp;
+	
+	gettimeofday(&tp, &tzp);
+	
+	if(zsec==0) zsec=tp.tv_sec;
+	if(zusec==0) zusec=tp.tv_usec;
+	
+	retval=(tp.tv_sec - zsec)+(tp.tv_usec-zusec)*0.000001;
+	return retval;
+
+}
 
 
 

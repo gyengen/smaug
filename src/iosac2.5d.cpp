@@ -1,6 +1,6 @@
 // iosac2.5d.cpp : Main routine for GPU enabled SAC
 #include "../include/iosac2.5d.h"
-#include "../include/step.h"
+#include "../include/smaugcukernels.h"
 #include "../include/iobparams.h"
 
 int main(int argc, char* argv[])

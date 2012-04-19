@@ -9,7 +9,7 @@
 /////////////////////////////////////
 #include <stdio.h>
 #include <math.h>
-#include "../include/step.h"
+#include "../include/smaugcukernels.h"
 #include "../include/gradops_cdf.cuh"
 #include "../include/dervfields_cdf.cuh"
 /////////////////////////////////////

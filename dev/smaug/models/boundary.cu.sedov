@@ -6,7 +6,7 @@
 /////////////////////////////////////
 #include <stdio.h>
 #include <math.h>
-#include "../include/step.h"
+#include "../include/smaugcukernels.h"
 
 /////////////////////////////////////
 // kernel function (CUDA device)

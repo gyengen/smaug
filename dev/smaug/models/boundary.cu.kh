@@ -6,7 +6,7 @@
 /////////////////////////////////////
 #include <stdio.h>
 #include <math.h>
-#include "../include/step.h"
+#include "../include/smaugcukernels.h"
 
 /////////////////////////////////////
 // kernel function (CUDA device)
@@ -83,8 +83,7 @@ int shift=order*NVAR*dimp;
                   bc3_cont_b(wmod+order*NVAR*dimp,p,iia,f);
 #else
                bc3_periodic1_dir_b(wmod+order*NVAR*dimp,p,iia,f,0);  //for OZT
-               bc3_periodic1_dir_b(wmod+order*NVAR*dimp,p,iia,f,1);
-               //bc3_cont_cd4_dir_b(wmod+order*NVAR*dimp,p,iia,f,1);  //for BW
+               bc3_cont_cd4_b(wmod+order*NVAR*dimp,p,iia,f,1);  //for BW
 #endif                
 
                 //  bc3_fixed_b(wmod+order*NVAR*dimp,p,iia,f,0.0);

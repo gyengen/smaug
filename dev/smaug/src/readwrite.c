@@ -138,8 +138,10 @@ int writevacconfig(char *name,int n,params p, meta md, real *w, real *wd, state 
   int status=0;
   int i1,j1,k1,ifield;
   int ni,nj,nk;
+  
+  char tcfg[300];  
   char configfile[300];
-  char tcfg[300];
+  
   char buffer[800];
   double dbuffer[12];
   int ibuffer[5];
@@ -151,7 +153,7 @@ int writevacconfig(char *name,int n,params p, meta md, real *w, real *wd, state 
   nk=p.n[2];
     #endif
 
-
+ 
    sprintf(configfile,"%s",name);
    
    #ifdef USE_MPI
@@ -162,19 +164,30 @@ int writevacconfig(char *name,int n,params p, meta md, real *w, real *wd, state 
    pch2 = strtok (NULL,".");
 
    //printf("here1 %s \n",tcfg);
-   sprintf(ext,"%s",pch2);
+   //sprintf(ext,"%s",pch2);
 
       //set the input filename corresponding to proc id
-      if(p.ipe>99)
-        sprintf(configfile,"%s_%d_%d.%s",tcfg,st.it,p.ipe,ext);
-      else if(p.ipe>9)
-        sprintf(configfile,"%s_%d_0%d.%s",tcfg,st.it,p.ipe,ext);
-      else
-        sprintf(configfile,"%s_%d_00%d.%s",tcfg,st.it,p.ipe,ext);
-   //printf("here2 %s %d %d %s \n",tcfg,st.it,p.ipe,ext); 
-    
+ 
+     #ifdef USE_SAC3D
+	      if(p.ipe>99)
+		sprintf(configfile,"%s_%d_np%d%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);
+	      else if(p.ipe>9)
+		sprintf(configfile,"%s_%d_np0%d0%d0%d_0%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);
+	      else
+		sprintf(configfile,"%s_%d_np00%d00%d00%d_00%d.out",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);  	     
+     #else
+	      if(p.ipe>99)
+		sprintf(configfile,"%s_%d_np%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);
+	      else if(p.ipe>9)
+		sprintf(configfile,"%s_%d_np%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);
+	      else
+		sprintf(configfile,"%s_%d_np0%d0%d_00%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);  	     	     
+     #endif
+
+ 
    #else
-   
+
+
          //save file containing current data
       sprintf(configfile,"%s_%d.out",name,st.it);
   #endif
@@ -208,13 +221,17 @@ int writevacconfig(char *name,int n,params p, meta md, real *w, real *wd, state 
       ibuffer[0]=2;
       ibuffer[1]=6;
       ibuffer[2]=10;
+      //ibuffer[2]=2;  //report from distribution routine to reset the data
+      //ibuffer[3]=6;
+      //ibuffer[4]=10;
    #endif
     #ifdef USE_SAC_3D
       ibuffer[0]=3;
       ibuffer[1]=7;
       ibuffer[2]=13;
+      //ibuffer[2]=3;
     #endif
-      fwrite(ibuffer,sizeof(int)*3,1,fdt);
+      fwrite(ibuffer,sizeof(int)*5,1,fdt);
 
       //line3:
       //*   nx()        - the grid dimensions      (ndim integers)
@@ -635,28 +652,7 @@ int readasciivacconfig(char *cfgfile, params p, meta md, real *w, real *wd, char
    #ifdef USE_SAC_3D
    nk=p.n[2];
    #endif
-   #ifdef USE_MPI
-   
-   char *pch1,*pch2;
- //  printf("hello1 %d\n",p.ipe);
-//printf("%s\n",cfgfilename);
-   pch1 = strtok (cfgfilename,".");
-   pch2 = strtok (NULL,".");
-   sprintf(ext,"%s",pch2);
- // printf("hello2 %d\n",p.ipe);
-//printf("%s\n",pch1);
-   //printf("%s %s %s %s\n",cfgfilename,cfgfile,pch1,pch2);
-//printf("%s\n",ext);
-  // sprintf(cfgfilename,"%s_00%d.%s\n",pch1,p.ipe,ext);
-      //set the input filename corresponding to proc id
-      if(p.ipe>99)
-        sprintf(cfgfilename,"%s_%d.%s",pch1,p.ipe,ext);
-      else if(p.ipe>9)
-        sprintf(cfgfilename,"%s_0%d.%s",pch1,p.ipe,ext);
-      else
-        sprintf(cfgfilename,"%s_00%d.%s",pch1,p.ipe,ext);
-     printf("%s\n",cfgfilename); 
-   #endif
+  
 printf("reading\n");
    FILE *fdt=fopen(cfgfilename,"r+");
 //FILE *fdt=fopen("zero1_np0201_001.ini","r+");
@@ -722,9 +718,57 @@ int writeasciivacconfig(char *cfgfile, params p, meta md, real *w,real *wd, char
    ni=p.n[0];
    nj=p.n[1];
 
-   FILE *fdt=fopen(cfgfile,"a+");
+   
    //char **hlines;
    char *line;
+
+ char configfile[300];
+  char tcfg[300];
+
+sprintf(configfile,"%s",cfgfile);
+
+
+ #ifdef USE_MPI
+   
+   char *pch1,*pch2;
+   pch1 = strtok (configfile,".");
+   sprintf(tcfg,"%s",pch1);
+   pch2 = strtok (NULL,".");
+
+   //printf("here1 %s \n",tcfg);
+   //sprintf(ext,"%s",pch2);
+
+      //set the input filename corresponding to proc id
+ 
+     #ifdef USE_SAC3D
+	      if(p.ipe>99)
+		sprintf(configfile,"%s_%d_np%d%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);
+	      else if(p.ipe>9)
+		sprintf(configfile,"%s_%d_np0%d0%d0%d_0%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);
+	      else
+		sprintf(configfile,"%s_%d_np00%d00%d00%d_00%d.out",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);  	     
+     #else
+	      if(p.ipe>99)
+		sprintf(configfile,"%s_%d_np%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);
+	      else if(p.ipe>9)
+		sprintf(configfile,"%s_%d_np%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);
+	      else
+		sprintf(configfile,"%s_%d_np0%d0%d_00%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);  	     	     
+     #endif
+
+ 
+   #else
+
+
+         //save file containing current data
+      sprintf(configfile,"%s_%d.out",cfgfile,st.it);
+  #endif
+
+
+  FILE *fdt=fopen(configfile,"a+");
+
+
+
    //hlines=(char **)calloc(5, sizeof(char*));
 
    //printf("here %s\n",hlines[0]);
@@ -737,7 +781,7 @@ int writeasciivacconfig(char *cfgfile, params p, meta md, real *w,real *wd, char
       //*   ndim        - dimensionality, negative sign for gen. coord (integer)
       //*   neqpar      - number of equation parameters (integer)
       //*   nw          - number of flow variables (integer)
-      fprintf(fdt,"%d %d %d 6 %d\n", st.it,st.t,NDIM,NVAR);
+     // fprintf(fdt,"%d %d %d 6 %d\n", st.it,st.t,NDIM,NVAR);
    for(i=1;i<=4;i++)
    {
      fprintf(fdt,"%s\n", hlines[i]);

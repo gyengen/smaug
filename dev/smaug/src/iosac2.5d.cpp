@@ -24,7 +24,7 @@ char *name=(char *)calloc(500,sizeof(char));
 char *outfile=(char *)calloc(500,sizeof(char));
 char *formfile=(char *)calloc(500,sizeof(char));
 
-
+char configinfile[300];
 #include "../include/defs.h"
 #include "../include/iosac2.5dparams.h"
 
@@ -52,20 +52,48 @@ if(argc>1)
 
 printf("calling cuinit\n");
 
+   char ext[3];
+   char tcfg[300];
+   char stemp[300];
+   char *pch1,*pch2;
+   strcpy(stemp,cfgfile);
+   pch1 = strtok (stemp,".");
+   sprintf(tcfg,"%s",pch1);
+   pch2 = strtok (NULL,".");
+
+   sprintf(ext,"%s",pch2);
+
+sprintf(configfile,"%s",cfgout);
 #ifdef USE_MPI
      MPI::Init(argc, argv);
      mpiinit(p);
-     sprintf(configfile,"%s",cfgout);
      ipe2iped(p);     
      mpineighbours(0,p);
      mpineighbours(1,p);
-     
      #ifdef USE_SAC3D
           mpineighbours(2,p);
      #endif
+
+     #ifdef USE_SAC3D
+	      if(p->ipe>99)
+		sprintf(configinfile,"%s_np%d%d%d_%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->pnpe[2],p->ipe,ext);
+	      else if(p->ipe>9)
+		sprintf(configinfile,"%s_np0%d0%d0%d_0%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->pnpe[2],p->ipe,ext);
+	      else
+		sprintf(configinfile,"%s_np00%d00%d00%d_00%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->pnpe[2],p->ipe,ext);  	     
+     #else
+	      if(p->ipe>99)
+		sprintf(configinfile,"%s_np%d%d_%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->ipe,ext);
+	      else if(p->ipe>9)
+		sprintf(configinfile,"%s_np%d%d_%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->ipe,ext);
+	      else
+		sprintf(configinfile,"%s_np0%d0%d_00%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->ipe,ext);  	     	     
+     #endif
+     printf("config files\n%s \n %s\n",configinfile,configfile);
+
      
 #else
-     sprintf(configfile,"%s",cfgout);
+     sprintf(configinfile,"%s",cfgfile);
 #endif
 
 char *method=NULL;
@@ -140,12 +168,16 @@ char *method=NULL;
           printf("allocating w and wnew\n");
 	  #ifdef USE_SAC_3D
 		 w=(real *)calloc(ni*nj*nk*NVAR,sizeof(real ));
+		 wmod=(real *)calloc(ni*nj*nk*NVAR,sizeof(real ));
+
 		 wd=(real *)calloc(ni*nj*nk*NDERV,sizeof(real ));
 		 wnew=(real *)calloc(ni*nj*nk*NVAR,sizeof(real ));
 		 for(i=0;i<ni*nj*nk*NDERV;i++)
 		    wd[i]=0.0;
 	 #else
 		 w=(real *)calloc(ni*nj*NVAR,sizeof(real ));
+		 wmod=(real *)calloc(ni*nj*NVAR,sizeof(real ));
+
 		 wd=(real *)calloc(ni*nj*NDERV,sizeof(real ));
 		 wnew=(real *)calloc(ni*nj*NVAR,sizeof(real ));
 		 for(i=0;i<ni*nj*NDERV;i++)
@@ -182,7 +214,7 @@ char *method=NULL;
 	if((p->readini)==0)
 	 initconfig(p, &meta, w);
 	else
-	 readasciivacconfig(cfgfile,*p,meta,w,wd,hlines);
+	 readasciivacconfig(configinfile,*p,meta,w,wd,hlines);
 
 	printf("after read\n");
 	p->it=0;
@@ -202,7 +234,7 @@ char *method=NULL;
 	#ifdef USE_MPI
 	  //initialise the mpi used memory locations
 	 cuinitmpibuffers(&p, &w, &wmod, &temp2, &gmpivisc,   &gmpiw, &gmpiwmod, &d_p, &d_w, &d_wmod,&d_wtemp2,  &d_gmpivisc, &d_gmpiw, &d_gmpiwmod);
-	  ucopywtompiw(&p,&w, &wmod,    &gmpiw, &gmpiwmod, &d_p,  &d_w, &d_wmod,   &d_gmpiw, &d_gmpiwmod, 0);
+	 cucopywtompiw(&p,&w, &wmod,    &gmpiw, &gmpiwmod, &d_p,  &d_w, &d_wmod,   &d_gmpiw, &d_gmpiwmod, 0);
 	#endif
        /*********************************************************************************************************/
        /* End of section initialising the configuration */
@@ -238,11 +270,11 @@ char *method=NULL;
 
         cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_w, 0,0,0);
 	#ifdef USE_MPI
-	   mpibound(NVAR, d_w ,d_p);
+	  mpibound(NVAR, w ,p);
 	#endif
 	  cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, 0,0,0);
 	#ifdef USE_MPI
-	   mpibound(NVAR, d_wmod ,d_p);
+	   mpibound(NVAR, wmod ,p);
 	   cucopywfrommpiw(&p,&w, &wmod,    &gmpiw, &gmpiwmod, &d_p,  &d_w, &d_wmod,   &d_gmpiw, &d_gmpiwmod,0);
 	#endif
        /*********************************************************************************************************/
@@ -251,7 +283,7 @@ char *method=NULL;
 	printf("after cuinit\n");
 
 
-
+       
 
 
 
@@ -334,13 +366,14 @@ char *method=NULL;
 		#ifndef USE_MPI
 			// writevtkconfig(configfile,n,*p, meta , w);
 		#endif
-			//writeasciivacconfig(cfgout,*p, meta , w,hlines,*state);
-		writevacconfig(configfile,n,*p, meta , w,wd,*state);	       
+			//writeasciivacconfig(configfile,*p, meta , w,wd,hlines,*state);
+		writevacconfig(configfile,n,*p, meta , w,wd,*state);	 
+     
 	    }
 	    order=0;
 	    t1=second();
 
-
+            printf("finished write routine\n");
 
 
        /*********************************************************************************************************/
@@ -572,11 +605,7 @@ char *method=NULL;
 
 	  //source terms
           cusource(&p,&d_p,&d_state,&d_w,&d_wmod, &d_dwn1, &d_wd,order, ordero,p->dt);
-	  #ifdef USE_MPI
-		   cucopywtompiw(&p,&w, &wmod,    &gmpiw, &gmpiwmod, &d_p,  &d_w, &d_wmod,   &d_gmpiw, &d_gmpiwmod, order);
-		   mpibound(NVAR, d_wmod ,d_p);
-		   cucopywfrommpiw(&p,&w, &wmod,    &gmpiw, &gmpiwmod, &d_p,  &d_w, &d_wmod,   &d_gmpiw, &d_gmpiwmod,order);		   
-	  #endif
+
 	  cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, ordero,0,0);
 
 	} //end of if((p->rkon)==0)
@@ -787,6 +816,12 @@ char *method=NULL;
 
 	 cuupdate(&p,&w,&wmod,&temp2,&state,&d_p,&d_w,&d_wmod,&d_wtemp2,  &d_state,n);
 
+	  #ifdef USE_MPI
+		   cucopywtompiw(&p,&w, &wmod,    &gmpiw, &gmpiwmod, &d_p,  &d_w, &d_wmod,   &d_gmpiw, &d_gmpiwmod, order);
+		   mpibound(NVAR, w ,p);
+		   cucopywfrommpiw(&p,&w, &wmod,    &gmpiw, &gmpiwmod, &d_p,  &d_w, &d_wmod,   &d_gmpiw, &d_gmpiwmod,order);		   
+	  #endif
+
 	printf("\n");
 
 	   t2=second()-t1;
@@ -814,6 +849,8 @@ char *method=NULL;
 	      g=dg;
 	     
 	    }*/
+
+           // mpisync();
 	    }//end of testep
        /*********************************************************************************************************/
        /* End of looping over iterations*/
@@ -827,7 +864,7 @@ char *method=NULL;
 
 	#ifdef USE_MPI
 	     mpifinalize(p);
-	     cufinishmpi(&p,&w, &wmod, &temp2,&gmpivisc,   &gmpiw, &gmpiwmod, &d_p,   &d_w, &d_wmod,&d_wtemp2,    &d_gmpivisc,   &d_gmpiw, &d_gmpiwmod);
+	     //cufinishmpi(&p,&w, &wmod, &temp2,&gmpivisc,   &gmpiw, &gmpiwmod, &d_p,   &d_w, &d_wmod,&d_wtemp2,    &d_gmpivisc,   &d_gmpiw, &d_gmpiwmod);
 	#endif
 	free(hlines);
 	free(p);

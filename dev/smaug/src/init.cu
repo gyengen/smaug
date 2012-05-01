@@ -1152,19 +1152,25 @@ void checkErrors_i(char *label)
 
   cudaError_t err;
 
+  
+
   err = cudaThreadSynchronize();
   if (err != cudaSuccess)
   {
     char *e = (char*) cudaGetErrorString(err);
     fprintf(stderr, "CUDA Error: %s (at %s)", e, label);
   }
-
+  
   err = cudaGetLastError();
   if (err != cudaSuccess)
   {
     char *e = (char*) cudaGetErrorString(err);
     fprintf(stderr, "CUDA Error: %s (at %s)", e, label);
   }
+
+  
+
+
 }
 
 
@@ -1188,12 +1194,32 @@ int cuinit(struct params **p, struct bparams **bp,real **w, real **wnew, real **
  //   fprintf(stderr, "Sorry, no CUDA device fount");
  //   return 1;
 //  }
+
+  #ifdef USE_MPI
+     int lipe=(*p)->ipe;
+     int gpugid=lipe/4;
+     selectedDevice=lipe-4*gpugid;
+  #endif
   if (selectedDevice >= deviceCount)
   {
     fprintf(stderr, "Choose device ID between 0 and %d\n", deviceCount-1);
     return 1;
   }
-  //cudaSetDevice(selectedDevice);
+
+
+        cudaDeviceProp deviceProp;
+        cudaGetDeviceProperties(&deviceProp, selectedDevice);
+        if (deviceProp.major < 1) {
+            fprintf(stderr, "gpuDeviceInit(): GPU device does not support CUDA.\n");
+            exit(-1);                                                  \
+        }
+
+        cudaSetDevice(selectedDevice) ;
+        printf("> gpuDeviceInit() CUDA device [%d]: %s %s\n", selectedDevice, deviceProp.name, getenv("HOSTNAME"));
+
+
+
+  cudaSetDevice(selectedDevice);
   printf("device count %d selected %d\n", deviceCount,selectedDevice);
   checkErrors_i("initialisations");
   
@@ -1820,8 +1846,8 @@ int cuinitmpibuffers(struct params **p,real **w, real **wmod, real **temp2, real
   gmpivisc=(real **)malloc(szvisc*sizeof(real));
   
   
-  cudaMalloc((void**)d_gmpiwmod, NVAR*szw*sizeof(real));
-  cudaMalloc((void**)d_gmpiw, NVAR*szw*sizeof(real));
+  cudaMalloc((void**)d_gmpiwmod, szw*sizeof(real));
+  cudaMalloc((void**)d_gmpiw, szw*sizeof(real));
   cudaMalloc((void**)d_gmpivisc, szvisc*sizeof(real));
   return 0;
 }
@@ -1838,7 +1864,7 @@ int cucopywtompiw(struct params **p,real **w, real **wmod,    real **gmpiw, real
      int dimp=(((*p)->n[0]))*(((*p)->n[1]));
      
      
-   
+     i3=0;
      #ifdef USE_SAC_3D  
        dimp=(((*p)->n[0]))*(((*p)->n[1]))*(((*p)->n[2]));
      #endif 
@@ -1855,7 +1881,9 @@ int cucopywtompiw(struct params **p,real **w, real **wmod,    real **gmpiw, real
      cudaThreadSynchronize();
      cudaMemcpy(*gmpiwmod, *d_gmpiwmod, NVAR*szbuf*sizeof(real), cudaMemcpyDeviceToHost);
      cudaMemcpy(*gmpiw, *d_gmpiw, NVAR*szbuf*sizeof(real), cudaMemcpyDeviceToHost);
-     
+    
+//gmpiw behaving OK but cannot display or access any of the gmpiwmod variables!
+printf("%f\n",(*gmpiwmod)[0]);
      
 //encodempiw (struct params *dp,int ix, int iy, int iz, int field,int bound,int dim)
      //copy data to correct area in w and wmod
@@ -1874,7 +1902,7 @@ int cucopywtompiw(struct params **p,real **w, real **wmod,    real **gmpiw, real
                        ii[0]=i1;
                        ii[1]=i2;
                        ii[2]=i3;                                                                     
-                       (*wmod)[fencode3_i(*p,ii,var)]=(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)];              
+                      ;// (*wmod)[fencode3_i(*p,ii,var)]=(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)];              
                        (*w)[fencode3_i(*p,ii,var)]=(*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)];
                   }
             #else
@@ -1884,9 +1912,13 @@ int cucopywtompiw(struct params **p,real **w, real **wmod,    real **gmpiw, real
                   {
                        ii[0]=i1;
                        ii[1]=i2;
+                      
+                      ;// (*wmod)[fencode3_i(*p,ii,var)]=(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)];  
+                      ;//if(encodempiw(*p,i1,i2,i3,var,bound,dim)<10)            
+                      ;//printf("%d %d %d %d %d actual %d  mpi data%d %f\n",i1,i2,bound,dim,var,fencode3_i(*p,ii,var),encodempiw(*p,i1,i2,i3,var,bound,dim),(*gmpiwmod)[0]);
 
-                       (*wmod)[fencode3_i(*p,ii,var)]=(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)];              
-                       (*w)[fencode3_i(*p,ii,var)]=(*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)];
+                     ;// if(encodempiw(*p,i1,i2,i3,var,bound,dim)<10239 )
+                     ;//  (*w)[fencode3_i(*p,ii,var)]=(*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)];
                                                                      
                       // *(wmod+encode3_i(*p,ii,var))=*(gmpiwmod+encodempiw(*p,i1,i2,i3,var,bound,dim));              
                       // (*w)[encode3_i(*p,ii,var)]=(*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)];
@@ -1904,7 +1936,7 @@ int cucopywtompiw(struct params **p,real **w, real **wmod,    real **gmpiw, real
                        ii[0]=i1;
                        ii[1]=i2;
                        ii[2]=i3;                                                                     
-                       (*wmod)[fencode3_i(*p,ii,var)]=(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)];              
+                     ;//  (*wmod)[fencode3_i(*p,ii,var)]=(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)];              
                        (*w)[fencode3_i(*p,ii,var)]=(*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)];
                   }
 
@@ -1916,8 +1948,8 @@ int cucopywtompiw(struct params **p,real **w, real **wmod,    real **gmpiw, real
                        ii[0]=i1;
                        ii[1]=i2;
                                                                      
-                       (*wmod)[fencode3_i(*p,ii,var)]=(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)];              
-                       (*w)[fencode3_i(*p,ii,var)]=(*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)];
+                      ;// (*wmod)[fencode3_i(*p,ii,var)]=(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)];              
+                     ;//  (*w)[fencode3_i(*p,ii,var)]=(*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)];
                   }
             
             
@@ -1933,7 +1965,7 @@ int cucopywtompiw(struct params **p,real **w, real **wmod,    real **gmpiw, real
                        ii[0]=i1;
                        ii[1]=i2;
                        ii[2]=i3;                                                                     
-                       (*wmod)[fencode3_i(*p,ii,var)]=(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)];              
+                     ;//  (*wmod)[fencode3_i(*p,ii,var)]=(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)];              
                        (*w)[fencode3_i(*p,ii,var)]=(*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)];
                   }                            
                        break;                       
@@ -1983,8 +2015,8 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw, re
                        ii[0]=i1;
                        ii[1]=i2;
                        ii[2]=i3;                                                                     
-                       (*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
-                       (*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];
+                       ;//(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
+                       ;//(*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];
                   }
             #else
          ii[2]=0;
@@ -1993,8 +2025,8 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw, re
                   {
                        ii[0]=i1;
                        ii[1]=i2;
-                       (*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
-                       (*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];
+                       ;//(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
+                       ;//(*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];
 
                   }            
             
@@ -2011,8 +2043,8 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw, re
                        ii[1]=i2;
                        ii[2]=i3;  
 
-                       (*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
-                       (*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];
+                       ;//(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
+                       ;//(*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];
 
                   }
 
@@ -2023,8 +2055,8 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw, re
                   {
                        ii[0]=i1;
                        ii[1]=i2;
-                      (*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
-                       (*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];      
+                      ;//(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
+                       ;//(*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];      
 
                   }
             
@@ -2042,8 +2074,8 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw, re
                        ii[1]=i2;
                        ii[2]=i3; 
 
-                      (*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
-                       (*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];      
+                      ;//(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
+                       ;//(*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];      
                     }                            
                        break;                       
             #endif             
@@ -2067,8 +2099,8 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw, re
                        ii[1]=i2;
                        ii[2]=i3;     
 
-                      (*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
-                       (*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];      
+                      ;//(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
+                      ;// (*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];      
   
                   }
             #else
@@ -2079,8 +2111,8 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw, re
                        ii[0]=i1;
                        ii[1]=i2;
 
-                      (*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
-                       (*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];      
+                      ;//(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
+                       ;//(*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];      
                   }            
             
             #endif
@@ -2096,8 +2128,8 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw, re
                        ii[1]=i2;
                        ii[2]=i3; 
 
-                      (*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
-                       (*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];      
+                      ;//(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
+                      ;// (*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];      
                    }
 
             #else
@@ -2109,8 +2141,8 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw, re
                        ii[1]=i2;
 
 
-                      (*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
-                       (*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];      
+                      ;//(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
+                       ;//(*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];      
                   }
             
             
@@ -2128,8 +2160,8 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw, re
                        ii[2]=i3; 
 
 
-                      (*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
-                       (*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];      
+                      ;//(*gmpiwmod)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*wmod)[fencode3_i(*p,ii,var)];              
+                       ;//(*gmpiw)[encodempiw(*p,i1,i2,i3,var,bound,dim)]=(*w)[fencode3_i(*p,ii,var)];      
                    }                            
                        break;                       
             #endif             

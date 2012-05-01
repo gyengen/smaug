@@ -10,7 +10,6 @@ static int numThreadsPerBlock = 512;
 
 // device to use in case there is more than one
 static int selectedDevice = 0;
-
 static int blocksize = 512;
 
 static int dimblock = 16;

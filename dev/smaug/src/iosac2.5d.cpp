@@ -183,6 +183,37 @@ char *method=NULL;
 		 for(i=0;i<ni*nj*NDERV;i++)
 		    wd[i]=0.0;
 	 #endif
+
+
+
+        #ifdef USE_MPI
+          int szw,szw0,szw1,szw2;
+	  #ifdef USE_SAC
+		  szw=4*(  ((p)->n[1])  +  ((p)->n[0])   );
+		  szw0=4*NVAR*(  ((p)->n[1])     );
+		  szw1=4*NVAR*(  ((p)->n[0])     );
+	  #endif
+	  #ifdef USE_SAC_3D	  
+		  szw=4*NVAR*(  ((p)->n[1])*((p)->n[2])  +  ((p)->n[0])*((p)->n[2])  +  ((p)->n[0])*((p)->n[1])  );
+		  szw0=4*NVAR*(  ((p)->n[1])*((p)->n[2])    );
+		  szw1=4*NVAR*(    ((p)->n[0])*((p)->n[2])   );
+		  szw2=4*NVAR*(    ((p)->n[0])*((p)->n[1])  );
+	  #endif
+
+
+
+
+
+	  gmpiwmod0=(real *)malloc(szw0*sizeof(real));
+	  gmpiw0=(real *)malloc(szw0*sizeof(real));
+	  gmpiwmod1=(real *)malloc(szw1*sizeof(real));
+	  gmpiw1=(real *)malloc(szw1*sizeof(real));
+
+	  #ifdef USE_SAC_3D
+		  gmpiwmod2=(real *)malloc(szw2*sizeof(real));
+		  gmpiw2=(real *)malloc(szw2*sizeof(real));
+	  #endif
+        #endif
        /*********************************************************************************************************/
        /* End of section creating arrays on the host*/
        /*********************************************************************************************************/
@@ -233,8 +264,12 @@ char *method=NULL;
 
 	#ifdef USE_MPI
 	  //initialise the mpi used memory locations
-	 cuinitmpibuffers(&p, &w, &wmod, &temp2, &gmpivisc,   &gmpiw, &gmpiwmod, &d_p, &d_w, &d_wmod,&d_wtemp2,  &d_gmpivisc, &d_gmpiw, &d_gmpiwmod);
-	 cucopywtompiw(&p,&w, &wmod,    &gmpiw, &gmpiwmod, &d_p,  &d_w, &d_wmod,   &d_gmpiw, &d_gmpiwmod, 0);
+	 cuinitmpibuffers(&p, &w, &wmod, &temp2, &gmpivisc,   &gmpiw0, &gmpiwmod0,   &gmpiw1, &gmpiwmod1,   &gmpiw2, &gmpiwmod2, &d_p, &d_w, &d_wmod,&d_wtemp2,  &d_gmpivisc, &d_gmpiw0, &d_gmpiwmod0, &d_gmpiw1, &d_gmpiwmod1, &d_gmpiw2, &d_gmpiwmod2);
+	 cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, 0);
+
+
+
+
 	#endif
        /*********************************************************************************************************/
        /* End of section initialising the configuration */
@@ -275,7 +310,7 @@ char *method=NULL;
 	  cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, 0,0,0);
 	#ifdef USE_MPI
 	   mpibound(NVAR, wmod ,p);
-	   cucopywfrommpiw(&p,&w, &wmod,    &gmpiw, &gmpiwmod, &d_p,  &d_w, &d_wmod,   &d_gmpiw, &d_gmpiwmod,0);
+	   cucopywfrommpiw(&p,&w, &wmod,      &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,0);
 	#endif
        /*********************************************************************************************************/
        /* End of section initialising the configuration */
@@ -798,9 +833,9 @@ char *method=NULL;
 
 		   cuadvance(&p,&d_p,&d_wmod,&d_w,order);
 		   #ifdef USE_MPI
-			cucopywtompiw(&p,&w, &wmod,    &gmpiw, &gmpiwmod, &d_p,  &d_w, &d_wmod,   &d_gmpiw, &d_gmpiwmod, order);
+			cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order);
 			mpibound(NVAR, d_wmod ,d_p);
-			cucopywfrommpiw(&p,&w, &wmod,    &gmpiw, &gmpiwmod, &d_p,  &d_w, &d_wmod,   &d_gmpiw, &d_gmpiwmod,order);
+			cucopywfrommpiw(&p,&w, &wmod,   &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order);
 
 		   #endif
 		   cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, orderb,0,0);
@@ -817,9 +852,9 @@ char *method=NULL;
 	 cuupdate(&p,&w,&wmod,&temp2,&state,&d_p,&d_w,&d_wmod,&d_wtemp2,  &d_state,n);
 
 	  #ifdef USE_MPI
-		   cucopywtompiw(&p,&w, &wmod,    &gmpiw, &gmpiwmod, &d_p,  &d_w, &d_wmod,   &d_gmpiw, &d_gmpiwmod, order);
+		   cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order);
 		   mpibound(NVAR, w ,p);
-		   cucopywfrommpiw(&p,&w, &wmod,    &gmpiw, &gmpiwmod, &d_p,  &d_w, &d_wmod,   &d_gmpiw, &d_gmpiwmod,order);		   
+		   cucopywfrommpiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order);		   
 	  #endif
 
 	printf("\n");
@@ -863,8 +898,11 @@ char *method=NULL;
 	cufinish(&p,&w,&wnew,&state,&d_p,&d_bp,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
 
 	#ifdef USE_MPI
-	     mpifinalize(p);
-	     //cufinishmpi(&p,&w, &wmod, &temp2,&gmpivisc,   &gmpiw, &gmpiwmod, &d_p,   &d_w, &d_wmod,&d_wtemp2,    &d_gmpivisc,   &d_gmpiw, &d_gmpiwmod);
+	     
+	     cufinishmpi(&p,&w, &wmod, &temp2,&gmpivisc,   &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,   &d_w, &d_wmod,&d_wtemp2,    &d_gmpivisc,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2);
+             mpifinalize(p);
+
+
 	#endif
 	free(hlines);
 	free(p);

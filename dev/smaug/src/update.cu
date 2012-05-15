@@ -250,7 +250,7 @@ int cufinish(struct params **p, real **w, real **wnew, struct state **state, str
 
   #ifdef USE_MPI
 
-int cufinishmpi(struct params **p,real **w, real **wmod, real **temp2, real **gmpivisc,   real **gmpiw, real **gmpiwmod, struct params **d_p,   real **d_w, real **d_wmod,real **d_wtemp2,    real **d_gmpivisc,   real **d_gmpiw, real **d_gmpiwmod)
+int cufinishmpi(struct params **p,real **w, real **wmod, real **temp2, real **gmpivisc,   real **gmpiw0, real **gmpiwmod0,   real **gmpiw1, real **gmpiwmod1,   real **gmpiw2, real **gmpiwmod2, struct params **d_p,   real **d_w, real **d_wmod,real **d_wtemp2,    real **d_gmpivisc,   real **d_gmpiw0, real **d_gmpiwmod0,   real **d_gmpiw1, real **d_gmpiwmod1,   real **d_gmpiw2, real **d_gmpiwmod2)
 {
   
 
@@ -258,16 +258,31 @@ int cufinishmpi(struct params **p,real **w, real **wmod, real **temp2, real **gm
 //cudaMemcpy(*wnew, *d_wnew, 8*((*p)->n[0])* ((*p)->n[1])*sizeof(real), cudaMemcpyDeviceToHost);
 //cudaMemcpy(*b, *d_u, (((*p)->n[0])* ((*p)->n[1]))*sizeof(real), cudaMemcpyDeviceToHost);
 
-  checkErrors_u("copy data from device");
+  //checkErrors_u("copy data from device");
 
 
-  cudaFree(*d_gmpiw);
-  cudaFree(*d_gmpiwmod);
+  cudaFree(*d_gmpiw0);
+  cudaFree(*d_gmpiwmod0);
+
+  cudaFree(*d_gmpiw1);
+  cudaFree(*d_gmpiwmod1);
+#ifdef USE_SAC_3D
+  cudaFree(*d_gmpiw2);
+  cudaFree(*d_gmpiwmod2);
+#endif
   cudaFree(*d_gmpivisc);
 
-  free(*gmpiw);
-  free(*gmpiwmod);
-  free(*gmpivisc);
-  free(*temp2);
+  //free(*gmpiw0);
+  //free(*gmpiwmod0);
+
+ // free(*gmpiw1);
+ // free(*gmpiwmod1);
+#ifdef USE_SAC_3D
+  free(*gmpiw2);
+  free(*gmpiwmod2);
+#endif
+
+  //free(*gmpivisc);
+  //free(*temp2);
 }
 #endif

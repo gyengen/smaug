@@ -352,7 +352,7 @@ sub read_header{
 	    # Calculate number of grid points
 	    my $nxs=1; for $idim (0..$ndim-1){$nxs *= $nx[$idim]}
 	    $nsnapshot = (-s $file)/($headersize+$nxs*$recordsize);
-
+            $nsnapshot = 1;
 	    print
 		"nw         = $nw\n",
 		"headersize = $headersize\n",
@@ -362,31 +362,32 @@ sub read_header{
 	}
     }else{
 	# read 2nd line, get file type and extract ndim
-	my $len2; # length of 2nd line in the header
-	seek FILE, 79+8, 0;
-	read FILE, $len2, 4;
-	($len2)=unpack 'L',$len2;
-	# double precision binary files have 24 byte long 2nd line
-	$precision = ($len2==24)? 8 : 4;
+        seek FILE, 79, 0;
+        $precision=8;
 	seek FILE,4+$precision,1;  # skip time step and time
 	read FILE,my $line2,12;    # read ndim,neqpar,nw
-        seek FILE,8,1;             # skip recordlengths
+
+        #read FILE, my $pnx1, 8;
+        #(my $nx1,my $nx2)=unpack "ll",$pnx1;
+        #read FILE, my $pnx2, 4;
 	read FILE,my $nx,$ndim*4;  # read nxs
 	@nx=unpack("l*",$nx);
+        #print "nx here= $nx[0] $nx[1]\n";
 	if(not $nw){
 	    (my $ndimin,my $neqpar,$nw)=unpack "lll",$line2;
+            print "$ndim $ndimin $neqpar $nw \n" if $Debug;
 	    $ndimin=abs($ndimin);
 	    die "ERROR: ndim in file is $ndimin != $ndim, the ndim for PE-s\n"
 		if $ndimin != $ndim;
 	    # read header tail, ie. equation parameters and variable names
-	    read FILE, $headertail, 4 + 8 + $neqpar*$precision + 8 + 79;
+	    read FILE, $headertail, $neqpar*$precision + 79;
 	    # Set header and record sizes
 	    $headersize = tell(FILE);
 	    $recordsize = $precision;
 	    # Calculate number of grid points
             my $nxs=1; for $idim (0..$ndim-1){$nxs *= $nx[$idim]}
 	    $nsnapshot = (-s $file)/&snapshot_size($nxs);
-
+            $nsnapshot = 1;
 	    print
 		"nw         = $nw\n",
 		"headersize = $headersize\n",
@@ -412,14 +413,17 @@ sub write_header{
     # jump to beginning of snapshot in IN and OUT files
     seek IN,  ($iread-1)*$snapshotsizein,  0;
     seek OUT, ($isave-1)*$snapshotsizeout, 0;
-
+    
+    print "here1 $nxout[$ipeout][0] $nxout[$ipeout][1] $ipeout $precision \n";
+    #print "here2 @$nxout \n";
     if($filetype eq 'ascii'){
 	print OUT scalar <IN>;               # header string
 	print OUT scalar <IN>;               # it, time, ndim, neqpar, nw
 	printf OUT ("%4d" x $ndim)."\n",@{$nxout[$ipeout]}; # nx (replaced)
 	print OUT $headertail;               # eqpar and variable names
     }else{
-	read IN,my $headerhead, 79+8+8+$precision+16+4; # header string,
+	read IN,my $headerhead, 79+$precision+16; # header string,
+        print "here3 $headertail \n";
 	print OUT $headerhead;                  # and it,time,ndim,neqpar,nw
 	print OUT pack "L*",@{$nxout[$ipeout]}; # nx (replaced)
 	print OUT $headertail;                  # eqpar and variable names

@@ -194,7 +194,9 @@ void mpifinalize(params *p)
 
 void mpisetnpediped(params *p, char *string)
 {    
-  
+  //we don't need to call this because the values p->pnpe[0],p->pnpe[1],p->pnpe[2]
+  //have been set in the params file (they should be the same as the values in the filename)
+  // for SAC these vaules are read from the filename
 }
 
 
@@ -306,6 +308,10 @@ void iped2ipe(int *tpipe,int *tpnp, int *oipe)
 
 //call ipeD2ipe(hpe1,hpe2,hpe)
 //call ipeD2ipe(jpe1,jpe2,jpe)
+
+// Find the hpe and jpe processors on the left and right side of this processor 
+// in direction idir. The processor cube is taken to be periodic in every
+// direction.
 void mpineighbours(int dir, params *p)
 {
      int i;
@@ -489,6 +495,8 @@ if((p->pnpe[0])>1)
    ixrmmin[0]=(p->n[0])-4; 
      //! Obtain left and right neighbor processors for this direction
    //call mpineighbors(1,hpe,jpe)
+   
+   mpineighbours(0, p);
    //already computed initially use phpe pjpe arrays
 
    //! receive right (2) boundary from left neighbor hpe
@@ -497,12 +505,12 @@ if((p->pnpe[0])>1)
 
    
    if(((p->mpilowerb[0])==1) ||  ((p->boundtype[0][0])==0))
-             mpirecvbuffer(nvar,ixrmmin,ixrmmax,p->phpe[0],1,p);
+             mpirecvbuffer(nvar,ixrmmin,ixrmmax,p->hpe,1,p);
    //! receive left (1) boundary from right neighbor jpe
    //if(mpiupperB(1) .or. periodic)call mpirecvbuffer(nvar,ixLMmin1,ixLMmin2,&
    //   ixLMmax1,ixLMmax2,jpe,1)
    if(((p->mpiupperb[0])==1) ||  ((p->boundtype[0][0])==0))
-             mpirecvbuffer(nvar,ixlmmin,ixlmmax,p->pjpe[0],0,p);
+             mpirecvbuffer(nvar,ixlmmin,ixlmmax,p->jpe,0,p);
 
   
    //! Wait for all receives to be posted
@@ -513,12 +521,12 @@ if((p->pnpe[0])>1)
    //if(mpilowerB(1) .or. periodic)call mpisend(nvar,var,ixLMmin1,ixLMmin2,&
    //   ixLMmax1,ixLMmax2,hpe,1)
    if(((p->mpilowerb[0])==1) ||  ((p->boundtype[0][0])==0))
-             mpisend(nvar,var,ixlmmin,ixlmmax,p->phpe[0],0,p);
+             mpisend(nvar,var,ixlmmin,ixlmmax,p->hpe,0,p);
    //! Ready send right (2) boundary to right neighbor
    //if(mpiupperB(1) .or. periodic)call mpisend(nvar,var,ixRMmin1,ixRMmin2,&
    //   ixRMmax1,ixRMmax2,jpe,2)
    if(((p->mpiupperb[0])==1) ||  ((p->boundtype[0][0])==0))
-             mpisend(nvar,var,ixrmmin,ixrmmax,p->pjpe[0],1,p);
+             mpisend(nvar,var,ixrmmin,ixrmmax,p->jpe,1,p);
    //! Wait for messages to arrive
    //call MPI_WAITALL(nmpirequest,mpirequests,mpistatus,ierrmpi)
   
@@ -570,18 +578,20 @@ if((p->pnpe[1])>1)
    ixrmmin[1]=(p->n[1])-4; 
      //! Obtain left and right neighbor processors for this direction
    //call mpineighbors(1,hpe,jpe)
+   mpineighbours(1, p);
+
    //already computed initially use phpe pjpe arrays
 
    //! receive right (2) boundary from left neighbor hpe
    //if(mpilowerB(1) .or. periodic)call mpirecvbuffer(nvar,ixRMmin1,ixRMmin2,&
    //   ixRMmax1,ixRMmax2,hpe,2)
    if(((p->mpilowerb[1])==1) ||  ((p->boundtype[0][1])==0))
-             mpirecvbuffer(nvar,ixrmmin,ixrmmax,p->phpe[1],1,p);
+             mpirecvbuffer(nvar,ixrmmin,ixrmmax,p->hpe,1,p);
    //! receive left (1) boundary from right neighbor jpe
    //if(mpiupperB(1) .or. periodic)call mpirecvbuffer(nvar,ixLMmin1,ixLMmin2,&
    //   ixLMmax1,ixLMmax2,jpe,1)
    if(((p->mpiupperb[1])==1) ||  ((p->boundtype[0][1])==0))
-             mpirecvbuffer(nvar,ixlmmin,ixlmmax,p->pjpe[1],0,p);
+             mpirecvbuffer(nvar,ixlmmin,ixlmmax,p->jpe,0,p);
    //! Wait for all receives to be posted
    //call MPI_BARRIER(MPI_COMM_WORLD,ierrmpi)
    comm.Barrier();
@@ -589,12 +599,12 @@ if((p->pnpe[1])>1)
    //if(mpilowerB(1) .or. periodic)call mpisend(nvar,var,ixLMmin1,ixLMmin2,&
    //   ixLMmax1,ixLMmax2,hpe,1)
    if(((p->mpilowerb[1])==1) ||  ((p->boundtype[0][1])==0))
-             mpisend(nvar,var,ixlmmin,ixlmmax,p->phpe[1],0,p);
+             mpisend(nvar,var,ixlmmin,ixlmmax,p->hpe,0,p);
    //! Ready send right (2) boundary to right neighbor
    //if(mpiupperB(1) .or. periodic)call mpisend(nvar,var,ixRMmin1,ixRMmin2,&
    //   ixRMmax1,ixRMmax2,jpe,2)
    if(((p->mpiupperb[1])==1) ||  ((p->boundtype[0][1])==0))
-             mpisend(nvar,var,ixrmmin,ixrmmax,p->pjpe[1],1,p);
+             mpisend(nvar,var,ixrmmin,ixrmmax,p->jpe,1,p);
    //! Wait for messages to arrive
    //call MPI_WAITALL(nmpirequest,mpirequests,mpistatus,ierrmpi)
    request.Waitall(gnmpirequest,gmpirequest);
@@ -643,18 +653,20 @@ if((p->pnpe[2])>1)
    ixrmmin[2]=(p->n[2])-4; 
      //! Obtain left and right neighbor processors for this direction
    //call mpineighbors(1,hpe,jpe)
+   mpineighbours(2, p);
+
    //already computed initially use phpe pjpe arrays
 
    //! receive right (2) boundary from left neighbor hpe
    //if(mpilowerB(1) .or. periodic)call mpirecvbuffer(nvar,ixRMmin1,ixRMmin2,&
    //   ixRMmax1,ixRMmax2,hpe,2)
    if(((p->mpilowerb[2])==1) ||  ((p->boundtype[0][2])==0))
-             mpirecvbuffer(nvar,ixrmmin,ixrmmax,p->phpe[2],1,p);
+             mpirecvbuffer(nvar,ixrmmin,ixrmmax,p->hpe,1,p);
    //! receive left (1) boundary from right neighbor jpe
    //if(mpiupperB(1) .or. periodic)call mpirecvbuffer(nvar,ixLMmin1,ixLMmin2,&
    //   ixLMmax1,ixLMmax2,jpe,1)
    if(((p->mpiupperb[2])==1) ||  ((p->boundtype[0][2])==0))
-             mpirecvbuffer(nvar,ixlmmin,ixlmmax,p->pjpe[2],0,p);
+             mpirecvbuffer(nvar,ixlmmin,ixlmmax,p->jpe,0,p);
    //! Wait for all receives to be posted
    //call MPI_BARRIER(MPI_COMM_WORLD,ierrmpi)
    comm.Barrier();
@@ -662,12 +674,12 @@ if((p->pnpe[2])>1)
    //if(mpilowerB(1) .or. periodic)call mpisend(nvar,var,ixLMmin1,ixLMmin2,&
    //   ixLMmax1,ixLMmax2,hpe,1)
    if(((p->mpilowerb[2])==1) ||  ((p->boundtype[0][2])==0))
-             mpisend(nvar,var,ixlmmin,ixlmmax,p->phpe[2],0,p);
+             mpisend(nvar,var,ixlmmin,ixlmmax,p->hpe,0,p);
    //! Ready send right (2) boundary to right neighbor
    //if(mpiupperB(1) .or. periodic)call mpisend(nvar,var,ixRMmin1,ixRMmin2,&
    //   ixRMmax1,ixRMmax2,jpe,2)
    if(((p->mpiupperb[2])==1) ||  ((p->boundtype[0][2])==0))
-             mpisend(nvar,var,ixrmmin,ixrmmax,p->pjpe[2],1,p);
+             mpisend(nvar,var,ixrmmin,ixrmmax,p->pjpe,1,p);
    //! Wait for messages to arrive
    //call MPI_WAITALL(nmpirequest,mpirequests,mpistatus,ierrmpi)
    request.Waitall(gnmpirequest,gmpirequest);
@@ -706,10 +718,10 @@ if((p->pnpe[2])>1)
 //   ierrmpi)
 void mpireduce(real *a, MPI::Op mpifunc)
 {
-  real *alocal;
+  real alocal;
 
-   *alocal=*a;
-   comm.Reduce(alocal, a, 1, MPI_DOUBLE_PRECISION, mpifunc, 0);
+   alocal=*a;
+   comm.Reduce(&alocal, a, 1, MPI_DOUBLE_PRECISION, mpifunc, 0);
 
 }
 
@@ -730,10 +742,10 @@ void mpireduce(real *a, MPI::Op mpifunc)
 //   ierrmpi)
 void mpiallreduce(real *a, MPI::Op mpifunc)
 {
-   real *alocal;
+   real alocal;
 
-   *alocal=*a;
-   comm.Allreduce(alocal, a, 1, MPI_DOUBLE_PRECISION, mpifunc);
+   alocal=*a;
+   comm.Allreduce(&alocal, a, 1, MPI_DOUBLE_PRECISION, mpifunc);
 
 }
 

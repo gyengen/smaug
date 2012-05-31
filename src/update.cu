@@ -250,7 +250,7 @@ int cufinish(struct params **p, real **w, real **wnew, struct state **state, str
 
   #ifdef USE_MPI
 
-int cufinishmpi(struct params **p,real **w, real **wmod, real **temp2, real **gmpivisc,   real **gmpiw0, real **gmpiwmod0,   real **gmpiw1, real **gmpiwmod1,   real **gmpiw2, real **gmpiwmod2, struct params **d_p,   real **d_w, real **d_wmod,real **d_wtemp2,    real **d_gmpivisc,   real **d_gmpiw0, real **d_gmpiwmod0,   real **d_gmpiw1, real **d_gmpiwmod1,   real **d_gmpiw2, real **d_gmpiwmod2)
+int cufinishmpi(struct params **p,real **w, real **wmod, real **temp2, real **gmpivisc0, real **gmpivisc1, real **gmpivisc2,   real **gmpiw0, real **gmpiwmod0,   real **gmpiw1, real **gmpiwmod1,   real **gmpiw2, real **gmpiwmod2, struct params **d_p,   real **d_w, real **d_wmod,real **d_wtemp2,    real **d_gmpivisc0,    real **d_gmpivisc1,    real **d_gmpivisc2,   real **d_gmpiw0, real **d_gmpiwmod0,   real **d_gmpiw1, real **d_gmpiwmod1,   real **d_gmpiw2, real **d_gmpiwmod2)
 {
   
 
@@ -269,8 +269,10 @@ int cufinishmpi(struct params **p,real **w, real **wmod, real **temp2, real **gm
 #ifdef USE_SAC_3D
   cudaFree(*d_gmpiw2);
   cudaFree(*d_gmpiwmod2);
+  cudaFree(*d_gmpivisc2);
 #endif
-  cudaFree(*d_gmpivisc);
+  cudaFree(*d_gmpivisc0);
+  cudaFree(*d_gmpivisc1);
 
   //free(*gmpiw0);
   //free(*gmpiwmod0);
@@ -280,9 +282,11 @@ int cufinishmpi(struct params **p,real **w, real **wmod, real **temp2, real **gm
 #ifdef USE_SAC_3D
   free(*gmpiw2);
   free(*gmpiwmod2);
+free(*gmpivisc2);
 #endif
 
-  //free(*gmpivisc);
+  free(*gmpivisc0);
+free(*gmpivisc1);
   //free(*temp2);
 }
 #endif

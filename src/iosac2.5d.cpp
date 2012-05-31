@@ -187,21 +187,33 @@ char *method=NULL;
 
 
         #ifdef USE_MPI
-          int szw,szw0,szw1,szw2;
+          int szw,szw0,szw1,szw2,szvisc0,szvisc1,szvisc2;
 	  #ifdef USE_SAC
 		  szw=4*(  ((p)->n[1])  +  ((p)->n[0])   );
 		  szw0=4*NVAR*(  ((p)->n[1])     );
 		  szw1=4*NVAR*(  ((p)->n[0])     );
+
+		  szvisc0=4*NVAR*(  (((p)->n[1])+2 )   );
+		  szvisc1=4*NVAR*(    (((p)->n[0]) +2 )  );
 	  #endif
 	  #ifdef USE_SAC_3D	  
 		  szw=4*NVAR*(  ((p)->n[1])*((p)->n[2])  +  ((p)->n[0])*((p)->n[2])  +  ((p)->n[0])*((p)->n[1])  );
 		  szw0=4*NVAR*(  ((p)->n[1])*((p)->n[2])    );
 		  szw1=4*NVAR*(    ((p)->n[0])*((p)->n[2])   );
 		  szw2=4*NVAR*(    ((p)->n[0])*((p)->n[1])  );
+
+		  szvisc0=4*NVAR*(  (((p)->n[1])+2)*(((p)->n[2])+2)  ); 
+		  szvisc1=4*NVAR*(   (((p)->n[0])+2)*(((p)->n[2])+2)    );    
+		  szvisc2=4*NVAR*(  (((p)->n[1])+2)*(((p)->n[2])+2)   );   
 	  #endif
 
 
-
+	  #ifdef USE_SAC
+	  temp2=(real *)calloc(NTEMP2*(((p)->n[0])+2)* (((p)->n[1])+2),sizeof(real));
+	  #endif
+	  #ifdef USE_SAC_3D
+	  temp2=(real *)calloc(NTEMP2*(((p)->n[0])+2)* (((p)->n[1])+2)* (((p)->n[2])+2),sizeof(real));
+	  #endif
 
 
 	  gmpiwmod0=(real *)malloc(szw0*sizeof(real));
@@ -209,9 +221,17 @@ char *method=NULL;
 	  gmpiwmod1=(real *)malloc(szw1*sizeof(real));
 	  gmpiw1=(real *)malloc(szw1*sizeof(real));
 
+          gmpivisc0=(real *)malloc(szvisc0*sizeof(real));
+          gmpivisc1=(real *)malloc(szvisc1*sizeof(real));
+
 	  #ifdef USE_SAC_3D
 		  gmpiwmod2=(real *)malloc(szw2*sizeof(real));
 		  gmpiw2=(real *)malloc(szw2*sizeof(real));
+                  gmpivisc2=(real *)malloc(szvisc2*sizeof(real));
+
+
+ 
+
 	  #endif
         #endif
        /*********************************************************************************************************/
@@ -264,7 +284,7 @@ char *method=NULL;
 
 	#ifdef USE_MPI
 	  //initialise the mpi used memory locations
-	 cuinitmpibuffers(&p, &w, &wmod, &temp2, &gmpivisc,   &gmpiw0, &gmpiwmod0,   &gmpiw1, &gmpiwmod1,   &gmpiw2, &gmpiwmod2, &d_p, &d_w, &d_wmod,&d_wtemp2,  &d_gmpivisc, &d_gmpiw0, &d_gmpiwmod0, &d_gmpiw1, &d_gmpiwmod1, &d_gmpiw2, &d_gmpiwmod2);
+	 cuinitmpibuffers(&p, &w, &wmod, &temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,   &gmpiw0, &gmpiwmod0,   &gmpiw1, &gmpiwmod1,   &gmpiw2, &gmpiwmod2, &d_p, &d_w, &d_wmod,&d_wtemp2,  &d_gmpivisc0,  &d_gmpivisc1,  &d_gmpivisc2, &d_gmpiw0, &d_gmpiwmod0, &d_gmpiw1, &d_gmpiwmod1, &d_gmpiw2, &d_gmpiwmod2);
 	 cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, 0);
 
 
@@ -512,9 +532,9 @@ char *method=NULL;
 		      cmax[dim]=p->cmax;
 		      cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
 		      #ifdef USE_MPI
-			  cucopytompivisc(&p,&temp2, &gmpivisc,  &d_p,&d_wtemp2,    &d_gmpivisc);
-			  mpivisc(dim,p,temp2);
-			  cucopyfrommpivisc(&p,&temp2, &gmpivisc,  &d_p,&d_wtemp2,    &d_gmpivisc);
+			  cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
+			   mpivisc(dim,p,temp2);
+			  ;//cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 		      #endif
 		      cuhyperdifvisc1r(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
 		      cuhyperdifvisc1l(&p,&d_p,&d_wmod,&wd,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
@@ -535,9 +555,9 @@ char *method=NULL;
 	        cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,energy,dim);
 
 		#ifdef USE_MPI
-			cucopytompivisc(&p,&temp2, &gmpivisc,  &d_p,&d_wtemp2,    &d_gmpivisc);
+			cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 			mpivisc(dim,p,temp2);
-			cucopyfrommpivisc(&p,&temp2, &gmpivisc,  &d_p,&d_wtemp2,    &d_gmpivisc);
+			cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 		#endif
 
 		cuhyperdifvisc1r(&p,&d_p,&d_wmod,&wd,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,energy,dim);
@@ -557,9 +577,10 @@ char *method=NULL;
 			  #endif
 		          cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,mom1+f,dim);
 		          #ifdef USE_MPI
-				  cucopytompivisc(&p,&temp2, &gmpivisc,  &d_p,&d_wtemp2,    &d_gmpivisc);
+				  
+                                  cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 				  mpivisc(dim,p,temp2);
-				  cucopyfrommpivisc(&p,&temp2, &gmpivisc,  &d_p,&d_wtemp2,    &d_gmpivisc);
+				  cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 	                 #endif
 			 cuhyperdifvisc1r(&p,&d_p,&d_wmod,&wd,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,mom1+f,dim);
 			 cuhyperdifvisc1l(&p,&d_p,&d_wmod,&wd,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,mom1+f,dim);
@@ -601,9 +622,9 @@ char *method=NULL;
 			       cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,b1+f,dim);
 
 			       #ifdef USE_MPI
-				  cucopytompivisc(&p,&temp2, &gmpivisc,  &d_p,&d_wtemp2,    &d_gmpivisc);
+				  cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 				  mpivisc(dim,p,temp2);
-				  cucopyfrommpivisc(&p,&temp2, &gmpivisc,  &d_p,&d_wtemp2,    &d_gmpivisc);		 
+				  cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);		 
 		               #endif
 			       cuhyperdifvisc1r(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,b1+f,dim);
 			       cuhyperdifvisc1l(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,b1+f,dim);
@@ -716,9 +737,9 @@ char *method=NULL;
 		  
 			cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
 			#ifdef USE_MPI
-				cucopytompivisc(&p,&temp2, &gmpivisc,  &d_p,&d_wtemp2,    &d_gmpivisc);
+				cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 				mpivisc(dim,p,temp2);
-				cucopyfrommpivisc(&p,&temp2, &gmpivisc,  &d_p,&d_wtemp2,    &d_gmpivisc);
+				cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 			#endif
 			cuhyperdifvisc1r(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
 			cuhyperdifvisc1l(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);				
@@ -735,9 +756,9 @@ char *method=NULL;
 			#endif
 			cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,energy,dim);
 			#ifdef USE_MPI
-				cucopytompivisc(&p,&temp2, &gmpivisc,  &d_p,&d_wtemp2,    &d_gmpivisc);
+			        cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 				mpivisc(dim,p,temp2);
-				cucopyfrommpivisc(&p,&temp2, &gmpivisc,  &d_p,&d_wtemp2,    &d_gmpivisc);
+				cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 			#endif
 			cuhyperdifvisc1r(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,energy,dim);
 			cuhyperdifvisc1l(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,energy,dim);
@@ -754,9 +775,9 @@ char *method=NULL;
 			#endif
 			cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,mom1+f,dim);
 			#ifdef USE_MPI
-				cucopytompivisc(&p,&temp2, &gmpivisc,  &d_p,&d_wtemp2,    &d_gmpivisc);
+                                cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 				mpivisc(dim,p,temp2);
-				cucopyfrommpivisc(&p,&temp2, &gmpivisc,  &d_p,&d_wtemp2,    &d_gmpivisc);
+				cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 			#endif
 			cuhyperdifvisc1r(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,mom1+f,dim);
 			cuhyperdifvisc1l(&p,&d_p,&d_wmod,&wd,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,mom1+f,dim);
@@ -797,9 +818,9 @@ char *method=NULL;
 			cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,b1+f,dim);
 				//cuhyperdifvisc1il(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,b1+f,dim);
 			#ifdef USE_MPI
-				cucopytompivisc(&p,&temp2, &gmpivisc,  &d_p,&d_wtemp2,    &d_gmpivisc);
+				cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 				mpivisc(dim,p,temp2);
-				cucopyfrommpivisc(&p,&temp2, &gmpivisc,  &d_p,&d_wtemp2,    &d_gmpivisc);
+				cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 			#endif
 			cuhyperdifvisc1r(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,b1+f,dim);
 			cuhyperdifvisc1l(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,b1+f,dim);
@@ -899,7 +920,7 @@ char *method=NULL;
 
 	#ifdef USE_MPI
 	     
-	     cufinishmpi(&p,&w, &wmod, &temp2,&gmpivisc,   &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,   &d_w, &d_wmod,&d_wtemp2,    &d_gmpivisc,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2);
+	     cufinishmpi(&p,&w, &wmod, &temp2,&gmpivisc0,&gmpivisc1,&gmpivisc2,   &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,   &d_w, &d_wmod,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2);
              mpifinalize(p);
 
 

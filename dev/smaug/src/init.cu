@@ -648,7 +648,6 @@ bound*(            +  ((p->n[0])*(p->n[1]))      )+   (  (ix+iy*(p->n[0]))    ))
 }
 
 
-
 __device__ __host__
 int encodempivisc (struct params *p,int ix, int iy, int iz, int bound,int dim) {
   #ifdef USE_SAC_3D
@@ -656,6 +655,36 @@ int encodempivisc (struct params *p,int ix, int iy, int iz, int bound,int dim) {
 bound*(         (dim==2)*(((p->n[0])+2)*((p->n[1])+2))   +  (dim==0)*(((p->n[1])+2)*((p->n[2])+2))  +   (dim==1)*(((p->n[0])+2)*((p->n[2])+2))    )+   (  (ix+iz*((p->n[0])+2))*(dim==1)+(iy+iz*((p->n[1])+2))*(dim==0)+(iz+ix*((p->n[2])+2))*(dim==2)    ));
   #else
     return (   dim*(2*(  ((p->n[0])+2)+((p->n[1])+2)   ))      +bound*(    (dim==1)*((p->n[0])+2)+(dim==0)*((p->n[1])+2)  )  +   (ix*(dim==1)+iy*(dim==0))     );
+  #endif
+}
+
+
+__device__ __host__
+int encodempivisc0 (struct params *p,int ix, int iy, int iz, int bound,int dim) {
+  #ifdef USE_SAC_3D
+    return (
+bound*(           (((p->n[1])+2)*((p->n[2])+2))      )+   (  (iy+iz*((p->n[1])+2))    ));
+  #else
+    return (   bound*(    ((p->n[1])+2)  )  +   iy     );
+  #endif
+}
+
+
+__device__ __host__
+int encodempivisc1 (struct params *p,int ix, int iy, int iz, int bound,int dim) {
+  #ifdef USE_SAC_3D
+    return (
+bound*(           (((p->n[0])+2)*((p->n[2])+2))      )+   (  (ix+iz*((p->n[0])+2))    ));
+  #else
+    return (   bound*(    ((p->n[0])+2)  )  +   ix     );
+  #endif
+}
+
+__device__ __host__
+int encodempivisc2 (struct params *p,int ix, int iy, int iz, int bound,int dim) {
+  #ifdef USE_SAC_3D
+    return (
+bound*(           (((p->n[0])+2)*((p->n[1])+2))      )+   (  (ix+iy*((p->n[0])+2))    ));
   #endif
 }
 
@@ -719,7 +748,7 @@ k=0;
 
     }
 
-__device__ __host__ void   mpivisctogpu(struct params *p,real *d_wtemp2,real *d_gmpivisc,int *ii,  int dim)
+__device__ __host__ void   mpivisctogpu(struct params *p,real *d_wtemp2,real *d_gmpivisc0,real *d_gmpivisc1,real *d_gmpivisc2,int *ii,  int dim)
 {
                                 
                int i,j,k,bound,var;
@@ -732,13 +761,13 @@ k=0;
                 if((i==0 ) && dim==0)
                 {              
                     bound=i;
-                    d_wtemp2[encode3p2_i(p,i,j,k,var)]=d_gmpivisc[encodempivisc(p,i,j,k,bound,dim)];
+                    d_wtemp2[encode3p2_i(p,i,j,k,var)]=d_gmpivisc0[encodempivisc0(p,i,j,k,bound,dim)];
                     
                 }
                 else if((( i==((p->n[0])+1)   ))  && dim==0)               
                 {
                     bound=1;
-                    d_wtemp2[encode3p2_i(p,i,j,k,var)]=d_gmpivisc[encodempivisc(p,i,j,k,bound,dim)];
+                    d_wtemp2[encode3p2_i(p,i,j,k,var)]=d_gmpivisc0[encodempivisc0(p,i,j,k,bound,dim)];
                 }
 
               
@@ -746,12 +775,12 @@ k=0;
                 if((j==0) && dim==1)              
                 {              
                     bound=j;
-                    d_wtemp2[encode3p2_i(p,i,j,k,var)]=d_gmpivisc[encodempivisc(p,i,j,k,bound,dim)];
+                    d_wtemp2[encode3p2_i(p,i,j,k,var)]=d_gmpivisc1[encodempivisc1(p,i,j,k,bound,dim)];
                 }            
                  else if((( j==((p->n[1])+1)   ))  && dim==1)               
                 {
                     bound=1;
-                    d_wtemp2[encode3p2_i(p,i,j,k,var)]=d_gmpivisc[encodempivisc(p,i,j,k,bound,dim)];
+                    d_wtemp2[encode3p2_i(p,i,j,k,var)]=d_gmpivisc1[encodempivisc1(p,i,j,k,bound,dim)];
              
                 }
 
@@ -760,12 +789,12 @@ k=0;
                 if((k==0 ) && dim==2)              
                 {              
                     bound=k;
-                    d_wtemp2[encode3p2_i(p,i,j,k,var)]=d_gmpivisc[encodempivisc(p,i,j,k,bound,dim)];
+                    d_wtemp2[encode3p2_i(p,i,j,k,var)]=d_gmpivisc2[encodempivisc2(p,i,j,k,bound,dim)];
                 }        
                  else if(((k==((p->n[2])+1)   ))  && dim==2)               
                 {
                     bound=1;
-                    d_wtemp2[encode3p2_i(p,i,j,k,var)]=d_gmpivisc[encodempivisc(p,i,j,k,bound,dim)];
+                    d_wtemp2[encode3p2_i(p,i,j,k,var)]=d_gmpivisc2[encodempivisc2(p,i,j,k,bound,dim)];
                 }
 
      #endif
@@ -773,7 +802,7 @@ k=0;
                                 
 }
 
-__device__ __host__ void   gputompivisc(struct params *p,real *d_wtemp2,real *d_gmpivisc,int *ii,  int dim)
+__device__ __host__ void   gputompivisc(struct params *p,real *d_wtemp2,real *d_gmpivisc0,real *d_gmpivisc1,real *d_gmpivisc2,int *ii,  int dim)
 {
                                 
               int i,j,k,bound,var;
@@ -786,13 +815,13 @@ k=0;
                 if((i==0 ) && dim==0)
                 {              
                     bound=i;
-                    d_gmpivisc[encodempivisc(p,i,j,k,bound,dim)]=d_wtemp2[encode3p2_i(p,i,j,k,var)];
+                    d_gmpivisc0[encodempivisc0(p,i,j,k,bound,dim)]=d_wtemp2[encode3p2_i(p,i,j,k,var)];
                     
                 }
                 else if((( i==((p->n[0])+1)   ))  && dim==0)               
                 {
                     bound=1;
-                    d_gmpivisc[encodempivisc(p,i,j,k,bound,dim)]=d_wtemp2[encode3p2_i(p,i,j,k,var)];
+                    d_gmpivisc0[encodempivisc0(p,i,j,k,bound,dim)]=d_wtemp2[encode3p2_i(p,i,j,k,var)];
                 }
 
               
@@ -800,12 +829,12 @@ k=0;
                 if((j==0) && dim==1)              
                 {              
                     bound=j;
-                    d_gmpivisc[encodempivisc(p,i,j,k,bound,dim)]=d_wtemp2[encode3p2_i(p,i,j,k,var)];
+                    d_gmpivisc1[encodempivisc1(p,i,j,k,bound,dim)]=d_wtemp2[encode3p2_i(p,i,j,k,var)];
                 }            
                  else if((( j==((p->n[1])+1)   ))  && dim==1)               
                 {
                     bound=1;
-                    d_gmpivisc[encodempivisc(p,i,j,k,bound,dim)]=d_wtemp2[encode3p2_i(p,i,j,k,var)];
+                    d_gmpivisc1[encodempivisc1(p,i,j,k,bound,dim)]=d_wtemp2[encode3p2_i(p,i,j,k,var)];
              
                 }
 
@@ -814,12 +843,12 @@ k=0;
                 if((k==0 ) && dim==2)              
                 {              
                     bound=k;
-                    d_gmpivisc[encodempivisc(p,i,j,k,bound,dim)]=d_wtemp2[encode3p2_i(p,i,j,k,var)];
+                    d_gmpivisc2[encodempivisc2(p,i,j,k,bound,dim)]=d_wtemp2[encode3p2_i(p,i,j,k,var)];
                 }        
                  else if(((k==((p->n[2])+1)   ))  && dim==2)               
                 {
                     bound=1;
-                    d_gmpivisc[encodempivisc(p,i,j,k,bound,dim)]=d_wtemp2[encode3p2_i(p,i,j,k,var)];
+                    d_gmpivisc2[encodempivisc2(p,i,j,k,bound,dim)]=d_wtemp2[encode3p2_i(p,i,j,k,var)];
                 }
 
      #endif
@@ -1012,7 +1041,7 @@ int dim;
 
  
 
-              ;//    gputompiw(p,d_w,d_wmod,d_mpiw0,d_mpiwmod0,d_mpiw1,d_mpiwmod1,d_mpiw2,d_mpiwmod2,iia,f,dim);
+                  gputompiw(p,d_w,d_wmod,d_mpiw0,d_mpiwmod0,d_mpiw1,d_mpiwmod1,d_mpiw2,d_mpiwmod2,iia,f,dim);
 
 	}
 
@@ -1024,7 +1053,7 @@ int dim;
 
 
 
-     __global__ void gputompivisc_parallel(struct params *p,real *d_wtemp2,real *d_gmpivisc)
+     __global__ void gputompivisc_parallel(struct params *p,real *d_wtemp2,real *d_gmpivisc0,real *d_gmpivisc1,real *d_gmpivisc2)
      {
                
   int iindex = blockIdx.x * blockDim.x + threadIdx.x;
@@ -1086,7 +1115,7 @@ int dim;
 
  
 
-                  gputompivisc(p,d_wtemp2,d_gmpivisc,iia,dim);
+                  gputompivisc(p,d_wtemp2,d_gmpivisc0,d_gmpivisc1,d_gmpivisc2,iia,dim);
 
 	}
 
@@ -1097,7 +1126,7 @@ int dim;
                }    
      
      
-    __global__ void  mpivisctogpu_parallel(struct params *p,real *d_wtemp2,real *d_gmpivisc)
+    __global__ void  mpivisctogpu_parallel(struct params *p,real *d_wtemp2,real *d_gmpivisc0,real *d_gmpivisc1,real *d_gmpivisc2)
     {
                
   int iindex = blockIdx.x * blockDim.x + threadIdx.x;
@@ -1159,7 +1188,7 @@ int dim;
 
  
 
-                  mpivisctogpu(p,d_wtemp2,d_gmpivisc,iia,dim);
+                  mpivisctogpu(p,d_wtemp2,d_gmpivisc0,d_gmpivisc1,d_gmpivisc2,iia,dim);
 
 	}
 
@@ -1847,10 +1876,10 @@ kp=0;
 //this will update only the ghost cells transferred between the CPU's
 
 
-int cuinitmpibuffers(struct params **p,real **w, real **wmod, real **temp2, real **gmpivisc,   real **gmpiw0, real **gmpiwmod0,   real **gmpiw1, real **gmpiwmod1,   real **gmpiw2, real **gmpiwmod2, struct params **d_p,   real **d_w, real **d_wmod,real **d_wtemp2,    real **d_gmpivisc,   real **d_gmpiw0, real **d_gmpiwmod0,   real **d_gmpiw1, real **d_gmpiwmod1,   real **d_gmpiw2, real **d_gmpiwmod2)
+int cuinitmpibuffers(struct params **p,real **w, real **wmod, real **temp2, real **gmpivisc0, real **gmpivisc1, real **gmpivisc2,   real **gmpiw0, real **gmpiwmod0,   real **gmpiw1, real **gmpiwmod1,   real **gmpiw2, real **gmpiwmod2, struct params **d_p,   real **d_w, real **d_wmod,real **d_wtemp2,    real **d_gmpivisc0,    real **d_gmpivisc1,    real **d_gmpivisc2,   real **d_gmpiw0, real **d_gmpiwmod0,   real **d_gmpiw1, real **d_gmpiwmod1,   real **d_gmpiw2, real **d_gmpiwmod2)
 {
 
-  int szw,  szvisc,szw0,szw1,szw2;
+  int szw,  szvisc0,szvisc1,szvisc2,szw0,szw1,szw2;
   #ifdef USE_SAC
   //real *dt;
   
@@ -1858,7 +1887,9 @@ int cuinitmpibuffers(struct params **p,real **w, real **wmod, real **temp2, real
   szw0=4*NVAR*(  ((*p)->n[1])     );
   szw1=4*NVAR*(  ((*p)->n[0])     );
 
-  szvisc=4*NVAR*(  (((*p)->n[1])+2 )  +  (((*p)->n[0]) +2 )  );
+  szvisc0=4*(  (((*p)->n[1])+2 )   );
+  szvisc1=4*(    (((*p)->n[0]) +2 )  );
+
  //dt=(real *)calloc( NTEMP2*(((*p)->n[0])+2)* (((*p)->n[1])+2),sizeof(real));
 
   #endif
@@ -1871,7 +1902,11 @@ int cuinitmpibuffers(struct params **p,real **w, real **wmod, real **temp2, real
 
 
 
-  szvisc=4*NVAR*(  (((*p)->n[1])+2)*(((*p)->n[2])+2)  +  (((*p)->n[0])+2)*(((*p)->n[2])+2)  +  (((*p)->n[0])+2)*(((*p)->n[1])+2)  );    
+  szvisc0=4*(  (((*p)->n[1])+2)*(((*p)->n[2])+2)  ); 
+  szvisc1=4*(   (((*p)->n[0])+2)*(((*p)->n[2])+2)    );    
+  szvisc2=4*(  (((*p)->n[1])+2)*(((*p)->n[2])+2)   );    
+
+   
   //dt=(real *)calloc( NTEMP2*(((*p)->n[0])+2)* (((*p)->n[1])+2)* (((*p)->n[2])+2),sizeof(real));
   #endif
 
@@ -1894,7 +1929,7 @@ int cuinitmpibuffers(struct params **p,real **w, real **wmod, real **temp2, real
 	//  gmpiw2=(real **)malloc(szw2*sizeof(real));
   #endif
 
-  gmpivisc=(real **)malloc(szvisc*sizeof(real));
+  //gmpivisc=(real **)malloc(szvisc*sizeof(real));
 	//  cudaMalloc((void**)d_gmpiwmod, szw*sizeof(real));
 	//  cudaMalloc((void**)d_gmpiw, szw*sizeof(real));
 
@@ -1907,8 +1942,13 @@ int cuinitmpibuffers(struct params **p,real **w, real **wmod, real **temp2, real
   #ifdef USE_SAC_3D  
 	  cudaMalloc((void**)d_gmpiwmod2, szw2*sizeof(real));
 	  cudaMalloc((void**)d_gmpiw2, szw2*sizeof(real));
+          cudaMalloc((void**)d_gmpivisc2, szvisc2*sizeof(real));
+  #else
+
+          cudaMalloc((void**)d_gmpivisc2, sizeof(real));
   #endif
-  cudaMalloc((void**)d_gmpivisc, szvisc*sizeof(real));
+          cudaMalloc((void**)d_gmpivisc0, szvisc0*sizeof(real));
+          cudaMalloc((void**)d_gmpivisc1, szvisc1*sizeof(real));
   return 0;
 }
 
@@ -2297,11 +2337,11 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw0, r
 
 //copy gpu memory data to mpi send buffer for w and wmod
 //just update the edges of w and wmod with values copied from gmpiw, gmpiwmod and gmpivisc
-int cucopytompivisc(struct params **p,real **temp2, real **gmpivisc,  struct params **d_p,real **d_wtemp2,    real **d_gmpivisc)
+int cucopytompivisc(struct params **p,real **temp2, real **gmpivisc0, real **gmpivisc1, real **gmpivisc2,  struct params **d_p,real **d_wtemp2,    real **d_gmpivisc0,    real **d_gmpivisc1,    real **d_gmpivisc2)
 {
 
 
-     int szbuf;
+     int szbuf,szbuf0,szbuf1,szbuf2;
      int dim,bound,var=0;
      int i1,i2,i3;
 
@@ -2316,13 +2356,25 @@ int cucopytompivisc(struct params **p,real **temp2, real **gmpivisc,  struct par
 
 
      szbuf=2*2*( ((*p)->n[0])+((*p)->n[1]));
+	  szbuf0=4*(  (((*p)->n[1])+2 )   );
+	  szbuf1=4*(    (((*p)->n[0]) +2 )  );
+
+
      #ifdef USE_SAC3D
      szbuf=2*2*( ((*p)->n[0])*((*p)->n[1])+ ((*p)->n[0])*((*p)->n[2]) + ((*p)->n[1])*((*p)->n[2])        );
-     #endif
-     gputompivisc_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,*d_wtemp2,*d_gmpivisc);
-     cudaThreadSynchronize();
-     cudaMemcpy(*gmpivisc, *d_gmpivisc, NVAR*szbuf*sizeof(real), cudaMemcpyDeviceToHost);
+  szbuf0=4*(  (((*p)->n[1])+2)*(((*p)->n[2])+2)  ); 
+  szbuf1=4*(   (((*p)->n[0])+2)*(((*p)->n[2])+2)    );    
+  szbuf2=4*(  (((*p)->n[1])+2)*(((*p)->n[2])+2)   );    
 
+
+     #endif
+     gputompivisc_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,*d_wtemp2,*d_gmpivisc0,*d_gmpivisc1,*d_gmpivisc2);
+     cudaThreadSynchronize();
+     cudaMemcpy(*gmpivisc0, *d_gmpivisc0, szbuf0*sizeof(real), cudaMemcpyDeviceToHost);
+     cudaMemcpy(*gmpivisc1, *d_gmpivisc1, szbuf1*sizeof(real), cudaMemcpyDeviceToHost);
+     #ifdef USE_SAC3D
+     	cudaMemcpy(*gmpivisc2, *d_gmpivisc2, szbuf2*sizeof(real), cudaMemcpyDeviceToHost);
+     #endif
      //copy data to correct area in temp2
 //encodempiw (struct params *dp,int ix, int iy, int iz, int field,int bound,int dim)
      //copy data to correct area in w and wmod
@@ -2343,14 +2395,14 @@ int cucopytompivisc(struct params **p,real **temp2, real **gmpivisc,  struct par
           //temp2[encode3p2_sacmpi (p,i1, i2, i3, tmpnui)]=gmpitgtbufferr[0][i2+i3*((p->n[1])+2)];
           //temp2[encode3p2_sacmpi (p,0, i2, i3, tmpnui)]=gmpitgtbufferl[0][i2+i3*((p->n[1])+2)];
          
-                       (*temp2)[encode3p2_i(*p,i1,i2,i3,var)]=(*gmpivisc)[encodempivisc(*p,i1,i2,i3,bound,dim)];
+                       (*temp2)[encode3p2_i(*p,i1,i2,i3,var)]=(*gmpivisc0)[encodempivisc0(*p,i1,i2,i3,bound,dim)];
                   }
             #else
          i3=0;
          i1=bound*(((*p)->n[0])+1);
                   for(i2=1;i2<(((*p)->n[1])+2);i2++ )
                   {
-                       (*temp2)[encode3p2_i(*p,i1,i2,i3,var)]=(*gmpivisc)[encodempivisc(*p,i1,i2,i3,bound,dim)];
+                       (*temp2)[encode3p2_i(*p,i1,i2,i3,var)]=(*gmpivisc0)[encodempivisc0(*p,i1,i2,i3,bound,dim)];
                   }            
             
             #endif
@@ -2362,7 +2414,7 @@ int cucopytompivisc(struct params **p,real **temp2, real **gmpivisc,  struct par
          for(i1=1;i1<(((*p)->n[0])+2);i1++ )
                   for(i3=1;i3<(((*p)->n[2])+2);i3++ )
                   {
-                       (*temp2)[encode3p2_i(*p,i1,i2,i3,var)]=(*gmpivisc)[encodempivisc(*p,i1,i2,i3,bound,dim)];
+                       (*temp2)[encode3p2_i(*p,i1,i2,i3,var)]=(*gmpivisc1)[encodempivisc1(*p,i1,i2,i3,bound,dim)];
                   }
 
             #else
@@ -2371,7 +2423,7 @@ int cucopytompivisc(struct params **p,real **temp2, real **gmpivisc,  struct par
                   for(i1=1;i1<(((*p)->n[0])+2);i1++ )
                   {
                                                                      
-                       (*temp2)[encode3p2_i(*p,i1,i2,i3,var)]=(*gmpivisc)[encodempivisc(*p,i1,i2,i3,bound,dim)];
+                       (*temp2)[encode3p2_i(*p,i1,i2,i3,var)]=(*gmpivisc1)[encodempivisc1(*p,i1,i2,i3,bound,dim)];
                   }
             
             
@@ -2385,7 +2437,7 @@ int cucopytompivisc(struct params **p,real **temp2, real **gmpivisc,  struct par
                   for(i2=1;i2<(((*p)->n[1])+2);i2++ )
                   {
                                                               
-                       (*temp2)[encode3p2_i(*p,i1,i2,i3,var)]=(*gmpivisc)[encodempivisc(*p,i1,i2,i3,bound,dim)];
+                       (*temp2)[encode3p2_i(*p,i1,i2,i3,var)]=(*gmpivisc2)[encodempivisc2(*p,i1,i2,i3,bound,dim)];
                   }                            
                        break;                       
             #endif             
@@ -2396,11 +2448,12 @@ int cucopytompivisc(struct params **p,real **temp2, real **gmpivisc,  struct par
 }
 
 //copy mpi recv buffer to gpu memory     
-int cucopyfrommpivisc(struct params **p,real **temp2,real **gmpivisc,  struct params **d_p,real **d_wtemp2,    real **d_gmpivisc)
+int cucopyfrommpivisc(struct params **p,real **temp2,real **gmpivisc0,real **gmpivisc1,real **gmpivisc2,  struct params **d_p,real **d_wtemp2,    real **d_gmpivisc0,    real **d_gmpivisc1,    real **d_gmpivisc2)
 {
       int dim,bound,var=0;
      int i1,i2,i3;      
-       int szbuf;
+ 
+     int szbuf,szbuf0,szbuf1,szbuf2;
 
   int dimp=(((*p)->n[0]))*(((*p)->n[1]));
 
@@ -2413,8 +2466,18 @@ int cucopyfrommpivisc(struct params **p,real **temp2,real **gmpivisc,  struct pa
 
      
      szbuf=2*2*( ((*p)->n[0])+((*p)->n[1]));
+     
+ 	  szbuf0=4*(  (((*p)->n[1])+2 )   );
+	  szbuf1=4*(    (((*p)->n[0]) +2 )  );
+
      #ifdef USE_SAC3D
      szbuf=2*2*( ((*p)->n[0])*((*p)->n[1])+ ((*p)->n[0])*((*p)->n[2]) + ((*p)->n[1])*((*p)->n[2])        );
+
+     
+  szbuf0=4*(  (((*p)->n[1])+2)*(((*p)->n[2])+2)  ); 
+  szbuf1=4*(   (((*p)->n[0])+2)*(((*p)->n[2])+2)    );    
+  szbuf2=4*(  (((*p)->n[1])+2)*(((*p)->n[2])+2)   ); 
+
      #endif
 
       //copy data from temp2 to gmpivisc
@@ -2435,14 +2498,14 @@ int cucopyfrommpivisc(struct params **p,real **temp2,real **gmpivisc,  struct pa
           //temp2[encode3p2_sacmpi (p,i1, i2, i3, tmpnui)]=gmpitgtbufferr[0][i2+i3*((p->n[1])+2)];
           //temp2[encode3p2_sacmpi (p,0, i2, i3, tmpnui)]=gmpitgtbufferl[0][i2+i3*((p->n[1])+2)];
          
-                       (*gmpivisc)[encodempivisc(*p,i1,i2,i3,bound,dim)]=(*temp2)[encode3p2_i(*p,i1,i2,i3,var)];
+                       (*gmpivisc0)[encodempivisc0(*p,i1,i2,i3,bound,dim)]=(*temp2)[encode3p2_i(*p,i1,i2,i3,var)];
                   }
             #else
          i3=0;
          i1=bound*(((*p)->n[0])+1);
                   for(i2=1;i2<(((*p)->n[1])+2);i2++ )
                   {
-                       (*gmpivisc)[encodempivisc(*p,i1,i2,i3,bound,dim)]=(*temp2)[encode3p2_i(*p,i1,i2,i3,var)];
+                       (*gmpivisc0)[encodempivisc0(*p,i1,i2,i3,bound,dim)]=(*temp2)[encode3p2_i(*p,i1,i2,i3,var)];
                   }            
             
             #endif
@@ -2454,7 +2517,7 @@ int cucopyfrommpivisc(struct params **p,real **temp2,real **gmpivisc,  struct pa
          for(i1=1;i1<(((*p)->n[0])+2);i1++ )
                   for(i3=1;i3<(((*p)->n[2])+2);i3++ )
                   {
-                       (*gmpivisc)[encodempivisc(*p,i1,i2,i3,bound,dim)]=(*temp2)[encode3p2_i(*p,i1,i2,i3,var)];
+                       (*gmpivisc1)[encodempivisc1(*p,i1,i2,i3,bound,dim)]=(*temp2)[encode3p2_i(*p,i1,i2,i3,var)];
                   }
 
             #else
@@ -2463,7 +2526,7 @@ int cucopyfrommpivisc(struct params **p,real **temp2,real **gmpivisc,  struct pa
                   for(i1=1;i1<(((*p)->n[0])+2);i1++ )
                   {
                                                                      
-                       (*gmpivisc)[encodempivisc(*p,i1,i2,i3,bound,dim)]=(*temp2)[encode3p2_i(*p,i1,i2,i3,var)];
+                       (*gmpivisc1)[encodempivisc1(*p,i1,i2,i3,bound,dim)]=(*temp2)[encode3p2_i(*p,i1,i2,i3,var)];
                   }
             
             
@@ -2477,7 +2540,7 @@ int cucopyfrommpivisc(struct params **p,real **temp2,real **gmpivisc,  struct pa
                   for(i2=1;i2<(((*p)->n[1])+2);i2++ )
                   {
                                                               
-                       (*gmpivisc)[encodempivisc(*p,i1,i2,i3,bound,dim)]=(*temp2)[encode3p2_i(*p,i1,i2,i3,var)];
+                       (*gmpivisc2)[encodempivisc2(*p,i1,i2,i3,bound,dim)]=(*temp2)[encode3p2_i(*p,i1,i2,i3,var)];
                   }                            
                        break;                       
             #endif             
@@ -2486,9 +2549,13 @@ int cucopyfrommpivisc(struct params **p,real **temp2,real **gmpivisc,  struct pa
          }    
 
 
-   	 cudaMemcpy(*d_gmpivisc, *gmpivisc, NVAR*szbuf*sizeof(real), cudaMemcpyHostToDevice);     
+   	 cudaMemcpy(*d_gmpivisc0, *gmpivisc0, szbuf0*sizeof(real), cudaMemcpyHostToDevice);     
+   	 cudaMemcpy(*d_gmpivisc1, *gmpivisc1, szbuf1*sizeof(real), cudaMemcpyHostToDevice);
+       #ifdef USE_SAC3D    
+   	 cudaMemcpy(*d_gmpivisc2, *gmpivisc2, szbuf2*sizeof(real), cudaMemcpyHostToDevice); 
+       #endif    
 
-     mpivisctogpu_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,*d_wtemp2,*d_gmpivisc);
+     mpivisctogpu_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,*d_wtemp2,*d_gmpivisc0,*d_gmpivisc1,*d_gmpivisc2);
      cudaThreadSynchronize();
 }
 

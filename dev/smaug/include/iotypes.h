@@ -149,6 +149,11 @@ struct params {
                 int pipe[NDIM];
                 int mpiupperb[NDIM];
                 int mpilowerb[NDIM];
+
+                int gpudirectgroup;
+                int ngpudirectgroups;
+
+                int gpudirectgroupneighb[2][NDIM]; //gpudirect group ID for each neighbour
                 
                 //nearest neighbours                
                 int phpe[NDIM];

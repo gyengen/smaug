@@ -163,25 +163,25 @@ int writevacconfig(char *name,int n,params p, meta md, real *w, real *wd, state 
    sprintf(tcfg,"%s",pch1);
    pch2 = strtok (NULL,".");
 
-   //printf("here1 %s \n",tcfg);
+   printf("here1 %s %d %d \n",tcfg,ni,nj);
    //sprintf(ext,"%s",pch2);
 
       //set the input filename corresponding to proc id
  
      #ifdef USE_SAC3D
 	      if(p.ipe>99)
-		sprintf(configfile,"%s_%d_np%d%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);
+		sprintf(configfile,"%s%d_np%d%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);
 	      else if(p.ipe>9)
-		sprintf(configfile,"%s_%d_np0%d0%d0%d_0%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);
+		sprintf(configfile,"%s%d_np0%d0%d0%d_0%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);
 	      else
-		sprintf(configfile,"%s_%d_np00%d00%d00%d_00%d.out",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);  	     
+		sprintf(configfile,"%s%d_np00%d00%d00%d_00%d.out",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);  	     
      #else
 	      if(p.ipe>99)
-		sprintf(configfile,"%s_%d_np%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);
+		sprintf(configfile,"%s%d_np%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);
 	      else if(p.ipe>9)
-		sprintf(configfile,"%s_%d_np%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);
+		sprintf(configfile,"%s%d_np%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);
 	      else
-		sprintf(configfile,"%s_%d_np0%d0%d_00%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);  	     	     
+		sprintf(configfile,"%s%d_np0%d0%d_00%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);  	     	     
      #endif
 
  
@@ -201,6 +201,10 @@ int writevacconfig(char *name,int n,params p, meta md, real *w, real *wd, state 
 
 
       fwrite(md.name,sizeof(char)*79,1,fdt);
+
+      // ibuffer[0]=24;
+       //fwrite(ibuffer,sizeof(int),1,fdt);
+      //fwrite(md.name,sizeof(char)*79,1,fdt);
       //*line2:
       //*   it          - timestep (integer)
       //*   t           - time     (real)
@@ -221,6 +225,10 @@ int writevacconfig(char *name,int n,params p, meta md, real *w, real *wd, state 
       ibuffer[0]=2;
       ibuffer[1]=6;
       ibuffer[2]=10;
+      //ibuffer[0]=st.it;
+      //ibuffer[1]=(float)st.t;
+
+
       //ibuffer[2]=2;  //report from distribution routine to reset the data
       //ibuffer[3]=6;
       //ibuffer[4]=10;
@@ -231,13 +239,16 @@ int writevacconfig(char *name,int n,params p, meta md, real *w, real *wd, state 
       ibuffer[2]=13;
       //ibuffer[2]=3;
     #endif
-      fwrite(ibuffer,sizeof(int)*5,1,fdt);
-
+      fwrite(ibuffer,sizeof(int)*3,1,fdt);
+      //fwrite(ibuffer,sizeof(int)*5,1,fdt);
       //line3:
       //*   nx()        - the grid dimensions      (ndim integers)
       //sprintf(buffer,"%ld %ld\n",ni,nj);
       ibuffer[0]=ni;
       ibuffer[1]=nj;
+
+      //ibuffer[0]=128;
+      //ibuffer[1]=256;
     #ifdef USE_SAC
       fwrite(ibuffer,sizeof(int)*2,1,fdt);
     #endif
@@ -273,7 +284,7 @@ int writevacconfig(char *name,int n,params p, meta md, real *w, real *wd, state 
     #ifdef USE_SAC_3D
       sprintf(buffer,"x y z rho mx my mz e bx by bz gamma eta g1 g2 g3");
     #else
-      sprintf(buffer,"x y rho mx my mz e bx by bz gamma eta g1 g2 g3");
+      sprintf(buffer,"x y rho mx my e bx by  gamma eta g1 g2");
     #endif
 
       fwrite(buffer,sizeof(char)*79,1,fdt);
@@ -293,7 +304,7 @@ for( j1=0;j1<nj;j1++)
 //energyb,rhob,b1b,b2b         
        for( i1=0;i1<ni;i1++)     
       {
-   
+          //if(ifield==2) printf("density %lG ",w[(j1*ni+i1)]);
                if(ifield==0)
                dbuffer[0]=wd[(j1*ni+i1)+(ni*nj*(pos1))];
                else if(ifield==1)
@@ -313,13 +324,17 @@ for( j1=0;j1<nj;j1++)
     #ifdef USE_SAC_3D
                 dbuffer[0]=w[(k1*ni*nj+j1*ni+i1)+(ni*nj*nk*(ifield-3))];
     #else
+                
+
                 dbuffer[0]=w[(j1*ni+i1)+(ni*nj*(ifield-2))];
+                
     #endif
 
                 fwrite(dbuffer,sizeof(double),1,fdt);		
 
         }     
       }
+      //printf("density nowt \n \n ");
       buffer[0]='\n';
       fwrite(buffer,sizeof(char),1,fdt);
       fclose(fdt);
@@ -682,10 +697,16 @@ for( i1=0;i1<(ni);i1++)
 #ifdef USE_SAC_3D
                          shift=(k1*ni*nj+j1*ni+i1);
                          fscanf(fdt,"%lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG\n",&wd[shift+(ni*nj*nk*pos1)],&wd[shift+(ni*nj*nk*pos2)],&wd[shift+(ni*nj*nk*pos3)], &w[shift],&w[shift+(ni*nj*nk)],&w[shift+(ni*nj*nk*2)],&w[shift+(ni*nj*nk*3)],&w[shift+(ni*nj*nk*4)],&w[shift+(ni*nj*nk*5)],&w[shift+(ni*nj*nk*6)],&w[shift+(ni*nj*nk*7)],&w[shift+(ni*nj*nk*8)],&w[shift+(ni*nj*nk*9)],&w[shift+(ni*nj*nk*10)],&w[shift+(ni*nj*nk*11)],&w[shift+(ni*nj*nk*12)]);
-//printf("density %lG %lG %lG %lG \n",x,y,z,w[shift]);
+
+
 #else
                          shift=(j1*ni+i1);
                          fscanf(fdt,"%lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG\n",&wd[shift+(ni*nj*pos1)],&wd[shift+(ni*nj*pos2)],&w[shift],&w[shift+(ni*nj)],&w[shift+(ni*nj*2)],&w[shift+(ni*nj*3)],&w[shift+(ni*nj*4)],&w[shift+(ni*nj*5)],&w[shift+(ni*nj*6)],&w[shift+(ni*nj*7)],&w[shift+(ni*nj*8)],&w[shift+(ni*nj*9)]);
+
+//if(p.ipe==0)
+//printf("density %lG %lG %lG \n",x,y,w[shift]);
+
+
 #endif
 
                          //freadl(fdt, &line);

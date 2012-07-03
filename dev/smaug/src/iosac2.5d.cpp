@@ -323,15 +323,25 @@ char *method=NULL;
 
         p->it=0;  
 
-        cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_w, 0,0,0);
 	#ifdef USE_MPI
-	  mpibound(NVAR, w ,p);
+                       
+	 		  mpibound(NVAR, gmpiw0,gmpiw1,gmpiw2 ,p);		
 	#endif
-	  cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, 0,0,0);
 	#ifdef USE_MPI
-	   mpibound(NVAR, wmod ,p);
+           
+           mpisync();
+           
+           
+	   mpibound(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p);
+          
+           mpisync();
+           
 	   cucopywfrommpiw(&p,&w, &wmod,      &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,0);
 	#endif
+
+        cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_w, 0,0,0);
+	cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, 0,0,0);
+
        /*********************************************************************************************************/
        /* End of section initialising the configuration */
        /*********************************************************************************************************/
@@ -452,6 +462,7 @@ char *method=NULL;
 		if(n>1)
 		   cugetdtvisc1(&p,&d_p,&d_wmod, &wd,&d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2);
 		#ifdef USE_MPI
+                   mpisync();
 		   mpiallreduce(&(p->maxviscoef), MPI_MAX);
 		#endif
 
@@ -487,7 +498,7 @@ char *method=NULL;
 		  { 
 		      if((f==mom1 && dir==0)  ||  (f==mom2 && dir==1)  || (f==mom2 && dir==2) )
 		       cucomputept(&p,&d_p,&d_wmod, &d_wd,order,dir);
-		      cucentdiff1(&p,&d_p,&d_state,&d_w,&d_wmod, &d_dwn1, &d_wd,order,ordero,p->dt,f,dir);	     
+		       cucentdiff1(&p,&d_p,&d_state,&d_w,&d_wmod, &d_dwn1, &d_wd,order,ordero,p->dt,f,dir);	     
 		  } //end looping over fields for cucentdiff1
 		   #ifndef ADIABHYDRO
 		   for(int f=energy; f<=(b1+(NDIM-1)); f++)
@@ -527,6 +538,7 @@ char *method=NULL;
 		      cucomputec(&p,&d_p,&d_wmod, &d_wd,order,dim);
 		      cucomputemaxc(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
 		      #ifdef USE_MPI
+                              mpisync();
 			      mpiallreduce(&(p->cmax), MPI_MAX);
 		      #endif
 		      cmax[dim]=p->cmax;
@@ -534,7 +546,7 @@ char *method=NULL;
 		      #ifdef USE_MPI
 			  cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 			   mpivisc(dim,p,temp2);
-			  ;//cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
+			  cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 		      #endif
 		      cuhyperdifvisc1r(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
 		      cuhyperdifvisc1l(&p,&d_p,&d_wmod,&wd,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
@@ -704,11 +716,11 @@ char *method=NULL;
 			cucomputevels(&p,&d_p,&d_wmod, &d_wd,order,dir);
 
 			for(int f=rho; f<=mom1+(NDIM-1); f++)//looping over fields for cucentdiff1
-			cucentdiff1(&p,&d_p,&d_state,&d_w,&d_wmod, &d_dwn1, &d_wd,order,ordero,dt,f,dir);
+			;//cucentdiff1(&p,&d_p,&d_state,&d_w,&d_wmod, &d_dwn1, &d_wd,order,ordero,dt,f,dir);
 
 			#ifndef ADIABHYDRO
 				   for(int f=energy; f<=b1+(NDIM-1); f++)//looping over fields for cucentdiff2
-				       cucentdiff2(&p,&d_p,&d_state,&d_w,&d_wmod, &d_dwn1, &d_wd,order,ordero,p->dt,f,dir);
+				     ;//  cucentdiff2(&p,&d_p,&d_state,&d_w,&d_wmod, &d_dwn1, &d_wd,order,ordero,p->dt,f,dir);
 
 			#endif
 		    }
@@ -771,7 +783,7 @@ char *method=NULL;
 		     {
 			cucomputec(&p,&d_p,&d_wmod, &d_wd,order,dim);
 			#ifdef USE_MPI
-				;//   mpiallreduce(&(p->cmax), MPI_MAX);
+				   mpiallreduce(&(p->cmax), MPI_MAX);
 			#endif
 			cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,mom1+f,dim);
 			#ifdef USE_MPI
@@ -813,7 +825,7 @@ char *method=NULL;
 		    {
 			cucomputec(&p,&d_p,&d_wmod, &d_wd,order,dim);
 			#ifdef USE_MPI
-				;//mpiallreduce(&(p->cmax), MPI_MAX);
+				mpiallreduce(&(p->cmax), MPI_MAX);
 			#endif
 			cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,b1+f,dim);
 				//cuhyperdifvisc1il(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,b1+f,dim);
@@ -855,7 +867,12 @@ char *method=NULL;
 		   cuadvance(&p,&d_p,&d_wmod,&d_w,order);
 		   #ifdef USE_MPI
 			cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order);
-			mpibound(NVAR, d_wmod ,d_p);
+
+
+		   mpibound(NVAR, gmpiw0,gmpiw1,gmpiw2 ,p);
+		   mpibound(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p);
+
+
 			cucopywfrommpiw(&p,&w, &wmod,   &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order);
 
 		   #endif
@@ -870,13 +887,25 @@ char *method=NULL;
 
 	   p->it=n+1;
 
-	 cuupdate(&p,&w,&wmod,&temp2,&state,&d_p,&d_w,&d_wmod,&d_wtemp2,  &d_state,n);
 
 	  #ifdef USE_MPI
+                  //mpisync();
 		   cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order);
-		   mpibound(NVAR, w ,p);
-		   cucopywfrommpiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order);		   
+		   mpibound(NVAR, gmpiw0,gmpiw1,gmpiw2 ,p);
+		   mpibound(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p);
+
+
+
+		   cucopywfrommpiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order);	
+	   
 	  #endif
+
+
+
+
+	 cuupdate(&p,&w,&wmod,&temp2,&state,&d_p,&d_w,&d_wmod,&d_wtemp2,  &d_state,n);
+
+
 
 	printf("\n");
 

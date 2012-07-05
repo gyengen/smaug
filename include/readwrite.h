@@ -12,5 +12,7 @@ int readconfig(char *cfgfile, params p, meta md, real *w);
 int readasciivacconfig(char *cfgfile, params p, meta md, real *w,real *wd, char **hlines);
 /*Big problems with reading fortran unformatted "binary files" need to include 
   record field*/
-int readbinvacconfig(char *name,params p, meta md, real *w, state st);
+int readbinvacconfig(char *name,params p, meta md, real *w,real *wd, state st);
 int writeasciivacconfig(char *cfgfile, params p, meta md, real *w,real *wd, char **hlines, state st);
+int createconfigsegment(params p,  real *wnew,real *wdnew, real *w,real *wd);
+int gathersegment(params p,  real *wnew,real *wdnew, real *w,real *wd);

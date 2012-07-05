@@ -8,8 +8,9 @@ int main(int argc, char* argv[])
 
 int itype=-1;
 int status=1;
+int mode=0;//run a model 1=scatter 2=gather
 int it=0; //test integer to be returned 
-
+int n;
 //getintparam_( int elist.id,char *sname,int *iv,  int elist.port, char *selist.server );
 //int elist.id=0;
 //int elist.port=8080;
@@ -34,6 +35,18 @@ struct bparams *bp=(struct bparams *)malloc(sizeof(struct bparams));
 
 
 FILE *portf;
+
+
+if(argc>2  && strcmp(argv[2],"gather")==0) 
+{    
+  mode=2;
+}
+
+if(argc>2  && strcmp(argv[2],"scatter")==0)
+{
+  mode=1;
+}
+
 
 #ifdef USE_IOME
 if(argc>1)
@@ -74,6 +87,7 @@ sprintf(configfile,"%s",cfgout);
           mpineighbours(2,p);
      #endif
 
+   
      #ifdef USE_SAC3D
 	      if(p->ipe>99)
 		sprintf(configinfile,"%s_np%d%d%d_%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->pnpe[2],p->ipe,ext);
@@ -89,8 +103,19 @@ sprintf(configfile,"%s",cfgout);
 	      else
 		sprintf(configinfile,"%s_np0%d0%d_00%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->ipe,ext);  	     	     
      #endif
-     printf("config files\n%s \n %s\n",configinfile,configfile);
 
+     if(mode==1 || mode==2)
+     {
+           sprintf(configinfile,"test%s",cfgfile);
+           ni=ni*(p->pnpe[0]);
+           nj=nj*(p->pnpe[1]);
+	   #ifdef USE_SAC3D
+		   nk=nk*(p->pnpe[2]);
+	   #endif
+     }
+
+     printf("config files\n%s \n %s\n",configinfile,configfile);
+  
      
 #else
      sprintf(configinfile,"%s",cfgfile);
@@ -171,7 +196,9 @@ char *method=NULL;
 		 wmod=(real *)calloc(ni*nj*nk*NVAR,sizeof(real ));
 
 		 wd=(real *)calloc(ni*nj*nk*NDERV,sizeof(real ));
-		 wnew=(real *)calloc(ni*nj*nk*NVAR,sizeof(real ));
+		 wdnew=(real *)calloc(((p)->n[0])*((p)->n[1])*((p)->n[2])*NDERV,sizeof(real ));
+
+		 wnew=(real *)calloc(((p)->n[0])*((p)->n[1])*((p)->n[2])*NVAR,sizeof(real ));
 		 for(i=0;i<ni*nj*nk*NDERV;i++)
 		    wd[i]=0.0;
 	 #else
@@ -179,7 +206,9 @@ char *method=NULL;
 		 wmod=(real *)calloc(ni*nj*NVAR,sizeof(real ));
 
 		 wd=(real *)calloc(ni*nj*NDERV,sizeof(real ));
-		 wnew=(real *)calloc(ni*nj*NVAR,sizeof(real ));
+		 wdnew=(real *)calloc(((p)->n[0])*((p)->n[1])*NDERV,sizeof(real ));
+
+		 wnew=(real *)calloc(((p)->n[0])*((p)->n[1])*NVAR,sizeof(real ));
 		 for(i=0;i<ni*nj*NDERV;i++)
 		    wd[i]=0.0;
 	 #endif
@@ -228,10 +257,6 @@ char *method=NULL;
 		  gmpiwmod2=(real *)malloc(szw2*sizeof(real));
 		  gmpiw2=(real *)malloc(szw2*sizeof(real));
                   gmpivisc2=(real *)malloc(szvisc2*sizeof(real));
-
-
- 
-
 	  #endif
         #endif
        /*********************************************************************************************************/
@@ -269,13 +294,110 @@ char *method=NULL;
 
 	printf("after read\n");
 	p->it=0;
+
+        //scatter/distribute configuration across eac CPU
+        if(mode==1)
+        {
+	       if(p->ipe==0)
+	       {
+		  for(i=0; i<p->npe; i++)
+		  {
+		     p->ipe=i;
+                     ipe2iped(p);
+		    
+		    //copy segment
+		    printf("copy segment %d\n",i);
+		    createconfigsegment(*p, wnew,wdnew,w,wd);
+
+		    //writeas
+		   
+		    writeasciivacconfig(configinfile, *p, meta, wnew,wdnew, hlines, *state);
+
+
+		  }
+		}
+        }
  
+
+       //gather configuration to single output file
+       if(mode==2)
+        {
+       if(p->ipe==0)
+       {
+
+        for( n=0;n<n;n++)
+          for(i=0; i<p->npe; i++)
+          //for(i=0; i<1; i++)
+          {
+             p->ipe=i;
+             ipe2iped(p);
+	   strcpy(stemp,cfgout);
+	   pch1 = strtok (stemp,".");
+	   sprintf(tcfg,"%s",pch1);
+
+
+     #ifdef USE_SAC3D
+	      if(p->ipe>99)
+		sprintf(configinfile,"%s%d_np%d%d%d_%d.out",tcfg,n,p->pnpe[0],p->pnpe[1],p->pnpe[2],p->ipe);
+	      else if(p->ipe>9)
+		sprintf(configinfile,"%s%d_np0%d0%d0%d_0%d.out",tcfg,n,p->pnpe[0],p->pnpe[1],p->pnpe[2],p->ipe);
+	      else
+		sprintf(configinfile,"%s%d_np00%d00%d00%d_00%d.out",tcfg,n,p->pnpe[0],p->pnpe[1],p->pnpe[2],p->ipe);  	     
+     #else
+	      if(p->ipe>99)
+		sprintf(configinfile,"%s%d_np%d%d_%d.out",tcfg,n,p->pnpe[0],p->pnpe[1],p->ipe);
+	      else if(p->ipe>9)
+		sprintf(configinfile,"%s%d_np%d%d_%d.out",tcfg,n,p->pnpe[0],p->pnpe[1],p->ipe);
+	      else
+		sprintf(configinfile,"%s%d_np0%d0%d_00%d.out",tcfg,n,p->pnpe[0],p->pnpe[1],p->ipe);  	     	     
+     #endif
+
+
+
+
+
+	    
+            //copy segment
+            printf("copy segment %d %s\n",i,configinfile);
+            readbinvacconfig(configinfile,*p, meta, wnew,wdnew, *state );
+            gathersegment(*p, wnew,wdnew,w,wd);
+
+            //writeas
+            //writeasciivacconfig(configinfile, *p, meta, wnew,wdnew, hlines, *state);
+
+
+          }
+
+        p->n[0]=ni;
+        p->n[1]=nj;
+	#ifdef USE_SAC3D
+            p->n[2]=nk;
+        #endif
+     #ifdef USE_SAC3D
+
+		sprintf(configinfile,"%s%d.out",tcfg,n);  	     
+     #else
+
+		sprintf(configinfile,"%s%d.out",tcfg,n);  	     	     
+     #endif           
+
+
+          writevacconfig(configfile,n,*p, meta , w,wd,*state);
+        }
+        }
+
+
+
+
         real *u,  *v,  *h;
 
 	h=w+(ni)*(nj)*rho;
 	u=w+(ni)*(nj)*mom1;
 	v=w+(ni)*(nj)*mom2;
 
+
+        if(mode==0)
+        {
 	cuinit(&p,&bp,&w,&wnew,&wd,&state,&d_p,&d_bp,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
 
         //same as the grid initialisation routine in SAC
@@ -399,7 +521,7 @@ char *method=NULL;
 
 
 
-	int n;
+	
 	real t1,t2,ttot;
 	int order=0;
 	int ordero=0;
@@ -545,7 +667,7 @@ char *method=NULL;
 		      cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
 		      #ifdef USE_MPI
 			  cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
-			   mpivisc(dim,p,temp2);
+			   ;//mpivisc(dim,p,gmpivisc0,gmpivisc1,gmpivisc2);
 			  cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 		      #endif
 		      cuhyperdifvisc1r(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
@@ -568,7 +690,7 @@ char *method=NULL;
 
 		#ifdef USE_MPI
 			cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
-			mpivisc(dim,p,temp2);
+			;//mpivisc(dim,p,gmpivisc0,gmpivisc1,gmpivisc2);
 			cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 		#endif
 
@@ -591,7 +713,7 @@ char *method=NULL;
 		          #ifdef USE_MPI
 				  
                                   cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
-				  mpivisc(dim,p,temp2);
+				  ;//mpivisc(dim,p,gmpivisc0,gmpivisc1,gmpivisc2);
 				  cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 	                 #endif
 			 cuhyperdifvisc1r(&p,&d_p,&d_wmod,&wd,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,mom1+f,dim);
@@ -635,7 +757,7 @@ char *method=NULL;
 
 			       #ifdef USE_MPI
 				  cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
-				  mpivisc(dim,p,temp2);
+				  ;//mpivisc(dim,p,gmpivisc0,gmpivisc1,gmpivisc2);
 				  cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);		 
 		               #endif
 			       cuhyperdifvisc1r(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,b1+f,dim);
@@ -750,7 +872,7 @@ char *method=NULL;
 			cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
 			#ifdef USE_MPI
 				cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
-				mpivisc(dim,p,temp2);
+				mpivisc(dim,p,gmpivisc0,gmpivisc1,gmpivisc2);
 				cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 			#endif
 			cuhyperdifvisc1r(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
@@ -769,7 +891,7 @@ char *method=NULL;
 			cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,energy,dim);
 			#ifdef USE_MPI
 			        cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
-				mpivisc(dim,p,temp2);
+				mpivisc(dim,p,gmpivisc0,gmpivisc1,gmpivisc2);
 				cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 			#endif
 			cuhyperdifvisc1r(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,energy,dim);
@@ -788,7 +910,7 @@ char *method=NULL;
 			cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,mom1+f,dim);
 			#ifdef USE_MPI
                                 cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
-				mpivisc(dim,p,temp2);
+				mpivisc(dim,p,gmpivisc0,gmpivisc1,gmpivisc2);
 				cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 			#endif
 			cuhyperdifvisc1r(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,mom1+f,dim);
@@ -831,7 +953,7 @@ char *method=NULL;
 				//cuhyperdifvisc1il(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,b1+f,dim);
 			#ifdef USE_MPI
 				cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
-				mpivisc(dim,p,temp2);
+				mpivisc(dim,p,gmpivisc0,gmpivisc1,gmpivisc2);
 				cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 			#endif
 			cuhyperdifvisc1r(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,b1+f,dim);
@@ -946,6 +1068,7 @@ char *method=NULL;
 
 
 	cufinish(&p,&w,&wnew,&state,&d_p,&d_bp,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
+        } //mode=0 clean up routine
 
 	#ifdef USE_MPI
 	     

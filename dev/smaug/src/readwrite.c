@@ -324,10 +324,7 @@ for( j1=0;j1<nj;j1++)
     #ifdef USE_SAC_3D
                 dbuffer[0]=w[(k1*ni*nj+j1*ni+i1)+(ni*nj*nk*(ifield-3))];
     #else
-                
-
-                dbuffer[0]=w[(j1*ni+i1)+(ni*nj*(ifield-2))];
-                
+                dbuffer[0]=w[(j1*ni+i1)+(ni*nj*(ifield-2))];              
     #endif
 
                 fwrite(dbuffer,sizeof(double),1,fdt);		
@@ -345,22 +342,34 @@ for( j1=0;j1<nj;j1++)
 /*Big problems with reading fortran unformatted "binary files" need to include 
   record field*/
 
-int readbinvacconfig(char *name,params p, meta md, real *w, state st)
+int readbinvacconfig(char *name,params p, meta md, real *w,real *wd, state st)
 {
+
   int status=0;
-  int i1,j1;
-  int ni,nj;
+  int i1,j1,k1,ifield;
+  int ni,nj,nk;
+  
+  char tcfg[300];  
   char configfile[300];
-  char buffer[85];
+  
+  char buffer[800];
   double dbuffer[12];
   int ibuffer[5];
+  char ext[3];
   long lsize;
   size_t result;
 
   char *bigbuf;
-
   ni=p.n[0];
   nj=p.n[1];
+    #ifdef USE_SAC_3D
+  nk=p.n[2];
+    #endif
+
+
+
+
+
 
       //save file containing current data
       //sprintf(configfile,"out/v%s.out",name);
@@ -373,6 +382,8 @@ int readbinvacconfig(char *name,params p, meta md, real *w, state st)
       for(i1=0;i1<81;i1++)
          putchar(buffer[i1]);
       printf("starting %s\n ",buffer);
+       strcpy(md.name,buffer);
+
       //*line2:
       //*   it          - timestep (integer)
       //*   t           - time     (real)
@@ -387,7 +398,7 @@ int readbinvacconfig(char *name,params p, meta md, real *w, state st)
       st.it=ibuffer[0]=st.it;
       st.t=dbuffer[0]=st.t;
       printf("st.it=%f st.t=%d\n",st.it,st.t);
-
+      fread(ibuffer,sizeof(int),3,fdt);
 
       //fread(ibuffer,sizeof(int)*3,1,fdt);
 
@@ -395,24 +406,73 @@ int readbinvacconfig(char *name,params p, meta md, real *w, state st)
       //*   nx()        - the grid dimensions      (ndim integers)
       //sprintf(buffer,"%ld %ld\n",ni,nj);
       //fread(ibuffer,sizeof(int)*2,1,fdt);
+    #ifdef USE_SAC
+      fread(ibuffer,sizeof(int)*2,1,fdt);
+    #endif
+    #ifdef USE_SAC_3D
+      
+      fread(ibuffer,sizeof(int)*3,1,fdt);
+      //nk=ibuffer[2];
+    #endif
       //ni=ibuffer[0];
       //nj=ibuffer[1];
+
+
+
+
+
+
 
       //*line4:
       //*   eqpar()     - equation parameters from filenameini (neqpar reals)
       //sprintf(buffer,"%lg %lg %lg %lg %lg %lg\n",p.gamma,p.eta,p.g[0],p.g[1],0,0);
       //fread(dbuffer,sizeof(double)*6,1,fdt);
+
+
+
+    #ifdef USE_SAC
+      fread(dbuffer,sizeof(double)*6,1,fdt);
+      //dbuffer[4]=0;
+      //dbuffer[5]=0;
+     
+    #endif
+    #ifdef USE_SAC_3D
+      fread(dbuffer,sizeof(double)*7,1,fdt);
+      p.g[2]=dbuffer[4];
+      //dbuffer[5]=0;
+      //dbuffer[6]=0;     
+    #endif
+
       p.gamma=dbuffer[0];
       p.eta=dbuffer[1];
       p.g[0]=dbuffer[2];
       p.g[1]=dbuffer[3];
       printf("%f %f %f %f\n",dbuffer[0],dbuffer[1],dbuffer[2],dbuffer[3]);
 
+
+
       //*line5:
       //*   varnames    - names of the coordinates, variables, equation parameters
       //*                 eg. 'x y rho mx my e bx by  gamma eta' (character*79)
       sprintf(buffer,"x y rho mx my mz e bx by bz gamma eta g1 g2 g3\n");
-      //fread(buffer,sizeof(char)*79,1,fdt);
+      fread(buffer,sizeof(char)*79,1,fdt);
+
+
+
+
+
+
+    #ifdef USE_SAC_3D
+      for(ifield=0;ifield<16;ifield++)   
+   #else
+       for(ifield=0;ifield<12;ifield++)   
+   #endif 
+
+    #ifdef USE_SAC_3D
+   for( k1=0;k1<nk;k1++)
+    #endif
+
+
          for( i1=0;i1<ni;i1++)   
 	{
 //energyb,rhob,b1b,b2b         
@@ -421,23 +481,43 @@ for( j1=0;j1<nj;j1++)
       {
 
 
+
+               fread(dbuffer,sizeof(double),1,fdt);
+               if(ifield==0)
+               	wd[(j1*ni+i1)+(ni*nj*(pos1))]=dbuffer[0];
+               else if(ifield==1)
+               	wd[(j1*ni+i1)+(ni*nj*(pos2))]=dbuffer[0];
+    #ifdef USE_SAC_3D
+               if(ifield==0)
+                 wd[(k1*ni*nj+j1*ni+i1)+(ni*nj*nk*(pos1))]=dbuffer[0];
+               else if(ifield==1)
+                 wd[(k1*ni*nj+j1*ni+i1)+(ni*nj*nk*(pos2))]=dbuffer[0];
+               else if(ifield==2)
+                 wd[(k1*ni*nj+j1*ni+i1)+(ni*nj*nk*(pos3))]=dbuffer[0];
+               
+    #else
+    
+    #endif
+               else
+    #ifdef USE_SAC_3D
+                w[(k1*ni*nj+j1*ni+i1)+(ni*nj*nk*(ifield-3))]=dbuffer[0];
+    #else
+                w[(j1*ni+i1)+(ni*nj*(ifield-2))]=dbuffer[0];              
+    #endif
+
+               
+
+
+
+
+
+
                // fread(dbuffer,12*sizeof(double),1,fdt);		
                 //i1*p.dx[0]=dbuffer[0];
                 //j1*p.dx[1]=dbuffer[1];
                //if(j1==2 || j1==3)
                 //  printf("%d %d %d %d %lg\n", ni,nj,i1,j1,dbuffer[2]);
-                w[(j1*ni+i1)+(ni*nj*rho)]=dbuffer[2];
-                w[(j1*ni+i1)+(ni*nj*mom1)]=dbuffer[3];
-                w[(j1*ni+i1)+(ni*nj*mom2)]=dbuffer[4];
-                w[(j1*ni+i1)+(ni*nj*energy)]=dbuffer[5];
-                w[(j1*ni+i1)+(ni*nj*b1)]=dbuffer[6];
-                w[(j1*ni+i1)+(ni*nj*b2)]=dbuffer[7];
-#ifndef ADIABHYDRO
-                w[(j1*ni+i1)+(ni*nj*energyb)]=dbuffer[8];
-                w[(j1*ni+i1)+(ni*nj*rhob)]=dbuffer[9];
-                w[(j1*ni+i1)+(ni*nj*b1b)]=dbuffer[10];
-                w[(j1*ni+i1)+(ni*nj*b2b)]=dbuffer[11];
-#endif
+ 
 
 
         }     
@@ -750,32 +830,55 @@ sprintf(configfile,"%s",cfgfile);
 
 
  #ifdef USE_MPI
-   
+   char ext[3];
    char *pch1,*pch2;
    pch1 = strtok (configfile,".");
    sprintf(tcfg,"%s",pch1);
    pch2 = strtok (NULL,".");
+   sprintf(ext,"%s",pch2);
 
    //printf("here1 %s \n",tcfg);
    //sprintf(ext,"%s",pch2);
 
       //set the input filename corresponding to proc id
- 
-     #ifdef USE_SAC3D
-	      if(p.ipe>99)
-		sprintf(configfile,"%s_%d_np%d%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);
-	      else if(p.ipe>9)
-		sprintf(configfile,"%s_%d_np0%d0%d0%d_0%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);
-	      else
-		sprintf(configfile,"%s_%d_np00%d00%d00%d_00%d.out",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);  	     
-     #else
-	      if(p.ipe>99)
-		sprintf(configfile,"%s_%d_np%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);
-	      else if(p.ipe>9)
-		sprintf(configfile,"%s_%d_np%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);
-	      else
-		sprintf(configfile,"%s_%d_np0%d0%d_00%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);  	     	     
-     #endif
+      //if scattering configuration and ini file will not have the name appended with the iteration number
+     if(strcmp(ext,"ini")==0)
+     {
+	     #ifdef USE_SAC3D
+		      if(p.ipe>99)
+			sprintf(configfile,"%s_np%d%d%d_%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe,ext);
+		      else if(p.ipe>9)
+			sprintf(configfile,"%s_np0%d0%d0%d_0%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe,ext);
+		      else
+			sprintf(configfile,"%s_np00%d00%d00%d_00%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe,ext);  	     
+	     #else
+		      if(p.ipe>99)
+			sprintf(configfile,"%s_np%d%d_%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.ipe,ext);
+		      else if(p.ipe>9)
+			sprintf(configfile,"%s_np%d%d_%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.ipe,ext);
+		      else
+			sprintf(configfile,"%s_np0%d0%d_00%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.ipe,ext);  	     	     
+	     #endif
+
+     }
+     else
+     {
+	     #ifdef USE_SAC3D
+		      if(p.ipe>99)
+			sprintf(configfile,"%s_%d_np%d%d%d_%d.%s",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe,ext);
+		      else if(p.ipe>9)
+			sprintf(configfile,"%s_%d_np0%d0%d0%d_0%d.%s",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe,ext);
+		      else
+			sprintf(configfile,"%s_%d_np00%d00%d00%d_00%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe,ext);  	     
+	     #else
+		      if(p.ipe>99)
+			sprintf(configfile,"%s_%d_np%d%d_%d.%s",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe,ext);
+		      else if(p.ipe>9)
+			sprintf(configfile,"%s_%d_np%d%d_%d.%s",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe,ext);
+		      else
+			sprintf(configfile,"%s_%d_np0%d0%d_00%d.%s",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe,ext);  	     	     
+	     #endif
+     }
 
  
    #else
@@ -809,18 +912,167 @@ sprintf(configfile,"%s",cfgfile);
      printf("%s\n",hlines[i]);
     }
 
+
+
+#ifdef USE_SAC_3D
+for( k1=0;k1<(nk);k1++)
+#endif
    for( j1=0;j1<(nj);j1++)
 	     for( i1=0;i1<(nj);i1++)
              {
                          x=(1+i1)*(p.dx[0]);
                          y=(1+j1)*(p.dx[1]);
+			#ifdef USE_SAC_3D
+				z=(1+k1)*(p.dx[2]);
+			#endif
+
+                         //shift=(j1*ni+i1);
+                         //fprintf(fdt,"%lE %lE %lE %lE %lE %lE %lE %lE %lE %lE %lE %lE\n",wd[shift+ni*nj*pos1],wd[shift+ni*nj*pos2],w[shift],w[shift+(ni*nj)],w[shift+(ni*nj*2)],w[shift+(ni*nj*3)],w[shift+(ni*nj*4)],w[shift+(ni*nj*5)],w[shift+(ni*nj*6)],w[shift+(ni*nj*7)],w[shift+(ni*nj*8)],w[shift+(ni*nj*9)]);
+
+
+
+#ifdef USE_SAC_3D
+                         shift=(k1*ni*nj+j1*ni+i1);
+                         fprintf(fdt,"%lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG\n",wd[shift+(ni*nj*nk*pos1)],wd[shift+(ni*nj*nk*pos2)],wd[shift+(ni*nj*nk*pos3)], w[shift],w[shift+(ni*nj*nk)],w[shift+(ni*nj*nk*2)],w[shift+(ni*nj*nk*3)],w[shift+(ni*nj*nk*4)],w[shift+(ni*nj*nk*5)],w[shift+(ni*nj*nk*6)],w[shift+(ni*nj*nk*7)],w[shift+(ni*nj*nk*8)],w[shift+(ni*nj*nk*9)],w[shift+(ni*nj*nk*10)],w[shift+(ni*nj*nk*11)],w[shift+(ni*nj*nk*12)]);
+
+
+#else
                          shift=(j1*ni+i1);
-                         fprintf(fdt,"%lE %lE %lE %lE %lE %lE %lE %lE %lE %lE %lE %lE\n",wd[shift+ni*nj*pos1],wd[shift+ni*nj*pos2],w[shift],w[shift+(ni*nj)],w[shift+(ni*nj*2)],w[shift+(ni*nj*3)],w[shift+(ni*nj*4)],w[shift+(ni*nj*5)],w[shift+(ni*nj*6)],w[shift+(ni*nj*7)],w[shift+(ni*nj*8)],w[shift+(ni*nj*9)]);
+                         fprintf(fdt,"%lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG\n",wd[shift+(ni*nj*pos1)],wd[shift+(ni*nj*pos2)],w[shift],w[shift+(ni*nj)],w[shift+(ni*nj*2)],w[shift+(ni*nj*3)],w[shift+(ni*nj*4)],w[shift+(ni*nj*5)],w[shift+(ni*nj*6)],w[shift+(ni*nj*7)],w[shift+(ni*nj*8)],w[shift+(ni*nj*9)]);
+
+//if(p.ipe==0)
+//printf("density %lG %lG %lG \n",x,y,w[shift]);
+
+
+#endif
+
+
+
+
+
 
               }
 
 
 	      fclose(fdt);
+
+  //free(hlines);
+  return status;
+}
+
+
+int createconfigsegment(params p,  real *wnew,real *wdnew, real *w,real *wd)
+{
+  int status=0;
+  int i,var;
+  int i1,j1,k1;
+  int ni,nj;                         
+  int shift;
+  real x,y,val;
+
+  int oni,onj,onk;
+
+   k1=0;
+   ni=p.n[0];
+   nj=p.n[1];
+   oni=ni*(p.pnpe[0]);
+   onj=nj*(p.pnpe[1]);
+
+int oi1,oj1,ok1;
+int oshift;
+
+   #ifdef USE_SAC3D
+   nk=p.n[2];
+   onk=nk*(p.pnpe[2]);
+
+   for( k1=0;k1<(nk);k1++)
+
+   #endif
+   for( j1=0;j1<(nj);j1++)
+	     for( i1=0;i1<(nj);i1++)
+             {
+                oi1=i1+(p.pipe[0]*ni);
+                oj1=j1+(p.pipe[1]*nj);  
+		#ifdef USE_SAC_3D
+                         shift=(k1*ni*nj+j1*ni+i1);
+                         ok1=k1+(p.pipe[2]*nk);
+
+                         oshift=(ok1*oni*onj+oj1*oni+oi1);
+		#else
+			 shift=(j1*ni+i1);
+                         oshift=(oj1*oni+oi1);
+                #endif
+                    for(var=0; var<NVAR; var++)
+                         wnew[shift+ni*nj*var]=w[oshift+oni*onj*var];
+
+                    for(var=pos1; var<=(pos2+(NDIM>2)); var++)
+                         wdnew[shift+ni*nj*var]=wd[oshift+oni*onj*var];
+//                         fprintf(fdt,"%lE %lE %lE %lE %lE %lE %lE %lE %lE %lE %lE %lE\n",wd[shift+ni*nj*pos1],wd[shift+ni*nj*pos2],w[shift],w[shift+(ni*nj)],w[shift+(ni*nj*2)],w[shift+(ni*nj*3)],w[shift+(ni*nj*4)],w[shift+(ni*nj*5)],w[shift+(ni*nj*6)],w[shift+(ni*nj*7)],w[shift+(ni*nj*8)],w[shift+(ni*nj*9)]);
+
+
+
+
+              }
+
+
+  //free(hlines);
+  return status;
+}
+
+
+int gathersegment(params p,  real *wnew,real *wdnew, real *w,real *wd)
+{
+  int status=0;
+  int i,var;
+  int i1,j1,k1;
+  int ni,nj;                         
+  int shift;
+  real x,y,val;
+
+  int oni,onj,onk;
+
+   k1=0;
+   ni=p.n[0];
+   nj=p.n[1];
+   oni=ni*(p.pnpe[0]);
+   onj=nj*(p.pnpe[1]);
+
+int oi1,oj1,ok1;
+int oshift;
+
+   #ifdef USE_SAC3D
+   nk=p.n[2];
+   onk=nk*(p.pnpe[2]);
+
+   for( k1=0;k1<(nk);k1++)
+
+   #endif
+   for( j1=0;j1<(nj);j1++)
+	     for( i1=0;i1<(nj);i1++)
+             {
+                oi1=i1+(p.pipe[0]*ni);
+                oj1=j1+(p.pipe[1]*nj);  
+		#ifdef USE_SAC_3D
+                         shift=(k1*ni*nj+j1*ni+i1);
+                         ok1=k1+(p.pipe[2]*nk);
+
+                         oshift=(ok1*oni*onj+oj1*oni+oi1);
+		#else
+			 shift=(j1*ni+i1);
+                         oshift=(oj1*oni+oi1);
+                #endif
+                    for(var=0; var<NVAR; var++)
+                         w[oshift+oni*onj*var]=wnew[shift+ni*nj*var];
+
+                    for(var=pos1; var<=(pos2+(NDIM>2)); var++)
+                         wd[oshift+oni*onj*var]=wdnew[shift+ni*nj*var];
+//                         fprintf(fdt,"%lE %lE %lE %lE %lE %lE %lE %lE %lE %lE %lE %lE\n",wd[shift+ni*nj*pos1],wd[shift+ni*nj*pos2],w[shift],w[shift+(ni*nj)],w[shift+(ni*nj*2)],w[shift+(ni*nj*3)],w[shift+(ni*nj*4)],w[shift+(ni*nj*5)],w[shift+(ni*nj*6)],w[shift+(ni*nj*7)],w[shift+(ni*nj*8)],w[shift+(ni*nj*9)]);
+
+
+
+
+              }
+
 
   //free(hlines);
   return status;

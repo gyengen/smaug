@@ -962,10 +962,12 @@ int iindex = blockIdx.x * blockDim.x + threadIdx.x;
 	   iia[2]=kp;
            k=iia[2];
       for(int dim=0; dim<NDIM;dim++)
-           for( f=rho; f<=b3; f++)
+           //for( f=rho; f<=b3; f++)
+            for( f=rho; f<NVAR; f++)
      #else
      for(int dim=0; dim<NDIM;dim++)
-           for( f=rho; f<=b2; f++)
+           //for( f=rho; f<=b2; f++)
+	  for( f=rho; f<NVAR; f++)
      #endif     
          #ifdef USE_SAC_3D
            if(i<((p->n[0])) && j<((p->n[1]))  && k<((p->n[2])))
@@ -1035,10 +1037,12 @@ int dim;
 	   iia[2]=kp;
            k=iia[2];
       for(dim=0; dim<NDIM;dim++)
-           for( f=rho; f<=b3; f++)
+           //for( f=rho; f<=b3; f++)
+           for( f=rho; f<NVAR; f++)
      #else
            for(dim=0; dim<NDIM;dim++)
-           for( f=rho; f<=b2; f++)
+           //for( f=rho; f<=b2; f++)
+	   for( f=rho; f<NVAR; f++)
      #endif
              {
             
@@ -2419,7 +2423,7 @@ int cucopytompivisc(struct params **p,real **temp2, real **gmpivisc0, real **gmp
      //copy data to correct area in temp2
 //encodempiw (struct params *dp,int ix, int iy, int iz, int field,int bound,int dim)
      //copy data to correct area in w and wmod
-       for(dim=0;dim<NDIM;dim++) 
+     /*  for(dim=0;dim<NDIM;dim++) 
          for(bound=0;bound<2;bound++)
          {
             switch(dim)
@@ -2482,7 +2486,7 @@ int cucopytompivisc(struct params **p,real **temp2, real **gmpivisc0, real **gmp
             #endif             
              }
                                      
-         }    
+         }    */
 
 }
 
@@ -2520,7 +2524,7 @@ int cucopyfrommpivisc(struct params **p,real **temp2,real **gmpivisc0,real **gmp
      #endif
 
       //copy data from temp2 to gmpivisc
-             for(dim=0;dim<NDIM;dim++) 
+        /*     for(dim=0;dim<NDIM;dim++) 
          for(bound=0;bound<2;bound++)
          {
             switch(dim)
@@ -2585,7 +2589,7 @@ int cucopyfrommpivisc(struct params **p,real **temp2,real **gmpivisc0,real **gmp
             #endif             
              }
                                      
-         }    
+         } */   
 
 
    	 cudaMemcpy(*d_gmpivisc0, *gmpivisc0, szbuf0*sizeof(real), cudaMemcpyHostToDevice);     

@@ -10,7 +10,7 @@ real *d_wnew;
 
 real *d_wmod,  *d_dwn1,  *d_dwn2,  *d_dwn3,  *d_dwn4,  *d_wd;
 
-real *w,*wnew,*wd, *temp2,*wmod;
+real *w,*wnew,*wd,*wdnew, *temp2,*wmod;
 real *d_wtemp,*d_wtemp1,*d_wtemp2;
 
 #ifdef USE_MPI

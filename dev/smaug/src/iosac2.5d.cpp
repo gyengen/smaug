@@ -37,7 +37,7 @@ struct bparams *bp=(struct bparams *)malloc(sizeof(struct bparams));
 FILE *portf;
 
 
-if(argc>2  && strcmp(argv[2],"gather")==0) 
+if(argc>3  && strcmp(argv[2],"gather")==0 && (atoi(argv[3])>=0) && (atoi(argv[3])<=nt)) 
 {    
   mode=2;
 }
@@ -99,21 +99,30 @@ sprintf(configfile,"%s",cfgout);
 	      if(p->ipe>99)
 		sprintf(configinfile,"%s_np%d%d_%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->ipe,ext);
 	      else if(p->ipe>9)
-		sprintf(configinfile,"%s_np%d%d_%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->ipe,ext);
+		sprintf(configinfile,"%s_np%d%d_%d.0%s",tcfg,p->pnpe[0],p->pnpe[1],p->ipe,ext);
 	      else
 		sprintf(configinfile,"%s_np0%d0%d_00%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->ipe,ext);  	     	     
      #endif
 
-     if(mode==1 || mode==2)
+     if(mode==1 )
      {
-           sprintf(configinfile,"test%s",cfgfile);
+           sprintf(configinfile,"%s",cfgfile);
+          p->n[0]=ni*(p->pnpe[0]);
+          p->n[1]=nj*(p->pnpe[1]);
+	   #ifdef USE_SAC3D
+		    p->n[2]=nk*(p->pnpe[2]);
+	   #endif
+     }
+
+     if( mode==2)
+     {
+           //sprintf(configinfile,"test%s",cfgfile);
            ni=ni*(p->pnpe[0]);
            nj=nj*(p->pnpe[1]);
 	   #ifdef USE_SAC3D
 		   nk=nk*(p->pnpe[2]);
 	   #endif
      }
-
      printf("config files\n%s \n %s\n",configinfile,configfile);
   
      
@@ -192,25 +201,28 @@ char *method=NULL;
        /*********************************************************************************************************/
           printf("allocating w and wnew\n");
 	  #ifdef USE_SAC_3D
-		 w=(real *)calloc(ni*nj*nk*NVAR,sizeof(real ));
-		 wmod=(real *)calloc(ni*nj*nk*NVAR,sizeof(real ));
+		 wnew=(real *)calloc(ni*nj*nk*NVAR,sizeof(real ));
 
-		 wd=(real *)calloc(ni*nj*nk*NDERV,sizeof(real ));
-		 wdnew=(real *)calloc(((p)->n[0])*((p)->n[1])*((p)->n[2])*NDERV,sizeof(real ));
-
-		 wnew=(real *)calloc(((p)->n[0])*((p)->n[1])*((p)->n[2])*NVAR,sizeof(real ));
+		 wdnew=(real *)calloc(ni*nj*nk*NDERV,sizeof(real ));
+		 wd=(real *)calloc(((p)->n[0])*((p)->n[1])*((p)->n[2])*NDERV,sizeof(real ));
+		 wmod=(real *)calloc(((p)->n[0])*((p)->n[1])*((p)->n[2])*NVAR,sizeof(real ));
+		 w=(real *)calloc(((p)->n[0])*((p)->n[1])*((p)->n[2])*NVAR,sizeof(real ));
+		 for(i=0;i<((p)->n[0])*((p)->n[1])*((p)->n[2])*NDERV;i++)
+		    wd[i]=0.0;
 		 for(i=0;i<ni*nj*nk*NDERV;i++)
-		    wd[i]=0.0;
+		    wdnew[i]=0.0;
 	 #else
-		 w=(real *)calloc(ni*nj*NVAR,sizeof(real ));
-		 wmod=(real *)calloc(ni*nj*NVAR,sizeof(real ));
+		 wnew=(real *)calloc(ni*nj*NVAR,sizeof(real ));
 
-		 wd=(real *)calloc(ni*nj*NDERV,sizeof(real ));
-		 wdnew=(real *)calloc(((p)->n[0])*((p)->n[1])*NDERV,sizeof(real ));
+		 wdnew=(real *)calloc(ni*nj*NDERV,sizeof(real ));
+		 wd=(real *)calloc(((p)->n[0])*((p)->n[1])*NDERV,sizeof(real ));
+		 wmod=(real *)calloc(((p)->n[0])*((p)->n[1])*NVAR,sizeof(real ));
 
-		 wnew=(real *)calloc(((p)->n[0])*((p)->n[1])*NVAR,sizeof(real ));
-		 for(i=0;i<ni*nj*NDERV;i++)
+		 w=(real *)calloc(((p)->n[0])*((p)->n[1])*NVAR,sizeof(real ));
+		 for(i=0;i<((p)->n[0])*((p)->n[1])*NDERV;i++)
 		    wd[i]=0.0;
+		 for(i=0;i<((p)->n[0])*((p)->n[1])*NDERV;i++)
+		    wdnew[i]=0.0;
 	 #endif
 
 
@@ -295,7 +307,7 @@ char *method=NULL;
 	printf("after read\n");
 	p->it=0;
 
-        //scatter/distribute configuration across eac CPU
+        //scatter/distribute configuration across each CPU
         if(mode==1)
         {
 	       if(p->ipe==0)
@@ -311,7 +323,19 @@ char *method=NULL;
 
 		    //writeas
 		   
+                    p->n[0]=ni/(p->pnpe[0]);
+                    p->n[1]=nj/(p->pnpe[1]);
+
+                    #ifdef USE_SAC3D
+                      p->n[1]=nk/(p->pnpe[2]);
+                    #endif
 		    writeasciivacconfig(configinfile, *p, meta, wnew,wdnew, hlines, *state);
+                    p->n[0]=ni;
+                    p->n[1]=nj;
+
+                    #ifdef USE_SAC3D
+                      p->n[1]=nk;
+                    #endif
 
 
 		  }
@@ -322,13 +346,21 @@ char *method=NULL;
        //gather configuration to single output file
        if(mode==2)
         {
+
+        //for( n=0;n<2;n++)
+        //{
+
+       n=atoi(argv[3]);
        if(p->ipe==0)
        {
+             int myipe=p->ipe;
 
-        for( n=0;n<n;n++)
+
           for(i=0; i<p->npe; i++)
           //for(i=0; i<1; i++)
           {
+             printf(" here nt=%d pid=%d i=%d\n",n,p->ipe,i);
+
              p->ipe=i;
              ipe2iped(p);
 	   strcpy(stemp,cfgout);
@@ -359,11 +391,32 @@ char *method=NULL;
 	    
             //copy segment
             printf("copy segment %d %s\n",i,configinfile);
-            readbinvacconfig(configinfile,*p, meta, wnew,wdnew, *state );
+
+            #ifdef USE_MPI
+            	readasciivacconfig(configinfile,*p, meta, w,wd, hlines);
+            #else
+                readbinvacconfig(configinfile,*p, meta, w,wd, *state );
+            #endif
+          /*for(i1=0; i1<(p->n[0]); i1++)
+          {
+
+		  for(j1=0; j1<(p->n[1]); j1++)
+		  {
+		     printf("%g ",w[j1*ni+i1]);
+
+		  }
+             printf("\n*************\n");
+          }
+          printf("\n******\n next proc \n*******\n");*/
+
             gathersegment(*p, wnew,wdnew,w,wd);
+             printf(" here read and gath nt=%d pid=%d i=%d\n",n,p->ipe,i);
 
             //writeas
             //writeasciivacconfig(configinfile, *p, meta, wnew,wdnew, hlines, *state);
+
+
+
 
 
           }
@@ -373,18 +426,32 @@ char *method=NULL;
 	#ifdef USE_SAC3D
             p->n[2]=nk;
         #endif
-     #ifdef USE_SAC3D
+	     #ifdef USE_SAC3D
+			sprintf(configinfile,"%s%d.out",tcfg,n);  	     
+	     #else
+			sprintf(configinfile,"%s%d.out",tcfg,n);  	     	     
+	     #endif           
 
-		sprintf(configinfile,"%s%d.out",tcfg,n);  	     
-     #else
+          state->it=n;
+          sprintf(configfile,"%s",cfggathout);
+          writevacgatherconfig(configfile,n,*p, meta , wnew,wdnew,*state);
+          printf(" here configfile %s nt=%d pid=%d \n",configfile,n,p->ipe);
 
-		sprintf(configinfile,"%s%d.out",tcfg,n);  	     	     
-     #endif           
 
 
-          writevacconfig(configfile,n,*p, meta , w,wd,*state);
-        }
-        }
+
+
+
+             p->ipe=myipe;
+
+        }//if p->ipe==0
+
+
+        mpisync();
+        //}//loop over nt steps
+        //printf("proc %d here \n", p->ipe);
+
+        }//if mode==2
 
 
 
@@ -553,8 +620,24 @@ char *method=NULL;
 		#ifndef USE_MPI
 			// writevtkconfig(configfile,n,*p, meta , w);
 		#endif
-			//writeasciivacconfig(configfile,*p, meta , w,wd,hlines,*state);
-		writevacconfig(configfile,n,*p, meta , w,wd,*state);	 
+			writeasciivacconfig(configfile,*p, meta , w,wd,hlines,*state);
+		//writevacconfig(configfile,n,*p, meta , w,wd,*state);
+
+          /*if((p->ipe)==3)
+          {
+		  for(i1=0; i1<(p->n[0]); i1++)
+		  {
+
+			  for(j1=0; j1<(p->n[1]); j1++)
+			  {
+			     printf("%g ",w[j1*ni+i1]);
+
+			  }
+		     printf("\n*************\n");
+		  }
+		  printf("\n******\n next proc \n*******\n");
+          }*/
+	 
      
 	    }
 	    order=0;

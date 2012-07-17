@@ -74,7 +74,8 @@ char *cfgfile="zero1_ot_asc.ini";
 //char *cfgfile="zero1_BW_bin.ini";
 //char *cfgout="zero1_np010203."
 //char *cfgout="out/zeroOT";
-char *cfgout="out/zero1_.out";
+char *cfgout="tmpout/zero1_.out";
+char *cfggathout="out/zero1_.out";
 //char *cfgout="zero1_np0202.out";
 
 
@@ -147,7 +148,7 @@ p->sodifon=1.0;
 p->moddton=0.0;
 p->divbon=0.0;
 p->divbfix=0.0;
-p->hyperdifmom=0.0;
+p->hyperdifmom=1.0;
 p->readini=1.0;
 p->cfgsavefrequency=1;
 

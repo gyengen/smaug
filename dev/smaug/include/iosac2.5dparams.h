@@ -74,7 +74,8 @@ char *cfgfile="zero1_ot_asc.ini";
 //char *cfgfile="zero1_BW_bin.ini";
 //char *cfgout="zero1_np010203."
 //char *cfgout="out/zeroOT";
-char *cfgout="out/zero1_.out";
+char *cfgout="tmpout/zero1_.out";
+char *cfggathout="out/zero1_.out";
 //char *cfgout="zero1_np0202.out";
 
 

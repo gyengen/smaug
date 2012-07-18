@@ -302,7 +302,7 @@ char *method=NULL;
 	if((p->readini)==0)
 	 initconfig(p, &meta, w);
 	else
-	 readasciivacconfig(configinfile,*p,meta,w,wd,hlines);
+	 readasciivacconfig(configinfile,*p,meta, state,w,wd,hlines);
 
 	printf("after read\n");
 	p->it=0;
@@ -312,6 +312,21 @@ char *method=NULL;
         {
 	       if(p->ipe==0)
 	       {
+
+
+
+          /*for(i1=0; i1<(p->n[0]); i1++)
+          {
+
+		  for(j1=0; j1<(p->n[1]); j1++)
+		  {
+		     printf("%g ",w[j1*(p->n[0])+i1+2*(p->n[0])*(p->n[1])]);
+
+		  }
+             printf("\n*************\n");
+          }
+          printf("\n******\n next proc \n*******\n");*/
+
 		  for(i=0; i<p->npe; i++)
 		  {
 		     p->ipe=i;
@@ -319,22 +334,37 @@ char *method=NULL;
 		    
 		    //copy segment
 		    printf("copy segment %d\n",i);
+
+
+
 		    createconfigsegment(*p, wnew,wdnew,w,wd);
+
+	  /*for(j1=0; j1<(nj); j1++)
+          {
+                  for(i1=0; i1<(ni); i1++)
+		  {
+		     printf("%g ",w[j1*(ni)+i1+2*(ni)*(nj)]);
+
+		  }
+             printf("\n*************\n");
+          }
+          printf("\n******\n next proc \n*******\n");*/
+
 
 		    //writeas
 		   
-                    p->n[0]=ni/(p->pnpe[0]);
-                    p->n[1]=nj/(p->pnpe[1]);
-
-                    #ifdef USE_SAC3D
-                      p->n[1]=nk/(p->pnpe[2]);
-                    #endif
-		    writeasciivacconfig(configinfile, *p, meta, wnew,wdnew, hlines, *state);
                     p->n[0]=ni;
                     p->n[1]=nj;
 
                     #ifdef USE_SAC3D
-                      p->n[1]=nk;
+                      p->n[2]=nk;
+                    #endif
+		    writeasciivacconfig(configinfile, *p, meta,  wnew,wdnew, hlines, *state);
+                    p->n[0]=ni*(p->pnpe[0]);
+                    p->n[1]=nj*(p->pnpe[1]);
+
+                    #ifdef USE_SAC3D
+                      p->n[2]=nk*(p->pnpe[2]);
                     #endif
 
 
@@ -393,7 +423,7 @@ char *method=NULL;
             printf("copy segment %d %s\n",i,configinfile);
 
             #ifdef USE_MPI
-            	readasciivacconfig(configinfile,*p, meta, w,wd, hlines);
+            	readasciivacconfig(configinfile,*p, meta, state, w,wd, hlines);
             #else
                 readbinvacconfig(configinfile,*p, meta, w,wd, *state );
             #endif

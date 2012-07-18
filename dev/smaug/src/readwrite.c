@@ -932,7 +932,7 @@ int readconfig(char *cfgfile, params p, meta md, real *w)
 }
 
 
-int readasciivacconfig(char *cfgfile, params p, meta md, real *w, real *wd, char **hlines)
+int readasciivacconfig(char *cfgfile, params p, meta md,state *st, real *w, real *wd, char **hlines)
 {
   int status=0;
   int i;
@@ -942,6 +942,8 @@ int readasciivacconfig(char *cfgfile, params p, meta md, real *w, real *wd, char
   real x,y,z,val;
   char cfgfilename[300];
   char ext[3];
+
+   int ii1,ii2,ii3;
 
    ni=p.n[0];
    nj=p.n[1];
@@ -956,9 +958,13 @@ printf("reading\n");
    //char **hlines;
    char *line;
    //hlines=(char **)calloc(5, sizeof(char*));
+freadl(fdt, &hlines[0]);
+     printf("%s\n", hlines[0]);
+
+fscanf(fdt,"%d %lG %d %d %d\n",&(st->it),&(st->t),&ii1,&ii2,&ii3);
 
    //read 5 header lines
-   for(i=0;i<5;i++)
+   for(i=2;i<5;i++)
    {
      freadl(fdt, &hlines[i]);
      printf("%s\n", hlines[i]);
@@ -1108,7 +1114,16 @@ sprintf(configfile,"%s",cfgfile);
       //*   neqpar      - number of equation parameters (integer)
       //*   nw          - number of flow variables (integer)
      // fprintf(fdt,"%d %d %d 6 %d\n", st.it,st.t,NDIM,NVAR);
-   for(i=1;i<=4;i++)
+
+    #ifdef USE_SAC_3D
+     fprintf(fdt,"%d %lg %d 7 %d\n", st.it,st.t,NDIM,NVAR);
+     printf("%d %g %d 7 %d\n", st.it,st.t,NDIM,NVAR);
+    #else
+     fprintf(fdt,"%d %lg %d 6 %d\n", st.it,st.t,NDIM,NVAR);
+     printf("%d %g %d 6 %d\n", st.it,st.t,NDIM,NVAR);
+   #endif
+
+   for(i=2;i<=4;i++)
    {
      fprintf(fdt,"%s\n", hlines[i]);
      printf("%s\n",hlines[i]);
@@ -1170,7 +1185,7 @@ int createconfigsegment(params p,  real *wnew,real *wdnew, real *w,real *wd)
   int i,var;
   int i1,j1,k1;
   int ni,nj;                         
-  int shift;
+  int shift,tvar;
   real x,y,val;
 
   int oni,onj,onk;
@@ -1188,11 +1203,14 @@ int oshift;
    nk=p.n[2]/(p.pnpe[2]);
    onk=p.n[2];
 
+
+//for(tvar=0; tvar<NVAR+NDIM; tvar++)
    for( k1=0;k1<(nk);k1++)
 
    #endif
    for( j1=0;j1<(nj);j1++)
-	     for( i1=0;i1<(nj);i1++)
+   {
+	     for( i1=0;i1<(ni);i1++)
              {
                 oi1=i1+(p.pipe[0]*ni);
                 oj1=j1+(p.pipe[1]*nj);  
@@ -1205,8 +1223,14 @@ int oshift;
 			 shift=(j1*ni+i1);
                          oshift=(oj1*oni+oi1);
                 #endif
-                    for(var=0; var<NVAR; var++)
+                   for(var=0; var<NVAR; var++)
+                    {
                          wnew[shift+ni*nj*var]=w[oshift+oni*onj*var];
+
+                       /*  if(var ==2)
+                            printf("%g ",w[oshift+oni*onj*var]);*/
+                     }
+                 
 
                     for(var=pos1; var<=(pos2+(NDIM>2)); var++)
                          wdnew[shift+ni*nj*var]=wd[oshift+oni*onj*var];
@@ -1216,8 +1240,9 @@ int oshift;
 
 
               }
+       // printf("\n");
 
-
+   }
   //free(hlines);
   return status;
 }

@@ -91,7 +91,7 @@ dt=0.0002;  //OZT test
 //nt=5000;
 //nt=200000;
 //nt=150000;
-nt=2;
+nt=5;
 
 
 real *t=(real *)calloc(nt,sizeof(real));

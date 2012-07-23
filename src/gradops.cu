@@ -456,7 +456,12 @@ if(ii[0]>1 && ii[0]<((p->n[0])-2) )
  grad=(  ( ((8*wmod[encode3_MODID(p,ii[0]+1,ii[1],ii[2],field)]-8*wmod[encode3_MODID(p,ii[0]-1,ii[1],ii[2],field)]+wmod[encode3_MODID(p,ii[0]-2,ii[1],ii[2],field)]-wmod[encode3_MODID(p,ii[0]+2,ii[1],ii[2],field)])/6.0))/(2.0*(wd[fencode3_MODID(p,ii,delx1)]))    );
  #endif
 
-if(p->boundtype[field][dir] !=0)
+#ifdef USE_MPI
+if(p->boundtype[field][dir][0] !=1  )
+  if(p->mpiupperb[dir]==1  )
+#else
+if(p->boundtype[field][dir][0] !=0  )
+#endif
 {
    if((ii[0]==(p->n[0])-3) || (ii[0]==(p->n[0])-4)  && ii[1]>1   && ii[1]<(p->n[1])-2 && ii[2]>1   && ii[2]<(p->n[2])-2  )
        grad=0;
@@ -473,7 +478,12 @@ if(ii[0]>2 && ii[0]<((p->n[0])-3) )
 if(ii[0]>1 && ii[0]<((p->n[0])-2) )
  grad=(  ( ((8*wmod[encode3_MODID(p,ii[0]+1,ii[1],0,field)]-8*wmod[encode3_MODID(p,ii[0]-1,ii[1],0,field)]+wmod[encode3_MODID(p,ii[0]-2,ii[1],0,field)]-wmod[encode3_MODID(p,ii[0]+2,ii[1],0,field)])/6.0))/(2.0*(wd[fencode3_MODID(p,ii,delx1)]))    );
  #endif
-if(p->boundtype[field][dir] !=0)
+#ifdef USE_MPI
+if(p->boundtype[field][dir][0] !=1  )
+  if(p->mpiupperb[dir]==1  )
+#else
+if(p->boundtype[field][dir][0] !=0  )
+#endif
 {
    if((ii[0]==(p->n[0])-3) || (ii[0]==(p->n[0])-4)  && ii[1]>1   && ii[1]<(p->n[1])-2  )
        grad=0;
@@ -498,7 +508,12 @@ if(p->boundtype[field][dir] !=0)
 if( ii[1] >1 &&  ii[1]<((p->n[1])-2))
 	grad=(  ( ((8*wmod[encode3_MODID(p,ii[0],ii[1]+1,ii[2],field)]-8*wmod[encode3_MODID(p,ii[0],ii[1]-1,ii[2],field)]+wmod[encode3_MODID(p,ii[0],ii[1]-2,ii[2],field)]-wmod[encode3_MODID(p,ii[0],ii[1]+2,ii[2],field)])/6.0))/(2.0*(wd[fencode3_MODID(p,ii,delx2)]))    );
  #endif
-if(p->boundtype[field][dir] !=0)
+#ifdef USE_MPI
+if(p->boundtype[field][dir][0] !=1  )
+  if(p->mpiupperb[dir]==1  )
+#else
+if(p->boundtype[field][dir][0] !=0  )
+#endif
 {
    if((ii[1]==(p->n[1])-3) || (ii[1]==(p->n[1])-4)  && ii[0]>1   && ii[0]<(p->n[0])-2  && ii[2]>1   && ii[2]<(p->n[2])-2  )
        grad=0;
@@ -515,7 +530,12 @@ if(ii[1]>2 && ii[1]<((p->n[1])-3) )
 if( ii[1] >1 &&  ii[1]<((p->n[1])-2))
 	grad=(  ( ((8*wmod[encode3_MODID(p,ii[0],ii[1]+1,0,field)]-8*wmod[encode3_MODID(p,ii[0],ii[1]-1,0,field)]+wmod[encode3_MODID(p,ii[0],ii[1]-2,0,field)]-wmod[encode3_MODID(p,ii[0],ii[1]+2,0,field)])/6.0))/(2.0*(wd[fencode3_MODID(p,ii,delx2)]))    );
 
-if(p->boundtype[field][dir] !=0)
+#ifdef USE_MPI
+if(p->boundtype[field][dir][0] !=1  )
+  if(p->mpiupperb[dir]==1  )
+#else
+if(p->boundtype[field][dir][0] !=0  )
+#endif
 {
    if((ii[1]==(p->n[1])-3) || (ii[1]==(p->n[1])-4)  && ii[0]>1   && ii[0]<(p->n[0])-2  )
        grad=0;
@@ -538,7 +558,12 @@ if( ii[2] >1 &&  ii[2]<((p->n[2])-2))
 	grad=(  ( ((8*wmod[encode3_MODID(p,ii[0],ii[1],ii[2]+1,field)]-8*wmod[encode3_MODID(p,ii[0],ii[1],ii[2]-1,field)]+wmod[encode3_MODID(p,ii[0],ii[1],ii[2]-2,field)]-wmod[encode3_MODID(p,ii[0],ii[1],ii[2]+2,field)])/6.0))/(2.0*(wd[fencode3_MODID(p,ii,delx3)]))    );
 #endif
 
-if(p->boundtype[field][dir] !=0)
+#ifdef USE_MPI
+if(p->boundtype[field][dir][0] !=1  )
+  if(p->mpiupperb[dir]==1  )
+#else
+if(p->boundtype[field][dir][0] !=0  )
+#endif
 {
    if((ii[2]==(p->n[2])-3) || (ii[2]==(p->n[2])-4)  && ii[0]>1   && ii[0]<(p->n[0])-2 && ii[1]>1   && ii[1]<(p->n[1])-2  )
        grad=0;
@@ -577,7 +602,7 @@ real grad1l3n_MODID(real *wmod, real *wd,struct params *p,int *ii,int field,int 
  {
     grad=(  ( wmod[encode3_MODID(p,i,j,k,field)]-wmod[encode3_MODID(p,i-1,j,k,field)]) /((wd[fencode3_MODID(p,ii,delx1)]))    );
 
-   if(p->boundtype[field][dir] !=0)
+   if(p->boundtype[field][dir][0] !=0)
 	{
 	   #ifdef USE_SAC_3D
 		   if((i==(p->n[0])-2) || (i==(p->n[0])-3)  && j>0   && j<(p->n[1])-1 && k>1   && k<(p->n[2])-1 )
@@ -596,7 +621,7 @@ real grad1l3n_MODID(real *wmod, real *wd,struct params *p,int *ii,int field,int 
  {
     grad=(  ( wmod[encode3_MODID(p,i,j,k,field)]-wmod[encode3_MODID(p,i,j-1,k,field)])/((wd[fencode3_MODID(p,ii,delx2)]))    );
 
-  if(p->boundtype[field][dir] !=0)
+  if(p->boundtype[field][dir][0] !=0)
   {
    #ifdef USE_SAC_3D
 	   if((j==(p->n[1])-2) || (j==(p->n[1])-3)  && i>0   && i<(p->n[0])-1 && k>0   && k<(p->n[2])-1 )
@@ -617,7 +642,7 @@ real grad1l3n_MODID(real *wmod, real *wd,struct params *p,int *ii,int field,int 
  {
     grad=(  ( wmod[encode3_MODID(p,i,j,k,field)]-wmod[encode3_MODID(p,i,j,k-1,field)])/((wd[fencode3_MODID(p,ii,delx3)]))    );
 
- if(p->boundtype[field][dir] !=0)
+ if(p->boundtype[field][dir][0] !=0)
  {
    if((k==(p->n[2])-2) || (k==(p->n[2])-3)  && i>0   && i<(p->n[0])-1  && j>0   && j<(p->n[1])-1 )
        grad=0;
@@ -650,7 +675,7 @@ real grad1r3n_MODID(real *wmod, real *wd,struct params *p,int *ii,int field,int 
     grad=(  ( wmod[encode3_MODID(p,i+1,j,k,field)]-wmod[encode3_MODID(p,i,j,k,field)]) /((wd[fencode3_MODID(p,ii,delx1)]))    );
 
 
-   if(p->boundtype[field][dir] !=0)
+   if(p->boundtype[field][dir][0] !=0)
    {
    #ifdef USE_SAC_3D
 	   if((i==(p->n[0])-2) || (i==(p->n[0])-3)  && j>0   && j<(p->n[1])-1 && k>0   && k<(p->n[2])-1 )
@@ -670,7 +695,7 @@ real grad1r3n_MODID(real *wmod, real *wd,struct params *p,int *ii,int field,int 
     grad=(  ( wmod[encode3_MODID(p,i,j+1,k,field)]-wmod[encode3_MODID(p,i,j,k,field)])/((wd[fencode3_MODID(p,ii,delx2)]))    );
 
 
-  if(p->boundtype[field][dir] !=0)
+  if(p->boundtype[field][dir][0] !=0)
   {
    #ifdef USE_SAC_3D
 	   if((j==(p->n[1])-2) || (j==(p->n[1])-3)  && i>0   && i<(p->n[0])-1 && k>0   && k<(p->n[2])-1 )
@@ -692,7 +717,7 @@ real grad1r3n_MODID(real *wmod, real *wd,struct params *p,int *ii,int field,int 
  {
     grad=(  ( wmod[encode3_MODID(p,i,j,k+1,field)]-wmod[encode3_MODID(p,i,j,k,field)])/((wd[fencode3_MODID(p,ii,delx3)]))    );
 
-if(p->boundtype[field][dir] !=0)
+if(p->boundtype[field][dir][0] !=0)
  {
    if((k==(p->n[2])-2) || (k==(p->n[2])-3)  && i>0   && i<(p->n[0])-1  && j>0   && j<(p->n[1])-1 )
        grad=0;
@@ -725,7 +750,7 @@ real grad13n_MODID(real *wmod, real *wd,struct params *p,int *ii,int field,int d
     grad=(  ( wmod[encode3_MODID(p,i+1,j,k,field)]-wmod[encode3_MODID(p,i-1,j,k,field)]) /((wd[fencode3_MODID(p,ii,delx1)]))/2.0    );
 
 
-	if(p->boundtype[field][dir] !=0)
+	if(p->boundtype[field][dir][0] !=0)
 	{
 	   #ifdef USE_SAC_3D
 		   if((i==(p->n[0])-2) || (i==(p->n[0])-3)  && j>0   && j<(p->n[1])-1 && k>0   && k<(p->n[2])-1 )
@@ -744,7 +769,7 @@ real grad13n_MODID(real *wmod, real *wd,struct params *p,int *ii,int field,int d
  {
     grad=(  ( wmod[encode3_MODID(p,i,j+1,k,field)]-wmod[encode3_MODID(p,i,j-1,k,field)])/((wd[fencode3_MODID(p,ii,delx2)]))/2.0    );
 
-	if(p->boundtype[field][dir] !=0)
+	if(p->boundtype[field][dir][0] !=0)
 	{
 	   #ifdef USE_SAC_3D
 		   if((j==(p->n[1])-2) || (j==(p->n[1])-3)  && i>0   && i<(p->n[0])-1 && k>0   && k<(p->n[2])-1 )
@@ -765,7 +790,7 @@ real grad13n_MODID(real *wmod, real *wd,struct params *p,int *ii,int field,int d
  {
     grad=(  ( wmod[encode3_MODID(p,i,j,k+1,field)]-wmod[encode3_MODID(p,i,j,k-1,field)])/((wd[fencode3_MODID(p,ii,delx3)]))/2.0    );
 
-	if(p->boundtype[field][dir] !=0)
+	if(p->boundtype[field][dir][0] !=0)
 	{
 	   if((k==(p->n[2])-2) || (k==(p->n[2])-3)  && i>0   && i<(p->n[0])-1  && j>0   && j<(p->n[1])-1 )
 	       grad=0;
@@ -836,17 +861,17 @@ k=0;
                  if(i==j==k  )
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,(p->n[0])-3,(p->n[1])-3,(p->n[2])-3,f)];
                 }                     
-                else*/ if(i==0 || i==1  && ((p->boundtype[f][0])==3))                
+                else*/ if(i==0 || i==1  && ((p->boundtype[f][0][0])==3))                
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,2,j,k,f)];              
-                else if((i==((p->n[0])-1)) || (i==((p->n[0])-2)) && ((p->boundtype[f][0])==3))                
+                else if((i==((p->n[0])-1)) || (i==((p->n[0])-2)) && ((p->boundtype[f][0][0])==3))                
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,(p->n[0])-3,j,k,f)];                            
-                else if(j==0 || j==1 && ((p->boundtype[f][1])==3))                
+                else if(j==0 || j==1 && ((p->boundtype[f][1][0])==3))                
                    wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,2,k,f)];                    
-                else if((j==((p->n[1])-1)) || (j==((p->n[1])-2))  && ((p->boundtype[f][1])==3))                
+                else if((j==((p->n[1])-1)) || (j==((p->n[1])-2))  && ((p->boundtype[f][1][0])==3))                
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,(p->n[1])-3,k,f)];
-                else if(k==0 || k==1  && ((p->boundtype[f][2])==3))                
+                else if(k==0 || k==1  && ((p->boundtype[f][2][0])==3))                
                    wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,2,k,f)];                    
-                else if((k==((p->n[2])-1)) || (k==((p->n[2])-2))  && ((p->boundtype[f][2])==3))                
+                else if((k==((p->n[2])-1)) || (k==((p->n[2])-2))  && ((p->boundtype[f][2][0])==3))                
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,j,(p->n[2])-3,f)];
 
         #else
@@ -880,16 +905,16 @@ k=0;
                   else                  
                     wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,i,(j-3),f)];                  
                 }                       
-                else*/ if(i==0 || i==1 && ((p->boundtype[f][0])==3))                
+                else*/ if(i==0 || i==1 && ((p->boundtype[f][0][0])==3))                
    
                   wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,2,j,f)];              
-                else if((i==((p->n[0])-1)) || (i==((p->n[0])-2))  && ((p->boundtype[f][0])==3))                
+                else if((i==((p->n[0])-1)) || (i==((p->n[0])-2))  && ((p->boundtype[f][0][0])==3))                
                   //wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,(i-3),j,f)];    
                   wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,(p->n[0])-3,j,f)];                            
-                else if(j==0 || j==1  && ((p->boundtype[f][1])==3))                
+                else if(j==0 || j==1  && ((p->boundtype[f][1][0])==3))                
                   //wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,i,j+2,f)]; 
                    wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,i,2,f)];                    
-                else if((j==((p->n[1])-1)) || (j==((p->n[1])-2))  && ((p->boundtype[f][1])==3))                
+                else if((j==((p->n[1])-1)) || (j==((p->n[1])-2))  && ((p->boundtype[f][1][0])==3))                
                   //wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,i,(j-3),f)];
                   wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,i,(p->n[1])-3,f)];
                 
@@ -950,17 +975,17 @@ k=0;
                  if(i==j==k  )
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,(p->n[0])-3,(p->n[1])-3,(p->n[2])-3,f)];
                 }                     
-                else*/ if((i==0 || i==1)  && dir==0 && ((p->boundtype[f][dir])==3))                
+                else*/ if((i==0 || i==1)  && dir==0 && ((p->boundtype[f][dir][0])==3))                
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,2,j,k,f)];              
-                else if(((i==((p->n[0])-1)) || (i==((p->n[0])-2)))  && dir==0 && ((p->boundtype[f][dir])==3))                
+                else if(((i==((p->n[0])-1)) || (i==((p->n[0])-2)))  && dir==0 && ((p->boundtype[f][dir][0])==3))                
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,(p->n[0])-3,j,k,f)];                            
-                else if((j==0 || j==1)  && dir==1 && ((p->boundtype[f][dir])==3))                
+                else if((j==0 || j==1)  && dir==1 && ((p->boundtype[f][dir][0])==3))                
                    wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,2,k,f)];                    
-                else if(((j==((p->n[1])-1)) || (j==((p->n[1])-2)))  && dir==1  && ((p->boundtype[f][dir])==3))                
+                else if(((j==((p->n[1])-1)) || (j==((p->n[1])-2)))  && dir==1  && ((p->boundtype[f][dir][0])==3))                
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,(p->n[1])-3,k,f)];
-                else if(k==0 || k==1  && dir==2  && ((p->boundtype[f][dir])==3))                
+                else if(k==0 || k==1  && dir==2  && ((p->boundtype[f][dir][0])==3))                
                    wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,2,k,f)];                    
-                else if((k==((p->n[2])-1)) || (k==((p->n[2])-2))  && dir==2  && ((p->boundtype[f][dir])==3))                
+                else if((k==((p->n[2])-1)) || (k==((p->n[2])-2))  && dir==2  && ((p->boundtype[f][dir][0])==3))                
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,j,(p->n[2])-3,f)];
 
         #else
@@ -996,16 +1021,16 @@ k=0;
                 }                       
                 else */
 
-                if((i==0 || i==1)  && dir==0 && ((p->boundtype[f][dir])==3))                
+                if((i==0 || i==1)  && dir==0 && ((p->boundtype[f][dir][0])==3))                
                   //wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,i+2,j,f)];   
                   wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,2,j,f)];              
-                else if(((i==((p->n[0])-1)) || (i==((p->n[0])-2)))  && dir==0  && ((p->boundtype[f][dir])==3))                
+                else if(((i==((p->n[0])-1)) || (i==((p->n[0])-2)))  && dir==0  && ((p->boundtype[f][dir][0])==3))                
                   //wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,(i-2),j,f)];    
                   wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,(p->n[0])-3,j,f)];                            
-                else if((j==0 || j==1)  && dir==1  && ((p->boundtype[f][dir])==3))                
+                else if((j==0 || j==1)  && dir==1  && ((p->boundtype[f][dir][0])==3))                
                   //wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,i,j+2,f)]; 
                    wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,i,2,f)];                    
-                else if(((j==((p->n[1])-1)) || (j==((p->n[1])-2)))  && dir==1  && ((p->boundtype[f][dir])==3))                
+                else if(((j==((p->n[1])-1)) || (j==((p->n[1])-2)))  && dir==1  && ((p->boundtype[f][dir][0])==3))                
                   //wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,i,(j-2),f)];
                   wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,i,(p->n[1])-3,f)];
                 
@@ -1026,7 +1051,7 @@ j=ii[1];
 k=0;
         #ifdef USE_SAC_3D
           k=ii[2];
-            if((p->boundtype[f][0])==4)
+            if((p->boundtype[f][0][0])==4)
                 if(i==0)              
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,4,j,k,f)];
                 else if(i==1)                
@@ -1037,7 +1062,7 @@ k=0;
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,(p->n[0])-4,j,k,f)];
                
 
-            if((p->boundtype[f][1])==4)
+            if((p->boundtype[f][1][0])==4)
                 if(j==0)               
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,4,k,f)];
                 else if(j==1)                
@@ -1049,7 +1074,7 @@ k=0;
 
 
 
-            if((p->boundtype[f][2])==4)
+            if((p->boundtype[f][2][0])==4)
                 if(k==0)               
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,j,4,f)];
                 else if(k==1)                
@@ -1059,7 +1084,7 @@ k=0;
                else if (k== ((p->n[2])-2))                
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,j,(p->n[2])-4,f)];
         #else
-        if((p->boundtype[f][0])==4)   
+        if((p->boundtype[f][0][0])==4)   
                 if(i==0)              
                     wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,3,j,f)];
                 else if(i==1)                
@@ -1070,7 +1095,7 @@ k=0;
                     wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,(p->n[0])-3,j,f)];
                
 
-            if((p->boundtype[f][1])==4)
+            if((p->boundtype[f][1][0])==4)
                 if(j==0)               
                   // wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,i,4,f)];
                   wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,i,3,f)];
@@ -1100,7 +1125,7 @@ k=0;
         #ifdef USE_SAC_3D
 
           k=ii[2];
-                      if((p->boundtype[f][dir])==4)
+                      if((p->boundtype[f][dir][0])==4)
                       {
                 if((i==0 || i==1) && dir==0)              
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,4-i,j,k,f)];             
@@ -1129,7 +1154,7 @@ k=0;
                
         #else
 
-                          if((p->boundtype[f][dir])==4)
+                          if((p->boundtype[f][dir][0])==4)
                           {
                 if((i==0 || i==1) && dir==0)              
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,4-i,j,k,f)];             
@@ -1167,7 +1192,7 @@ k=0;
           k=ii[2];
         #endif
 
-          if((p->boundtype[f][dir])==5)   
+          if((p->boundtype[f][dir][0])==5)   
                 if(i==0 || i==1  && dir==0)                
                   bp->fixed1[encodefixed13_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,j,k,f)];                
                 else if((i==((p->n[0])-1)) || (i==((p->n[0])-2)) && dir==0 )                
@@ -1200,7 +1225,7 @@ k=0;
           k=ii[2];
         #endif
 
-     if((p->boundtype[f][dir])==5)         
+     if((p->boundtype[f][dir][0])==5)         
                 if(i==0 || i==1  && dir==0)                
                   wt[encode3_MODID(p,i,j,k,f)]=bp->fixed1[encodefixed13_MODID(p,i,j,k,f)];                
                 else if((i==((p->n[0])-1)) || (i==((p->n[0])-2)) && dir==0 )                
@@ -1232,35 +1257,35 @@ j=ii[1];
 k=0;
         #ifdef USE_SAC_3D
           k=ii[2];
-          if((p->boundtype[f][dir])==0)   
+          if((p->boundtype[f][dir][0])==0)   
                 if((i==0 || i==1) && dir==0)                
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,(p->n[0])-4+i,j,k,f)];
              
                 else if(((i==((p->n[0])-1)) || (i==((p->n[0])-2))) && dir==0)                
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,4-(p->n[0])+i,j,k,f)];
 
-          if((p->boundtype[f][dir])==0)   
+          if((p->boundtype[f][dir][0])==0)   
                 if((j==0 || j==1) && dir==1)                
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,(p->n[1])-4+j,k,f)];
 
                 else if(((j==((p->n[1])-1)) || (j==((p->n[1])-2))) && dir==1)                 
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,4-(p->n[1])+j,k,f)];
 
-           if((p->boundtype[f][dir])==0)   
+           if((p->boundtype[f][dir][0])==0)   
                 if((k==0 || k==1) && dir==2)                
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,j,(p->n[2])-4+j,f)];
 
                 else if(((k==((p->n[2])-1)) || (k==((p->n[2])-2))) && dir==2)                 
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,j,4-(p->n[2])+k,f)];
        #else
-           if((p->boundtype[f][dir])==0)   
+           if((p->boundtype[f][dir][0])==0)   
                 if((i==0 || i==1) && dir==0)                
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,(p->n[0])-4+i,j,k,f)];
 
                 else if(((i==((p->n[0])-1)) || (i==((p->n[0])-2))) && dir==0)                
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,4-(p->n[0])+i,j,k,f)];
 
-           if((p->boundtype[f][dir])==0)   
+           if((p->boundtype[f][dir][0])==0)   
                 if((j==0 || j==1) && dir==1 )                
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,(p->n[1])-4+j,k,f)];
 
@@ -1282,7 +1307,7 @@ j=ii[1];
 k=0;
         #ifdef USE_SAC_3D
           k=ii[2];
-                    if((p->boundtype[f][dir])==6)   
+                    if((p->boundtype[f][dir][0])==6)   
                 if(i==0  && dir==0)              
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,4,j,k,f)];
                 else if(i==1 && dir==0)                
@@ -1293,7 +1318,7 @@ k=0;
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,(p->n[0])-4,j,k,f)];
                
 
-          if((p->boundtype[f][dir])==6)   
+          if((p->boundtype[f][dir][0])==6)   
                 if(j==0  && dir==1)               
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,4,k,f)];
                 else if(j==1  && dir==1)                
@@ -1305,7 +1330,7 @@ k=0;
 
 
 
-          if((p->boundtype[f][dir])==6)   
+          if((p->boundtype[f][dir][0])==6)   
                 if(k==0 && dir==2)               
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,j,4,f)];
                 else if(k==1 && dir==2)                
@@ -1315,7 +1340,7 @@ k=0;
                else if (k== ((p->n[2])-2) && dir==2)                
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,j,(p->n[2])-4,f)];
         #else
-        if((p->boundtype[f][dir])==6)   
+        if((p->boundtype[f][dir][0])==6)   
                 if(i==0  && dir==0)              
                     wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,3,j,f)];
                 else if(i==1  && dir==0)                
@@ -1326,7 +1351,7 @@ k=0;
                     wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,(p->n[0])-3,j,f)];
                
 
-          if((p->boundtype[f][dir])==6)   
+          if((p->boundtype[f][dir][0])==6)   
                 if(j==0  && dir==1)               
                   // wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,i,4,f)];
                   wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,i,3,f)];
@@ -1354,7 +1379,7 @@ j=ii[1];
 k=0;
         #ifdef USE_SAC_3D
           k=ii[2];
-          if((p->boundtype[f][dir])==7)   
+          if((p->boundtype[f][dir][0])==7)   
                 if(i==0  && dir==0)              
                     wt[encode3_MODID(p,i,j,k,f)]=-wt[encode3_MODID(p,4,j,k,f)];
                 else if(i==1 && dir==0)                
@@ -1365,7 +1390,7 @@ k=0;
                     wt[encode3_MODID(p,i,j,k,f)]=-wt[encode3_MODID(p,(p->n[0])-4,j,k,f)];
                
 
-          if((p->boundtype[f][dir])==7)   
+          if((p->boundtype[f][dir][0])==7)   
                 if(j==0  && dir==1)               
                     wt[encode3_MODID(p,i,j,k,f)]=-wt[encode3_MODID(p,i,4,k,f)];
                 else if(j==1  && dir==1)                
@@ -1377,7 +1402,7 @@ k=0;
 
 
 
-          if((p->boundtype[f][dir])==7)   
+          if((p->boundtype[f][dir][0])==7)   
                 if(k==0 && dir==2)               
                     wt[encode3_MODID(p,i,j,k,f)]=-wt[encode3_MODID(p,i,j,4,f)];
                 else if(k==1 && dir==2)                
@@ -1387,7 +1412,7 @@ k=0;
                else if (k== ((p->n[2])-2) && dir==2)                
                     wt[encode3_MODID(p,i,j,k,f)]=-wt[encode3_MODID(p,i,j,(p->n[2])-4,f)];
         #else
-           if((p->boundtype[f][dir])==7)     
+           if((p->boundtype[f][dir][0])==7)     
                 if(i==0  && dir==0)              
                     wt[fencode_MODID(p,i,j,f)]=-wt[fencode_MODID(p,3,j,f)];
                 else if(i==1  && dir==0)                
@@ -1398,7 +1423,7 @@ k=0;
                     wt[fencode_MODID(p,i,j,f)]=-wt[fencode_MODID(p,(p->n[0])-3,j,f)];
                
 
-          if((p->boundtype[f][dir])==7)   
+          if((p->boundtype[f][dir][0])==7)   
                 if(j==0  && dir==1)               
                   // wt[fencode_MODID(p,i,j,f)]=wt[fencode_MODID(p,i,4,f)];
                   wt[fencode_MODID(p,i,j,f)]=-wt[fencode_MODID(p,i,3,f)];
@@ -1427,35 +1452,35 @@ j=ii[1];
 k=0;
         #ifdef USE_SAC_3D
           k=ii[2];
-          if((p->boundtype[f][0])==0)   
+          if((p->boundtype[f][0][0])==0)   
                 if(i==0 || i==1 )                
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,(p->n[0])-4+i,j,k,f)];
              
                 else if((i==((p->n[0])-1)) || (i==((p->n[0])-2)))                
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,4-(p->n[0])+i,j,k,f)];
 
-          if((p->boundtype[f][1])==0)
+          if((p->boundtype[f][1][0])==0)
                 if(j==0 || j==1 )                
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,(p->n[1])-4+j,k,f)];
 
                 else if((j==((p->n[1])-1)) || (j==((p->n[1])-2)) )                 
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,4-(p->n[1])+j,k,f)];
                   
-          if((p->boundtype[f][2])==0)
+          if((p->boundtype[f][2][0])==0)
                 if(k==0 || k==1 )                
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,j,(p->n[2])-4+j,f)];
 
                 else if((k==((p->n[2])-1)) || (k==((p->n[2])-2)) )                 
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,j,4-(p->n[2])+k,f)];
        #else
-          if((p->boundtype[f][0])==0)
+          if((p->boundtype[f][0][0])==0)
                 if(i==0 || i==1 )                
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,(p->n[0])-4+i,j,k,f)];
 
                 else if((i==((p->n[0])-1)) || (i==((p->n[0])-2)))                
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,4-(p->n[0])+i,j,k,f)];
 
-           if((p->boundtype[f][0])==1)
+           if((p->boundtype[f][0][0])==1)
                 if(j==0 || j==1 )                
                   wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,(p->n[1])-4+j,k,f)];
 
@@ -1481,27 +1506,27 @@ k=0;
                 if(i<2 && j<2  && k<2)
                 {
                  if(i==j==k )
-                   if((p->boundtype[f][1])==0)
+                   if((p->boundtype[f][1][0])==0)
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,(p->n[1])-4+j,k,f)];
 
                 }
                 else if(i<2 && j>((p->n[1])-3)  &&  k<2)
                 {
                   if(i==(j-(p->n[1]))  && k==(j-(p->n[1])))
-                  if((p->boundtype[f][1])==0)                  
+                  if((p->boundtype[f][1][0])==0)                  
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,(p->n[0])-4+i,j,k,f)];                                     
              
                 }
                 else if(i>((p->n[0])-3) && j<2 && k<2)
                 {
-                     if((p->boundtype[f][0])==0)
+                     if((p->boundtype[f][0][0])==0)
                   if(j==(i-(p->n[0]))  && k==(i-(p->n[0])))                  
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,4-(p->n[0])+i,j,k,f)];                                    
            
                 }
                 else if(i>((p->n[0])-3) && j>((p->n[1])-3) && k<2)
                 {
-                     if((p->boundtype[f][1])==0)
+                     if((p->boundtype[f][1][0])==0)
                   if(i==j  && k==(i-(p->n[0])))   
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,4-(p->n[1])+j,k,f)];                                    
                                  
@@ -1509,26 +1534,26 @@ k=0;
                 }
                 else if(i<2 && j<2  && k>((p->n[2])-3))
                 {
-                     if((p->boundtype[f][2])==0)
+                     if((p->boundtype[f][2][0])==0)
                  if(i==j && i==(k-(p->n[2]))  )                 
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,j,(p->n[2])-4+k,f)];                                     
 
                 } 
                 else if(i>((p->n[0])-3) && j<2  && k>((p->n[2])-3))
                 {
-                     if((p->boundtype[f][0])==2)
+                     if((p->boundtype[f][0][0])==2)
                  if(i==k && j==(i-(p->n[0]))  )
                      wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,4-(p->n[0])+i,j,4-(p->n[2])+k,f)];   
                 }
                 else if(i<2 && j>((p->n[1])-3)  && k>((p->n[2])-3) )
                 {
-                     if((p->boundtype[f][2])==0)
+                     if((p->boundtype[f][2][0])==0)
                  if(j==k && i==(j-(p->n[1]))  )
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,4-(p->n[1])+j,4-(p->n[2])+k,f)]; 
                 } 
                 else if(i>((p->n[0])-3) && j>((p->n[1])-3)  && k>((p->n[2])-3) )
                 {
-                     if((p->boundtype[f][2])==0)
+                     if((p->boundtype[f][2][0])==0)
                  if(i==j==k  )
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,4-(p->n[0])+i,4-(p->n[1])+j,4-(p->n[2])+k,f)]; 
                 }   
@@ -1537,7 +1562,7 @@ k=0;
 
                if(i<2 && j<2)
                 {
-                      if((p->boundtype[f][0])==1)
+                      if((p->boundtype[f][0][0])==1)
                   if(i==j)
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,(p->n[1])-4+j,k,f)];
                   else              
@@ -1545,7 +1570,7 @@ k=0;
                 }
                 else if(i<2 && j>((p->n[1])-3))
                 {
-                     if((p->boundtype[f][0])==0)
+                     if((p->boundtype[f][0][0])==0)
                   if(i==(j-(p->n[1])))                  
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,(p->n[0])-4+i,j,k,f)];                                     
                   else                  
@@ -1553,7 +1578,7 @@ k=0;
                 }
                 else if(i>((p->n[0])-3) && j<2)
                 {
-                     if((p->boundtype[f][1])==0)
+                     if((p->boundtype[f][1][0])==0)
                   if((i-(p->n[0]))==j)                  
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,4-(p->n[0])+i,j,k,f)];                                    
                   else                  
@@ -1561,7 +1586,7 @@ k=0;
                 }
                 else if(i>((p->n[0])-3) && j>((p->n[1])-3))
                 {
-                     if((p->boundtype[f][1])==0)
+                     if((p->boundtype[f][1][0])==0)
                   if(i==j)                  
                     wt[encode3_MODID(p,i,j,k,f)]=wt[encode3_MODID(p,i,4-(p->n[1])+j,k,f)];                                    
                   else                  

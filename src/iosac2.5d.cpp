@@ -529,10 +529,11 @@ char *method=NULL;
        /*********************************************************************************************************/
 	for(int ii=0; ii<NVAR; ii++)
 	for(int idir=0; idir<NDIM; idir++)
+        for(int ibound=0; ibound<2; ibound++)
 	{
 	   p->it=-1;  //initialise fixed boundaries
 	   //printf("btype %d %d %d\n",idir,ii,p->boundtype[ii][idir]);
-	   if((p->boundtype[ii][idir])==5)  //period=0 mpi=1 mpiperiod=2  cont=3 contcd4=4 fixed=5 symm=6 asymm=7
+	   if((p->boundtype[ii][idir][ibound])==5)  //period=0 mpi=1 mpiperiod=2  cont=3 contcd4=4 fixed=5 symm=6 asymm=7
 	   {
 
 		       cuboundary(&p, &bp, &d_p, &d_bp, &d_state, &d_w, 0,idir,ii);
@@ -1121,15 +1122,18 @@ char *method=NULL;
 
 
 	   p->it=n+1;
+	 cuupdate(&p,&w,&wmod,&temp2,&state,&d_p,&d_w,&d_wmod,&d_wtemp2,  &d_state,n);
 
 
 	  #ifdef USE_MPI
-                  //mpisync();
+                  mpisync();
 		   cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order);
+                 mpisync();
 		   mpibound(NVAR, gmpiw0,gmpiw1,gmpiw2 ,p);
+mpisync();
 		   mpibound(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p);
 
-
+mpisync();
 
 		   cucopywfrommpiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order);	
 	   
@@ -1138,7 +1142,6 @@ char *method=NULL;
 
 
 
-	 cuupdate(&p,&w,&wmod,&temp2,&state,&d_p,&d_w,&d_wmod,&d_wtemp2,  &d_state,n);
 
 
 

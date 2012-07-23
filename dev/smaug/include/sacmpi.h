@@ -317,11 +317,12 @@ void ipe2iped(params *p)
     //ensure boundary set correctly 
     for(int ii=0; ii<NVAR; ii++)
     for(int idir=0; idir<NDIM; idir++)
+    for(int ibound=0; ibound<2; ibound++)
     {
-       if( ((p->boundtype[ii][idir])==0) && ((p->pnpe[idir])>0) )
-                                     p->boundtype[ii][idir]=2;
+       if( ((p->boundtype[ii][idir][ibound])==0) && ((p->pnpe[idir])>0) )
+                                     p->boundtype[ii][idir][ibound]=2;
        else if( ((p->mpiupperb[idir])==1)    ||  ((p->mpilowerb[idir])==1) )
-                                     p->boundtype[ii][idir]=1;
+                                     p->boundtype[ii][idir][ibound]=1;
     }
 
 
@@ -413,27 +414,46 @@ void mpisend(int nvar,real *var, int *ixmin, int *ixmax  ,int qipe,int iside, in
 		case 0:
 		   for(ivar=0; ivar<NVAR;ivar++)
 		     for(i1=0;i1<=1;i1++)
-		      for(i2=0;i2<p->n[1];i2++)
 		#ifdef USE_SAC3D
 			for(i3=0;i3<p->n[2];i3++)
 		#endif
+
+		      for(i2=0;i2<p->n[1];i2++)
 		      {
 			n++;
                         bound=i1+2*(iside>0);
 			 gmpisendbuffer[n]=var[sacencodempiw0 (p,i1, i2, i3, ivar,bound)];
+
+			/*if((p->ipe==0  ) && ivar==0 )
+			{
+			 //for(int i=0;i<nvar;i++)
+			   printf(" %d %d %d %lg ",bound,i1,i2,gmpisendbuffer[n]);
+			 printf("\n");
+			}*/
+
 		      }
 		break;
 		case 1:
 		   for(ivar=0; ivar<NVAR;ivar++)
-		     for(i1=0;i1<p->n[0];i1++)
-		      for(i2=0;i2<=1;i2++)
+                     for(i2=0;i2<=1;i2++)
 		#ifdef USE_SAC3D
 			for(i3=0;i3<p->n[2];i3++)
 		#endif
+
+		     for(i1=0;i1<p->n[0];i1++)
+		      
 		      {
 			n++;
                         bound=i2+2*(iside>0);
 			 gmpisendbuffer[n]=var[sacencodempiw1 (p,i1, i2, i3, ivar,bound)];
+
+			if((p->ipe==0  ) && ivar==0 )
+			{
+			 //for(int i=0;i<nvar;i++)
+			   printf(" %d %d %d %lg ",bound,i2,i1,gmpisendbuffer[n]);
+			 printf("\n");
+			}
+
 		      }
 
 		break;
@@ -441,9 +461,11 @@ void mpisend(int nvar,real *var, int *ixmin, int *ixmax  ,int qipe,int iside, in
 
 		#ifdef USE_SAC3D
 		   for(ivar=0; ivar<NVAR;ivar++)
+                     for(i3=0;i3<=1;i3++)
+                     for(i2=0;p->n[1];i2++)
 		     for(i1=0;i1<p->n[0];i1++)
-		      for(i2=0;p->n[1];i2++)		
-			for(i3=0;i3<=1;i3++)			
+		      		
+						
 		      {
 			n++;
                         bound=i3+2*(iside>0);
@@ -460,17 +482,12 @@ void mpisend(int nvar,real *var, int *ixmin, int *ixmax  ,int qipe,int iside, in
 
 
 
-/*if((p->ipe==0  ) && ivar==4 )
-{
- //for(int i=0;i<nvar;i++)
-   printf(" %d %d %g ",i1,i2,gmpisendbuffer[n]);
- printf("\n");
-}*/
 
-if(p->ipe==1  && dim==0)
-      printf("ipe %d send tag %d nb %d  to %d %d %d\n",p->ipe,10*(p->ipe)+iside,n,qipe,iside,dim);
+
+//if(p->ipe==1  && dim==0)
+//      printf("ipe %d send tag %d nb %d  to %d %d %d\n",p->ipe,10*(p->ipe)+iside,n,qipe,iside,dim);
    
-   comm.Rsend(gmpisendbuffer, n, MPI_DOUBLE_PRECISION, qipe, 10*(p->ipe)+iside);
+   comm.Rsend(gmpisendbuffer, n, MPI_DOUBLE_PRECISION, qipe, 100*(p->ipe)+10*dim+iside);
 
 
 }
@@ -529,7 +546,7 @@ gnmpirequest++;
 
 //gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(iside*gnmpibuffer),nrecv,MPI_DOUBLE_PRECISION,qipe,10*(p->ipe)+iside);
 //gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(iside*gnmpibuffer),nrecv,MPI_DOUBLE_PRECISION,qipe,MPI_ANY_TAG);
-gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(iside*gnmpibuffer),nrecv,MPI_DOUBLE_PRECISION,qipe,10*qipe+(iside==0?1:0));
+gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(iside*gnmpibuffer),nrecv,MPI_DOUBLE_PRECISION,qipe,100*qipe+10*dim+(iside==0?1:0));
 }
 
 
@@ -554,10 +571,11 @@ void mpibuffer2var(int iside,int nvar,real *var, int *ixmin, int *ixmax, int dim
 		case 0:
 		   for(ivar=0; ivar<NVAR;ivar++)
 		     for(i1=0;i1<=1;i1++)
-		      for(i2=0;i2<p->n[1];i2++)
 		#ifdef USE_SAC3D
 			for(i3=0;i3<p->n[2];i3++)
 		#endif
+		      for(i2=0;i2<p->n[1];i2++)
+
 		      {
 			n++;
                         bound=i1+2*(iside>0);
@@ -566,11 +584,13 @@ void mpibuffer2var(int iside,int nvar,real *var, int *ixmin, int *ixmax, int dim
 		break;
 		case 1:
 		   for(ivar=0; ivar<NVAR;ivar++)
-		     for(i1=0;i1<p->n[0];i1++)
-		      for(i2=0;i2<=1;i2++)
+                    for(i2=0;i2<=1;i2++)
 		#ifdef USE_SAC3D
 			for(i3=0;i3<p->n[2];i3++)
 		#endif
+		     for(i1=0;i1<p->n[0];i1++)
+		      
+
 		      {
 			n++;
                         bound=i2+2*(iside>0);
@@ -582,9 +602,9 @@ void mpibuffer2var(int iside,int nvar,real *var, int *ixmin, int *ixmax, int dim
 
 		#ifdef USE_SAC3D
 		   for(ivar=0; ivar<NVAR;ivar++)
-		     for(i1=0;i1<p->n[0];i1++)
-		      for(i2=0;p->n[1];i2++)		
 			for(i3=0;i3<=1;i3++)			
+		      for(i2=0;p->n[1];i2++)		
+		     for(i1=0;i1<p->n[0];i1++)
 		      {
 			n++;
                         bound=i3+2*(iside>0);
@@ -676,13 +696,13 @@ if((p->pnpe[0])>1)
    //   ixRMmax1,ixRMmax2,hpe,2)*/
 
    //printf("ipe %d  recv right (from left) %d recv left (from right neigh) %d\n",p->ipe,p->hpe,p->jpe);
-   if(((p->mpilowerb[0])==1) ||  ((p->boundtype[0][0])==0)||  ((p->boundtype[0][0])==2))
+   if(((p->mpilowerb[0])==1) ||  ((p->boundtype[0][0][0])==0)||  ((p->boundtype[0][0][0])==2))
 	mpirecvbuffer(nvar,ixrmmin,ixrmmax,p->hpe,0,0,p);
 
    //! receive left (1) boundary from right neighbor jpe
    //if(mpiupperB(1) .or. periodic)call mpirecvbuffer(nvar,ixLMmin1,ixLMmin2,&
    //   ixLMmax1,ixLMmax2,jpe,1)
-   if(((p->mpiupperb[0])==1) ||  ((p->boundtype[0][0])==0)||  ((p->boundtype[0][0])==2))
+   if(((p->mpiupperb[0])==1) ||  ((p->boundtype[0][0][0])==0)||  ((p->boundtype[0][0][0])==2))
              mpirecvbuffer(nvar,ixlmmin,ixlmmax,p->jpe,1,0,p);
 
 
@@ -695,14 +715,14 @@ if((p->pnpe[0])>1)
    //! Ready send left (1) boundary to left neighbor hpe
    //if(mpilowerB(1) .or. periodic)call mpisend(nvar,var,ixLMmin1,ixLMmin2,&
    //   ixLMmax1,ixLMmax2,hpe,1)
-   if(((p->mpilowerb[0])==1) ||  ((p->boundtype[0][0])==0)||  ((p->boundtype[0][0])==2))
-            mpisend(nvar,var1,ixlmmin,ixlmmax,p->hpe,1,0,p);
+   if(((p->mpilowerb[0])==1) ||  ((p->boundtype[0][0][0])==0)||  ((p->boundtype[0][0][0])==2))
+            mpisend(nvar,var1,ixlmmin,ixlmmax,p->hpe,0,0,p);
 
    //! Ready send right (2) boundary to right neighbor
    //if(mpiupperB(1) .or. periodic)call mpisend(nvar,var,ixRMmin1,ixRMmin2,&
    //   ixRMmax1,ixRMmax2,jpe,2)
-   if(((p->mpiupperb[0])==1) ||  ((p->boundtype[0][0])==0)||  ((p->boundtype[0][0])==2))
-             mpisend(nvar,var1,ixrmmin,ixrmmax,p->jpe,0,0,p);
+   if(((p->mpiupperb[0])==1) ||  ((p->boundtype[0][0][0])==0)||  ((p->boundtype[0][0][0])==2))
+             mpisend(nvar,var1,ixrmmin,ixrmmax,p->jpe,1,0,p);
 
    //! Wait for messages to arrive
    //call MPI_WAITALL(nmpirequest,mpirequests,mpistatus,ierrmpi)
@@ -712,12 +732,12 @@ if((p->pnpe[0])>1)
    //! Copy buffer received from right (2) physical cells into left ghost cells
    //if(mpilowerB(1) .or. periodic)call mpibuffer2var(2,nvar,var,ixLGmin1,&
    //   ixLGmin2,ixLGmax1,ixLGmax2)
-   if(((p->mpilowerb[0])==1) ||  ((p->boundtype[0][0])==0)||  ((p->boundtype[0][0])==2))
+   if(((p->mpilowerb[0])==1) ||  ((p->boundtype[0][0][0])==0)||  ((p->boundtype[0][0][0])==2))
              mpibuffer2var(1,nvar,var1,ixlgmin,ixlgmax,0,p);
    //! Copy buffer received from left (1) physical cells into right ghost cells
    //if(mpiupperB(1) .or. periodic)call mpibuffer2var(1,nvar,var,ixRGmin1,&
    //   ixRGmin2,ixRGmax1,ixRGmax2)
-   if(((p->mpiupperb[0])==1) ||  ((p->boundtype[0][0])==0)||  ((p->boundtype[0][0])==2))
+   if(((p->mpiupperb[0])==1) ||  ((p->boundtype[0][0][0])==0)||  ((p->boundtype[0][0][0])==2))
              mpibuffer2var(0,nvar,var1,ixrgmin,ixrgmax,0,p);    
   
  
@@ -762,12 +782,12 @@ if((p->pnpe[1])>1)
    //! receive right (2) boundary from left neighbor hpe
    //if(mpilowerB(1) .or. periodic)call mpirecvbuffer(nvar,ixRMmin1,ixRMmin2,&
    //   ixRMmax1,ixRMmax2,hpe,2)
-   if(((p->mpilowerb[1])==1) ||  ((p->boundtype[0][1])==0)||  ((p->boundtype[0][0])==2))
+   if(((p->mpilowerb[1])==1) ||  ((p->boundtype[0][1][0])==0)||  ((p->boundtype[0][0][0])==2))
              mpirecvbuffer(nvar,ixrmmin,ixrmmax,p->hpe,0,1,p);
    //! receive left (1) boundary from right neighbor jpe
    //if(mpiupperB(1) .or. periodic)call mpirecvbuffer(nvar,ixLMmin1,ixLMmin2,&
    //   ixLMmax1,ixLMmax2,jpe,1)
-   if(((p->mpiupperb[1])==1) ||  ((p->boundtype[0][1])==0)||  ((p->boundtype[0][0])==2))
+   if(((p->mpiupperb[1])==1) ||  ((p->boundtype[0][1][0])==0)||  ((p->boundtype[0][0][0])==2))
              mpirecvbuffer(nvar,ixlmmin,ixlmmax,p->jpe,1,1,p);
    //! Wait for all receives to be posted
    //call MPI_BARRIER(MPI_COMM_WORLD,ierrmpi)
@@ -775,13 +795,13 @@ if((p->pnpe[1])>1)
    //! Ready send left (1) boundary to left neighbor hpe
    //if(mpilowerB(1) .or. periodic)call mpisend(nvar,var,ixLMmin1,ixLMmin2,&
    //   ixLMmax1,ixLMmax2,hpe,1)
-   if(((p->mpilowerb[1])==1) ||  ((p->boundtype[0][1])==0)||  ((p->boundtype[0][0])==2))
-             mpisend(nvar,var2,ixlmmin,ixlmmax,p->hpe,1,1,p);
+   if(((p->mpilowerb[1])==1) ||  ((p->boundtype[0][1][0])==0)||  ((p->boundtype[0][0][0])==2))
+             mpisend(nvar,var2,ixlmmin,ixlmmax,p->hpe,0,1,p);
    //! Ready send right (2) boundary to right neighbor
    //if(mpiupperB(1) .or. periodic)call mpisend(nvar,var,ixRMmin1,ixRMmin2,&
    //   ixRMmax1,ixRMmax2,jpe,2)
-   if(((p->mpiupperb[1])==1) ||  ((p->boundtype[0][1])==0)||  ((p->boundtype[0][0])==2))
-             mpisend(nvar,var2,ixrmmin,ixrmmax,p->jpe,0,1,p);
+   if(((p->mpiupperb[1])==1) ||  ((p->boundtype[0][1][0])==0)||  ((p->boundtype[0][0][0])==2))
+             mpisend(nvar,var2,ixrmmin,ixrmmax,p->jpe,1,1,p);
    //! Wait for messages to arrive
    //call MPI_WAITALL(nmpirequest,mpirequests,mpistatus,ierrmpi)
    request.Waitall(gnmpirequest,gmpirequest);
@@ -789,12 +809,12 @@ if((p->pnpe[1])>1)
    //! Copy buffer received from right (2) physical cells into left ghost cells
    //if(mpilowerB(1) .or. periodic)call mpibuffer2var(2,nvar,var,ixLGmin1,&
    //   ixLGmin2,ixLGmax1,ixLGmax2)
-   if(((p->mpilowerb[1])==1) ||  ((p->boundtype[0][1])==0)||  ((p->boundtype[0][0])==2))
+   if(((p->mpilowerb[1])==1) ||  ((p->boundtype[0][1][0])==0)||  ((p->boundtype[0][0][0])==2))
              mpibuffer2var(1,nvar,var2,ixlgmin,ixlgmax,1,p);
    //! Copy buffer received from left (1) physical cells into right ghost cells
    //if(mpiupperB(1) .or. periodic)call mpibuffer2var(1,nvar,var,ixRGmin1,&
    //   ixRGmin2,ixRGmax1,ixRGmax2)
-   if(((p->mpiupperb[1])==1) ||  ((p->boundtype[0][1])==0)||  ((p->boundtype[0][0])==2))
+   if(((p->mpiupperb[1])==1) ||  ((p->boundtype[0][1][0])==0)||  ((p->boundtype[0][0][0])==2))
              mpibuffer2var(0,nvar,var2,ixrgmin,ixrgmax,1,p);
 }
 
@@ -837,12 +857,12 @@ if((p->pnpe[2])>1)
    //! receive right (2) boundary from left neighbor hpe
    //if(mpilowerB(1) .or. periodic)call mpirecvbuffer(nvar,ixRMmin1,ixRMmin2,&
    //   ixRMmax1,ixRMmax2,hpe,2)
-   if(((p->mpilowerb[2])==1) ||  ((p->boundtype[0][2])==0)||  ((p->boundtype[0][0])==2))
+   if(((p->mpilowerb[2])==1) ||  ((p->boundtype[0][2][0])==0)||  ((p->boundtype[0][0][0])==2))
              mpirecvbuffer(nvar,ixrmmin,ixrmmax,p->hpe,0,2,p);
    //! receive left (1) boundary from right neighbor jpe
    //if(mpiupperB(1) .or. periodic)call mpirecvbuffer(nvar,ixLMmin1,ixLMmin2,&
    //   ixLMmax1,ixLMmax2,jpe,1)
-   if(((p->mpiupperb[2])==1) ||  ((p->boundtype[0][2])==0)||  ((p->boundtype[0][0])==2))
+   if(((p->mpiupperb[2])==1) ||  ((p->boundtype[0][2][0])==0)||  ((p->boundtype[0][0][0])==2))
              mpirecvbuffer(nvar,ixlmmin,ixlmmax,p->jpe,1,2,p);
    //! Wait for all receives to be posted
    //call MPI_BARRIER(MPI_COMM_WORLD,ierrmpi)
@@ -850,13 +870,13 @@ if((p->pnpe[2])>1)
    //! Ready send left (1) boundary to left neighbor hpe
    //if(mpilowerB(1) .or. periodic)call mpisend(nvar,var,ixLMmin1,ixLMmin2,&
    //   ixLMmax1,ixLMmax2,hpe,1)
-   if(((p->mpilowerb[2])==1) ||  ((p->boundtype[0][2])==0)||  ((p->boundtype[0][0])==2))
-             mpisend(nvar,var3,ixlmmin,ixlmmax,p->hpe,1,2,p);
+   if(((p->mpilowerb[2])==1) ||  ((p->boundtype[0][2][0])==0)||  ((p->boundtype[0][0][0])==2))
+             mpisend(nvar,var3,ixlmmin,ixlmmax,p->hpe,0,2,p);
    //! Ready send right (2) boundary to right neighbor
    //if(mpiupperB(1) .or. periodic)call mpisend(nvar,var,ixRMmin1,ixRMmin2,&
    //   ixRMmax1,ixRMmax2,jpe,2)
-   if(((p->mpiupperb[2])==1) ||  ((p->boundtype[0][2])==0)||  ((p->boundtype[0][0])==2))
-             mpisend(nvar,var3,ixrmmin,ixrmmax,p->jpe,0,2,p);
+   if(((p->mpiupperb[2])==1) ||  ((p->boundtype[0][2][0])==0)||  ((p->boundtype[0][0][0])==2))
+             mpisend(nvar,var3,ixrmmin,ixrmmax,p->jpe,1,2,p);
    //! Wait for messages to arrive
    //call MPI_WAITALL(nmpirequest,mpirequests,mpistatus,ierrmpi)
    request.Waitall(gnmpirequest,gmpirequest);
@@ -864,12 +884,12 @@ if((p->pnpe[2])>1)
    //! Copy buffer received from right (2) physical cells into left ghost cells
    //if(mpilowerB(1) .or. periodic)call mpibuffer2var(2,nvar,var,ixLGmin1,&
    //   ixLGmin2,ixLGmax1,ixLGmax2)
-   if(((p->mpilowerb[2])==1) ||  ((p->boundtype[0][2])==0)||  ((p->boundtype[0][0])==2))
+   if(((p->mpilowerb[2])==1) ||  ((p->boundtype[0][2][0])==0)||  ((p->boundtype[0][0][0])==2))
              mpibuffer2var(1,nvar,var3,ixlgmin,ixlgmax,2,p);
    //! Copy buffer received from left (1) physical cells into right ghost cells
    //if(mpiupperB(1) .or. periodic)call mpibuffer2var(1,nvar,var,ixRGmin1,&
    //   ixRGmin2,ixRGmax1,ixRGmax2)
-   if(((p->mpiupperb[2])==1) ||  ((p->boundtype[0][2])==0)||  ((p->boundtype[0][0])==2))
+   if(((p->mpiupperb[2])==1) ||  ((p->boundtype[0][2][0])==0)||  ((p->boundtype[0][0][0])==2))
              mpibuffer2var(0,nvar,var3,ixrgmin,ixrgmax,2,p);
 }
 

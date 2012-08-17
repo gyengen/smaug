@@ -610,14 +610,17 @@ char *method=NULL;
 
 
 	  #ifdef USE_MPI
+    int iii[3];
+    int ip,jp;
+    iii[2]=0;
 
     cuinitmgpubuffers(&p, &w, &wmod, &temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,   &gmpiw0, &gmpiwmod0,   &gmpiw1, &gmpiwmod1,   &gmpiw2, &gmpiwmod2, &d_p, &d_w, &d_wmod,&d_wtemp2,  &d_gmpivisc0,  &d_gmpivisc1,  &d_gmpivisc2, &d_gmpiw0, &d_gmpiwmod0, &d_gmpiw1, &d_gmpiwmod1, &d_gmpiw2, &d_gmpiwmod2);
 
                   gpusync();
-		   cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order);
-    int iii[3];
-    int ip,jp;
-    iii[2]=0;
+          for(int idir=0; idir<NDIM; idir++)
+          //for(int idir=0; idir<=0; idir++)
+          {
+		   cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,idir,  order);
 
 
 /*if((p)->ipe==2) 
@@ -649,7 +652,7 @@ for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++)
  
 
                  gpusync();
-		   mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2 ,p);
+		   mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2 ,p,idir);
 
 
    /* if((p)->ipe==2 )
@@ -669,7 +672,8 @@ for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++)
 		 
  gpusync();
 
-		   cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order);
+		   cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order,idir);
+          }
 
 
 
@@ -690,7 +694,7 @@ for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++)
 
          cuupdatehostwd(&p,&wd,&wmod,&temp2,&state,&d_gp[igid],&d_gwd[igid],&d_gwmod[igid],&d_gwtemp2[igid],  &d_gstate[igid],n);
 
-  /*if((p)->ipe==0)
+  if((p)->ipe==0)
   { 
    printf("ipe0 pos results after \n");
      
@@ -703,7 +707,7 @@ for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++)
                printf("delx %d %d %16.20f  %16.20f\n",iii[0],iii[1],wd[(fencode3_test(p,iii,pos1))],wd[(fencode3_test(p,iii,pos2))]);
 
               }
-   }*/
+   }
 
 
  
@@ -818,15 +822,7 @@ printf("grid initialised\n");
 
         ;//initgrid(&p,&w,&wnew,&state,&wd,&d_p,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
 
-	#ifdef USE_MULTIGPU
-	  //initialise the mpi used memory locations
-	 //cuinitmgpubuffers(&p, &w, &wmod, &temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,   &gmpiw0, &gmpiwmod0,   &gmpiw1, &gmpiwmod1,   &gmpiw2, &gmpiwmod2, &d_p, &d_w, &d_wmod,&d_wtemp2,  &d_gmpivisc0,  &d_gmpivisc1,  &d_gmpivisc2, &d_gmpiw0, &d_gmpiwmod0, &d_gmpiw1, &d_gmpiwmod1, &d_gmpiw2, &d_gmpiwmod2);
-	 cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, 0);
 
-
-
-
-	#endif
        /*********************************************************************************************************/
        /* End of section initialising the configuration */
        /*********************************************************************************************************/
@@ -858,24 +854,39 @@ printf("grid initialised\n");
 	   }
 	}
 
-        p->it=0;  
+        p->it=0;
+
+
+	#ifdef USE_MULTIGPU
+
+         for(int idir=0; idir<NDIM; idir++)
+         {
+	  //initialise the mpi used memory locations
+	 //cuinitmgpubuffers(&p, &w, &wmod, &temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,   &gmpiw0, &gmpiwmod0,   &gmpiw1, &gmpiwmod1,   &gmpiw2, &gmpiwmod2, &d_p, &d_w, &d_wmod,&d_wtemp2,  &d_gmpivisc0,  &d_gmpivisc1,  &d_gmpivisc2, &d_gmpiw0, &d_gmpiwmod0, &d_gmpiw1, &d_gmpiwmod1, &d_gmpiw2, &d_gmpiwmod2);
+	 cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,0, idir);
+
+
+
+
+	
 
 	#ifdef USE_MPI
                        
-	 		  mpibound(NVAR, gmpiw0,gmpiw1,gmpiw2 ,p);		
+	 		  mpibound(NVAR, gmpiw0,gmpiw1,gmpiw2 ,p,idir);		
 	#endif
 	#ifdef USE_MPI
            
            gpusync();
            
            
-	   mpibound(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p);
+	   mpibound(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p,idir);
           
            gpusync();
            
-	   cucopywfrommpiw(&p,&w, &wmod,      &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,0);
+	   cucopywfrommpiw(&p,&w, &wmod,      &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,0,idir);
 	#endif
-
+          }//end loop over directions for messaging
+     #endif  // end of #ifdef USE_MULTIGPU
         ;//cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_w, 0,0,0);
 	;//cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, 0,0,0);
 
@@ -1447,14 +1458,17 @@ printf("grid initialised\n");
 
 		   cuadvance(&p,&d_p,&d_wmod,&d_w,order);
 		   #ifdef USE_MPI
-			cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order);
+        for(int idir=0; idir<NDIM; idir++)
+         {
+			cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order,idir);
 
 
-		   mpibound(NVAR, gmpiw0,gmpiw1,gmpiw2 ,p);
-		   mpibound(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p);
+		   mpibound(NVAR, gmpiw0,gmpiw1,gmpiw2 ,p,idir);
+		   mpibound(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p,idir);
 
 
-			cucopywfrommpiw(&p,&w, &wmod,   &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order);
+			cucopywfrommpiw(&p,&w, &wmod,   &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order,idir);
+          }
 
 		   #endif
 		   cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, orderb,0,0);
@@ -1477,17 +1491,19 @@ printf("grid initialised\n");
 
 
 	  #ifdef USE_MPI
+        for(int idir=0; idir<NDIM; idir++)
+        {
                   gpusync();
-		   cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order);
+		   cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order,idir);
 
 
 
 
-    if((p)->ipe==3 && ((p)->it)==2)
-    {
-         printf("ipe3 mpiwmod \n");
-         for(int i=0; i<4*((p)->n[0]);i++)
-             printf("%d %lg \n",i, (gmpiwmod1[i]));
+    //if((p)->ipe==3 && ((p)->it)==2)
+    //{
+    //     printf("ipe3 mpiwmod \n");
+    //     for(int i=0; i<4*((p)->n[0]);i++)
+    //         printf("%d %lg \n",i, (gmpiwmod1[i]));
          //printf("\n");
 
 
@@ -1495,19 +1511,19 @@ printf("grid initialised\n");
          for(int i=0; i<4*((p)->n[0]);i++)
              printf("%d %lg ",i,(gmpiw0[i]));
          printf("\n");*/
-     }
+    // }
 
 
                  gpusync();
-		   mpibound(NVAR, gmpiw0,gmpiw1,gmpiw2 ,p);
+		   mpibound(NVAR, gmpiw0,gmpiw1,gmpiw2 ,p,idir);
 		   gpusync();
-		   mpibound(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p);
+		   mpibound(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p,idir);
 
 		 
  gpusync();
 
-		   cucopywfrommpiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order);	
-	   
+		   cucopywfrommpiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order,idir);	
+	   }
 	  #endif
 
 

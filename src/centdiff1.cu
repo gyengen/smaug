@@ -277,6 +277,8 @@ __global__ void centdiff1init_parallel(struct params *p, struct state *s, real *
                         {
                             dwn1[fencode3_cd1(p,ii,f)]=0.0;
                                wd[fencode3_cd1(p,ii,flux)]=0.0;
+
+ 
                          }
 
    
@@ -491,6 +493,7 @@ __global__ void centdiff1af_parallel(struct params *p, struct state *s, real *w,
      #endif
 
 
+
                         switch(dir)
                         {
                          case 0:
@@ -524,6 +527,20 @@ __global__ void centdiff1af_parallel(struct params *p, struct state *s, real *w,
                          break;
                         }
 
+
+               /* if( ii[1] <(nj) && ii[0]<(ni) )
+                           if(p->ipe==0 && ii[0]==124  && (p->it)==2)
+                           {
+                               wmod[fencode3_cd1(p,ii,rho)]=0.225;
+ 			       w[fencode3_cd1(p,ii,rho)]=0.225;
+                           }*/
+
+               /* if( ii[1] <(nj) && ii[0]<(ni) )
+                           if(p->ipe==3 && ii[1]==3  && (p->it)==2)
+                           {
+                               wmod[fencode3_cd1(p,ii,rho)]=0.22114;
+ 			       w[fencode3_cd1(p,ii,rho)]=0.22114;
+                           }*/
 	
 
   __syncthreads();

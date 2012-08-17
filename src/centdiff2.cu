@@ -660,6 +660,53 @@ __global__ void centdiff2c_parallel(struct params *p, struct state *s, real *w, 
                      #endif*/
 
 
+
+
+
+                /*if( ii[1] <(nj) && ii[0]<(ni) )
+                           if(p->ipe==1 && ii[1]==125  && (p->it)==2)
+                           {
+                               wmod[fencode3_cd2(p,ii,rho)]=0.22113;
+ 			       w[fencode3_cd2(p,ii,rho)]=0.22113;
+                           }*/
+
+               /* if( ii[1] <(nj) && ii[0]<(ni) )
+                           if(p->ipe==3 && ii[1]==3  && (p->it)==2)
+                           {
+                               wmod[fencode3_cd2(p,ii,rho)]=0.22118;
+ 			       w[fencode3_cd2(p,ii,rho)]=0.22118;
+                           }*/
+
+                /*if( ii[1] <(nj) && ii[0]<(ni) )
+                           if(p->ipe==1 && ii[1]==127  && (p->it)==2)
+                           {
+                               wmod[fencode3_cd2(p,ii,rho)]=wmod[fencode_cd2(p,ii[0],ii[1]-4,rho)];
+ 			       w[fencode3_cd2(p,ii,rho)]= w[fencode_cd2(p,ii[0],ii[1]-4,rho)];
+                           }
+
+                if( ii[1] <(nj) && ii[0]<(ni) )
+                           if(p->ipe==3 && ii[1]==0  && (p->it)==2)
+                           {
+                               wmod[fencode3_cd2(p,ii,rho)]=wmod[fencode_cd2(p,ii[0],ii[1]+4,rho)];
+ 			       w[fencode3_cd2(p,ii,rho)]= w[fencode_cd2(p,ii[0],ii[1]+4,rho)];
+                           }
+
+                if( ii[1] <(nj) && ii[0]<(ni) )
+                           if(p->ipe==1 && ii[1]==126  && (p->it)==2)
+                           {
+                               wmod[fencode3_cd2(p,ii,rho)]=wmod[fencode_cd2(p,ii[0],ii[1]-4,rho)];
+ 			       w[fencode3_cd2(p,ii,rho)]= w[fencode_cd2(p,ii[0],ii[1]-4,rho)];
+                           }
+
+                if( ii[1] <(nj) && ii[0]<(ni) )
+                           if(p->ipe==3 && ii[1]==1  && (p->it)==2)
+                           {
+                               wmod[fencode3_cd2(p,ii,rho)]=wmod[fencode_cd2(p,ii[0],ii[1]+4,rho)];
+ 			       w[fencode3_cd2(p,ii,rho)]= w[fencode_cd2(p,ii[0],ii[1]+4,rho)];
+                           }*/
+
+
+
 __syncthreads();
 
 
@@ -802,6 +849,14 @@ __global__ void source_parallel(struct params *p, struct state *s, real *w, real
                      #ifdef USE_USERSOURCE
                                addsourceterms2_cd2(dwn1,wd,wmod+ordero*NVAR*dimp,p,s,ii,f,dir); 
                      #endif
+
+
+
+
+
+
+
+	
 
 
 __syncthreads();

@@ -347,6 +347,8 @@ int writevacgatherconfig(char *name,int n,params p, meta md, real *w, real *wd, 
   int status=0;
   int i1,j1,k1,ifield;
   int ni,nj,nk;
+  int istart,jstart,kstart;
+  int ifin,jfin,kfin;
   
   char tcfg[300];  
   char configfile[300];
@@ -356,11 +358,25 @@ int writevacgatherconfig(char *name,int n,params p, meta md, real *w, real *wd, 
   int ibuffer[5];
   char ext[3];
 
-  ni=p.n[0];
-  nj=p.n[1];
+ istart=2*((p.noghost)>0);
+ jstart=2*((p.noghost)>0);
+ kstart=2*((p.noghost)>0);
+
+
+
+  ni=p.n[0];//-4*((p.noghost)>0);
+  nj=p.n[1];//-4*((p.noghost)>0);
+
+ ifin=ni-2*((p.noghost)>0);
+ jfin=nj-2*((p.noghost)>0);
+
     #ifdef USE_SAC_3D
-  nk=p.n[2];
+  nk=p.n[2];//-4*((p.noghost)>0);
+  kfin=nk+2*((p.noghost)>0);
     #endif
+
+
+
 
  
    sprintf(configfile,"%s",name);
@@ -435,8 +451,8 @@ int writevacgatherconfig(char *name,int n,params p, meta md, real *w, real *wd, 
       //line3:
       //*   nx()        - the grid dimensions      (ndim integers)
       //sprintf(buffer,"%ld %ld\n",ni,nj);
-      ibuffer[0]=ni;
-      ibuffer[1]=nj;
+      ibuffer[0]=ni-4*((p.noghost)>0);
+      ibuffer[1]=nj-4*((p.noghost)>0);
 
       //ibuffer[0]=128;
       //ibuffer[1]=256;
@@ -444,7 +460,7 @@ int writevacgatherconfig(char *name,int n,params p, meta md, real *w, real *wd, 
       fwrite(ibuffer,sizeof(int)*2,1,fdt);
     #endif
     #ifdef USE_SAC_3D
-      ibuffer[2]=nk;
+      ibuffer[2]=nk-4*((p.noghost)>0);
       fwrite(ibuffer,sizeof(int)*3,1,fdt);
     #endif
       //*line4:
@@ -487,13 +503,13 @@ int writevacgatherconfig(char *name,int n,params p, meta md, real *w, real *wd, 
    #endif 
 
     #ifdef USE_SAC_3D
-   for( k1=0;k1<nk;k1++)
+   for( k1=kstart;k1<kfin;k1++)
     #endif
-for( j1=0;j1<nj;j1++)
+for( j1=jstart;j1<jfin;j1++)
   
 	{
 //energyb,rhob,b1b,b2b         
-       for( i1=0;i1<ni;i1++)     
+       for( i1=istart;i1<ifin;i1++)     
       {
           //if(ifield==2) printf("density %lG ",w[(j1*ni+i1)]);
                if(ifield==0)
@@ -932,12 +948,14 @@ int readconfig(char *cfgfile, params p, meta md, real *w)
 }
 
 
-int readasciivacconfig(char *cfgfile, params p, meta md,state *st, real *w, real *wd, char **hlines)
+int readasciivacconfig(char *cfgfile, params p, meta md,state *st, real *w, real *wd, char **hlines, int mode)
 {
   int status=0;
   int i;
   int i1,j1,k1;
   int ni,nj,nk;
+  int iif,jf,kf;
+  int is,js,ks;
   int shift;
   real x,y,z,val;
   char cfgfilename[300];
@@ -947,12 +965,36 @@ int readasciivacconfig(char *cfgfile, params p, meta md,state *st, real *w, real
 
    ni=p.n[0];
    nj=p.n[1];
+   is=0;
+   js=0;
+   ks=0;
+
+   iif=ni;
+   jf=nj;
+
    sprintf(cfgfilename,"%s",cfgfile);
    #ifdef USE_SAC_3D
    nk=p.n[2];
+   kf=nk;
    #endif
+
+    if(mode==0)
+    {
+       #ifdef USE_MULTIGPU
+		if((p.pipe[0])==0) iif=ni -2;
+		if((p.pipe[0])==((p.pnpe[0])-1)) is=2;
+		if((p.pipe[1])==0) jf=nj-2;
+		if((p.pipe[1])==((p.pnpe[1])-1)) js=2;
+
+	  #ifdef USE_SAC_3D
+		if((p.pipe[2])==0) kf=nk-2;
+		if((p.pipe[2])==((p.pnpe[2])-1)) ks=2;
+          #endif
+	
+        #endif
+    }
   
-printf("reading\n");
+printf("reading %s %d %d\n",cfgfile,ni,nj);
    FILE *fdt=fopen(cfgfilename,"r+");
 //FILE *fdt=fopen("zero1_np0201_001.ini","r+");
    //char **hlines;
@@ -969,14 +1011,14 @@ fscanf(fdt,"%d %lG %d %d %d\n",&(st->it),&(st->t),&ii1,&ii2,&ii3);
      freadl(fdt, &hlines[i]);
      printf("%s\n", hlines[i]);
    }
-printf("read header\n");
+printf("read header %d\n" , p.ipe);
   //fscanf(fdt,"%f",&val);
  //printf("%f",val);
 #ifdef USE_SAC_3D
-for( k1=0;k1<(nk);k1++)
+for( k1=ks;k1<(kf);k1++)
 #endif
-for( j1=0;j1<(nj);j1++)
-for( i1=0;i1<(ni);i1++)
+for( j1=js;j1<(jf);j1++)
+for( i1=is;i1<(iif);i1++)
 
    
 	     
@@ -1015,7 +1057,7 @@ for( i1=0;i1<(ni);i1++)
   return status;
 }
 
-int writeasciivacconfig(char *cfgfile, params p, meta md, real *w,real *wd, char **hlines, state st)
+int writeasciivacconfig(char *cfgfile, params p, meta md, real *w,real *wd, char **hlines, state st, int mode)
 {
   int status=0;
   int i;
@@ -1024,9 +1066,22 @@ int writeasciivacconfig(char *cfgfile, params p, meta md, real *w,real *wd, char
   int shift;
   real x,y,val;
 
+  int iif,jf,kf;
+  int is,js,ks;
+  is=0;
+  js=0;
+  ks=0;
+
    ni=p.n[0];
    nj=p.n[1];
 
+   iif=ni;
+   jf=nj;
+    
+	  #ifdef USE_SAC_3D
+            nk=p.n[2];
+            kf=nk;
+	#endif
    
    //char **hlines;
    char *line;
@@ -1036,6 +1091,22 @@ int writeasciivacconfig(char *cfgfile, params p, meta md, real *w,real *wd, char
 
 sprintf(configfile,"%s",cfgfile);
 
+if(mode==0)
+{
+      #ifdef USE_MULTIGPU
+		if((p.pipe[0])==0) iif=ni -2;
+		if((p.pipe[0])==((p.pnpe[0])-1)) is=2;
+		if((p.pipe[1])==0) jf=nj-2;
+		if((p.pipe[1])==((p.pnpe[1])-1)) js=2;
+
+	  #ifdef USE_SAC_3D
+		if((p.pipe[2])==0) kf=nk-2;
+		if((p.pipe[2])==((p.pnpe[2])-1)) ks=2;
+          #endif
+	
+        #endif
+}
+
 
  #ifdef USE_MPI
    char ext[3];
@@ -1044,6 +1115,9 @@ sprintf(configfile,"%s",cfgfile);
    sprintf(tcfg,"%s",pch1);
    pch2 = strtok (NULL,".");
    sprintf(ext,"%s",pch2);
+
+
+ 
 
    //printf("here1 %s \n",tcfg);
    //sprintf(ext,"%s",pch2);
@@ -1096,7 +1170,8 @@ sprintf(configfile,"%s",cfgfile);
       sprintf(configfile,"%s_%d.out",cfgfile,st.it);
   #endif
 
-
+//printf("%s %d", configfile,p.ipe);
+//return 0;
   FILE *fdt=fopen(configfile,"a+");
 
 
@@ -1123,6 +1198,9 @@ sprintf(configfile,"%s",cfgfile);
      printf("%d %g %d 6 %d\n", st.it,st.t,NDIM,NVAR);
    #endif
 
+    
+
+
    for(i=2;i<=4;i++)
    {
      fprintf(fdt,"%s\n", hlines[i]);
@@ -1132,10 +1210,10 @@ sprintf(configfile,"%s",cfgfile);
 
 
 #ifdef USE_SAC_3D
-for( k1=0;k1<(nk);k1++)
+for( k1=ks;k1<(kf);k1++)
 #endif
-   for( j1=0;j1<(nj);j1++)
-	     for( i1=0;i1<(nj);i1++)
+   for( j1=js;j1<(jf);j1++)
+	     for( i1=is;i1<(iif);i1++)
              {
                          x=(1+i1)*(p.dx[0]);
                          y=(1+j1)*(p.dx[1]);
@@ -1191,6 +1269,8 @@ int createconfigsegment(params p,  real *wnew,real *wdnew, real *w,real *wd)
   int oni,onj,onk;
 
    k1=0;
+
+   #ifdef USE_MULTIGPU
    ni=p.n[0]/(p.pnpe[0]);
    nj=p.n[1]/(p.pnpe[1]);
    oni=p.n[0];
@@ -1243,6 +1323,8 @@ int oshift;
        // printf("\n");
 
    }
+
+  #endif
   //free(hlines);
   return status;
 }
@@ -1258,6 +1340,9 @@ int gathersegment(params p,  real *wnew,real *wdnew, real *w,real *wd)
   real x,y,val;
 
   int oni,onj,onk;
+
+
+   #ifdef USE_MULTIGPU
 
    k1=0;
    ni=p.n[0];
@@ -1301,7 +1386,7 @@ int oshift;
 
               }
 
-
+  #endif
   //free(hlines);
   return status;
 }

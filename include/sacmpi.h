@@ -681,7 +681,7 @@ comm.Barrier();
 //   ixRMmax2, ixLGmin1,ixLGmin2,ixLGmax1,ixLGmax2, ixRGmin1,ixRGmin2,ixRGmax1,&
 //   ixRGmax2
 //logical :: periodic
-void mpibound(int nvar,  real *var1, real *var2, real *var3, params *p)
+void mpibound(int nvar,  real *var1, real *var2, real *var3, params *p, int idir)
 {
    int i;
 
@@ -695,7 +695,7 @@ void mpibound(int nvar,  real *var1, real *var2, real *var3, params *p)
 
 //printf("to here1 %d\n");
 
-if((p->pnpe[0])>1)
+if((p->pnpe[0])>1   && idir==0)
 {
    gnmpirequest=0;
    for(i=0; i<2; i++)
@@ -784,7 +784,7 @@ if((p->pnpe[0])>1)
 }
 
  comm.Barrier();
-if((p->pnpe[1])>1)
+if((p->pnpe[1])>1     && idir==1)
 {
   gnmpirequest=0;  
   for(i=0; i<2; i++)
@@ -859,7 +859,7 @@ if((p->pnpe[1])>1)
 
 #ifdef USE_SAC3D
  comm.Barrier();
-if((p->pnpe[2])>1)
+if((p->pnpe[2])>1      && idir==2)
 {
   gnmpirequest=0;  
   for(i=0; i<2; i++)

@@ -610,17 +610,13 @@ char *method=NULL;
 
 
 	  #ifdef USE_MPI
-    int iii[3];
-    int ip,jp;
-    iii[2]=0;
 
     cuinitmgpubuffers(&p, &w, &wmod, &temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,   &gmpiw0, &gmpiwmod0,   &gmpiw1, &gmpiwmod1,   &gmpiw2, &gmpiwmod2, &d_p, &d_w, &d_wmod,&d_wtemp2,  &d_gmpivisc0,  &d_gmpivisc1,  &d_gmpivisc2, &d_gmpiw0, &d_gmpiwmod0, &d_gmpiw1, &d_gmpiwmod1, &d_gmpiw2, &d_gmpiwmod2);
 
                   gpusync();
-          for(int idir=0; idir<NDIM; idir++)
-          //for(int idir=0; idir<=0; idir++)
-          {
-		   cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,idir,  order);
+    int iii[3];
+    int ip,jp;
+    iii[2]=0;
 
 
 /*if((p)->ipe==2) 
@@ -649,11 +645,26 @@ for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++)
         // printf("\n");
      }*/
 
- 
+ 		   cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order,0);
+                   gpusync();
+		   mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2 ,p,0);
+ 		   gpusync();
+		   cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order,0);
+gpusync();
+ 		   cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order,1);
+                   gpusync();
+		   mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2 ,p,1);
+ 		   gpusync();
+		   cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order,1);
+#ifdef USE_SAC3D
+gpusync();
+ 		   cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order,2);
+                   gpusync();
+		   mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2 ,p,2);
+ 		   gpusync();
+		   cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order,2);
 
-                 gpusync();
-		   mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2 ,p,idir);
-
+#endif
 
    /* if((p)->ipe==2 )
     {
@@ -670,10 +681,6 @@ for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++)
         // printf("\n");
      }*/
 		 
- gpusync();
-
-		   cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order,idir);
-          }
 
 
 
@@ -694,9 +701,9 @@ for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++)
 
          cuupdatehostwd(&p,&wd,&wmod,&temp2,&state,&d_gp[igid],&d_gwd[igid],&d_gwmod[igid],&d_gwtemp2[igid],  &d_gstate[igid],n);
 
-  if((p)->ipe==0)
+  if((p)->ipe==3)
   { 
-   printf("ipe0 pos results after \n");
+   printf("ipe2 pos results after \n");
      
         for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++)
          for(iii[1]=0; iii[1]<((p)->n[1]); iii[1]++)
@@ -854,27 +861,14 @@ printf("grid initialised\n");
 	   }
 	}
 
-        p->it=0;
-
-
-	#ifdef USE_MULTIGPU
-
-         for(int idir=0; idir<NDIM; idir++)
-         {
-	  //initialise the mpi used memory locations
-	 //cuinitmgpubuffers(&p, &w, &wmod, &temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,   &gmpiw0, &gmpiwmod0,   &gmpiw1, &gmpiwmod1,   &gmpiw2, &gmpiwmod2, &d_p, &d_w, &d_wmod,&d_wtemp2,  &d_gmpivisc0,  &d_gmpivisc1,  &d_gmpivisc2, &d_gmpiw0, &d_gmpiwmod0, &d_gmpiw1, &d_gmpiwmod1, &d_gmpiw2, &d_gmpiwmod2);
-	 cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,0, idir);
-
-
-
-
-	
+        p->it=0;  
 
 	#ifdef USE_MPI
-                       
+        for(int idir=0; idir<NDIM;idir++)
+        {
+          	 cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, 0,idir);
+             
 	 		  mpibound(NVAR, gmpiw0,gmpiw1,gmpiw2 ,p,idir);		
-	#endif
-	#ifdef USE_MPI
            
            gpusync();
            
@@ -884,9 +878,10 @@ printf("grid initialised\n");
            gpusync();
            
 	   cucopywfrommpiw(&p,&w, &wmod,      &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,0,idir);
+           gpusync();
+         }
 	#endif
-          }//end loop over directions for messaging
-     #endif  // end of #ifdef USE_MULTIGPU
+
         ;//cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_w, 0,0,0);
 	;//cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, 0,0,0);
 
@@ -1458,8 +1453,8 @@ printf("grid initialised\n");
 
 		   cuadvance(&p,&d_p,&d_wmod,&d_w,order);
 		   #ifdef USE_MPI
-        for(int idir=0; idir<NDIM; idir++)
-         {
+                           for(int idir=0; idir<NDIM;idir++)
+        {
 			cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order,idir);
 
 
@@ -1468,7 +1463,7 @@ printf("grid initialised\n");
 
 
 			cucopywfrommpiw(&p,&w, &wmod,   &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order,idir);
-          }
+      }
 
 		   #endif
 		   cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, orderb,0,0);
@@ -1491,19 +1486,15 @@ printf("grid initialised\n");
 
 
 	  #ifdef USE_MPI
-        for(int idir=0; idir<NDIM; idir++)
-        {
-                  gpusync();
-		   cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order,idir);
 
 
 
 
-    //if((p)->ipe==3 && ((p)->it)==2)
-    //{
-    //     printf("ipe3 mpiwmod \n");
-    //     for(int i=0; i<4*((p)->n[0]);i++)
-    //         printf("%d %lg \n",i, (gmpiwmod1[i]));
+    if((p)->ipe==3 && ((p)->it)==2)
+    {
+         printf("ipe3 mpiwmod \n");
+         for(int i=0; i<4*((p)->n[0]);i++)
+             printf("%d %lg \n",i, (gmpiwmod1[i]));
          //printf("\n");
 
 
@@ -1511,8 +1502,12 @@ printf("grid initialised\n");
          for(int i=0; i<4*((p)->n[0]);i++)
              printf("%d %lg ",i,(gmpiw0[i]));
          printf("\n");*/
-    // }
+     }
 
+        for(int idir=0; idir<NDIM;idir++)
+        {
+                  gpusync();
+		   cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order,idir);
 
                  gpusync();
 		   mpibound(NVAR, gmpiw0,gmpiw1,gmpiw2 ,p,idir);
@@ -1523,7 +1518,8 @@ printf("grid initialised\n");
  gpusync();
 
 		   cucopywfrommpiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order,idir);	
-	   }
+   }
+	   
 	  #endif
 
 
@@ -1670,7 +1666,7 @@ free(d_gbp);
 		writesimulation_(elist.id,newsimfile,elist.port,elist.server);
 	#endif
 	#ifdef USE_MPI
-           mgpufinalize(p);
+          ;// mgpufinalize(p);
         #endif
 
 		return 0;

@@ -152,7 +152,7 @@ p->hyperdifmom=0.0;
 p->readini=1.0;
 p->cfgsavefrequency=1;
 p->noghost=0;
-
+p->fullgridini=1;
 p->xmax[0]=xmax;
 p->xmax[1]=ymax;
 p->nt=nt;

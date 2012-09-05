@@ -701,26 +701,30 @@ gpusync();
 
          cuupdatehostwd(&p,&wd,&wmod,&temp2,&state,&d_gp[igid],&d_gwd[igid],&d_gwmod[igid],&d_gwtemp2[igid],  &d_gstate[igid],n);
 
-  if((p)->ipe==3)
-  { 
-   printf("ipe2 pos results after \n");
-     
-        for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++)
-         for(iii[1]=0; iii[1]<((p)->n[1]); iii[1]++)
-          
-             {
-               //if(iii[0]==0)
- 		
-               printf("delx %d %d %16.20f  %16.20f\n",iii[0],iii[1],wd[(fencode3_test(p,iii,pos1))],wd[(fencode3_test(p,iii,pos2))]);
-
-              }
-   }
-
+ 
 
  
 	//initgrid(&p,&w,&wnew,&state,&wd,&d_p,&d_gw[igid],&d_wnew,&d_wmod, &d_dwn1,  &d_gwd[igid], &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
 	initgrid(&p,&w,&wnew,&state,&wd,&d_gp[igid],&d_gw[igid],&d_gwnew[igid],&d_gwmod[igid], &d_gdwn1[igid],  &d_gwd[igid], &d_gstate[igid],&d_gwtemp[igid],&d_gwtemp1[igid],&d_gwtemp2[igid]);
 printf("grid initialised\n");
+
+
+ if((p)->ipe==0)
+  { 
+   printf("ipe3 pos results after \n");
+          for(iii[1]=0; iii[1]<((p)->n[1]); iii[1]++)    
+        	for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++)       
+             {
+               //if(iii[0]==0)
+ 		
+               ;//printf("delx %d %d %16.20f  %16.20f\n",iii[0],iii[1],wd[(fencode3_test(p,iii,pos1))],wd[(fencode3_test(p,iii,pos2))]);
+
+              }
+   }
+
+
+
+
         #ifdef USE_GPUD
 
          }
@@ -826,8 +830,20 @@ printf("grid initialised\n");
 
 
 
+      #ifndef USE_MULTIGPU
+   int iii[2];
 
-        ;//initgrid(&p,&w,&wnew,&state,&wd,&d_p,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
+        initgrid(&p,&w,&wnew,&state,&wd,&d_p,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
+  /* for(iii[1]=0; iii[1]<((p)->n[1]); iii[1]++)
+     for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++)                
+             {
+               //if(iii[0]==0)
+ 		
+               printf("delx %d %d %16.20f  %16.20f\n",iii[0],iii[1],wd[(fencode3_test(p,iii,delx1))],wd[(fencode3_test(p,iii,delx2))]);
+
+              }*/
+
+      #endif
 
 
        /*********************************************************************************************************/
@@ -888,7 +904,7 @@ printf("grid initialised\n");
        /*********************************************************************************************************/
        /* End of section initialising the configuration */
        /*********************************************************************************************************/
-	printf("after cuinit %d\n",p->ipe);
+	//printf("after cuinit %d\n",p->ipe);
 
 
        
@@ -1607,7 +1623,7 @@ printf("grid initialised\n");
        /*********************************************************************************************************/
 
          //cufinish(&p,&w,&wnew,&state,&d_p,&d_bp,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
-         printf("at cufinish end here %d\n",p->ipe);
+         //printf("at cufinish end here %d\n",p->ipe);
          #ifdef USE_GPUD
          for(igid=0; igid<(p->npe); igid++)
          {

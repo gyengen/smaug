@@ -1998,7 +1998,7 @@ checkErrors_i("initgrid memory allocation");
    dimp=(((*p)->n[0]))*(((*p)->n[1]))*(((*p)->n[2]));
 #endif      
     kp=0;
-   // printf("called initgrid %d\n",(*p)->ipe);
+    //printf("called initgrid %d\n",(*p)->ipe);
     
     #ifdef USE_GPUD
       if(((*p)->ipe)==0)
@@ -2082,7 +2082,20 @@ checkErrors_i("initgrid memory allocation");
 		     break;			
 		     #endif
 	     }
+
+
       }	
+
+
+   /* if((*p)->ipe==3   ) 
+        for(ii[1]=1; ii[1]<((*p)->n[1])+1; ii[1]++)                                                            
+        for(ii[0]=1; ii[0]<((*p)->n[0])+1; ii[0]++)    
+           {
+                      ip=ii[0];
+                        jp=ii[1];
+                         printf("ii0, ii1 %d %d %16.20f %16.20f\n",ip,jp, ttemp2[encode3p2_i(*p,ip,jp,kpo,tmpnui)],ttemp2[(encode3p2_i(*p,ip,jp,kpo,tmpnui1))]);
+
+            }*/
 
 
   	
@@ -2096,10 +2109,10 @@ checkErrors_i("initgrid memory allocation");
 	    {
 		     case 0:
                        ixmax=((*p)->n[0])+1;//ixGmax1+1; 
-                       ixmin=((*p)->n[0])+1;//ixmin1=ixGmax1+1                      
+                       ixmin=((*p)->n[0])-1;//ixmin1=ixGmax1+1                      
 
                       #ifdef USE_MULTIGPU
-			if(((*p)->mpiupperb[dir])==1) ixmin=((*p)->n[0])+1;//ixGmax1+1;
+			if(((*p)->fullgridini)==1    ||   ((*p)->mpiupperb[dir])==1) ixmin=((*p)->n[0])+1;//ixGmax1+1;
                       #endif
 
                        ixe=ixmin-1; 
@@ -2128,6 +2141,9 @@ checkErrors_i("initgrid memory allocation");
                                                        }
                                                        ii1[0]=ixe;
                                                        ii2[0]=ixf; 
+
+ 
+
                                                        ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))])-(abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
 						      //ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+abs(ixe-ix))* (wda[fencode3_i(*p,ii1,pos1+dir1)]);
 						  }
@@ -2139,10 +2155,10 @@ checkErrors_i("initgrid memory allocation");
                       //lower layers
 
                        ixmin=0;//ixmin1=ixGmin1-1;
-                       ixmax=1;//ixmax1=ixGmin1-1 
+                       ixmax=2;//ixmax1=ixGmin1-1 
 
                      #ifdef USE_MULTIGPU
-			if(((*p)->mpilowerb[dir])==1) ixmax=0;
+			if(((*p)->fullgridini)==1    ||  ((*p)->mpilowerb[dir])==1) ixmax=0;
                       #endif
 
                   
@@ -2168,10 +2184,23 @@ checkErrors_i("initgrid memory allocation");
                                                          ii2[dir2]=ii[dir2];
                                                        }
                                                        ii1[0]=ixe;
-                                                       ii2[0]=ixf; 
+                                                       ii2[0]=ixf;
+
+
+
+
+ 
     ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))])-(abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
 // ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]= (ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))])+ (ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
    // qx(ix,ixmin2:ixmax2,jdim)=(1+abs(ixe-ix))*qx(ixe,ixmin2:ixmax2,jdim)- abs(ixe-ix) *qx(ixf,ixmin2:ixmax2,jdim)
+
+
+//		if((*p)->ipe==0   && ii[1]==0) 
+//                         printf("ii0, ii1 %d %d %16.20f %16.20f %d %d %d %d %d  %d %d %d %d\n",ip,jp, ttemp2[encode3p2_i(*p,ip,jp,kpo,tmpnui)],ttemp2[(encode3p2_i(*p,ip,jp,kpo,tmpnui1))],dir1,ixe,ixf,ixmin,ixmax,ii1[0],ii1[1],ii2[0],ii2[1]);
+
+
+
+
 
 						  }
 
@@ -2180,10 +2209,10 @@ checkErrors_i("initgrid memory allocation");
 	
 		     case 1:
                        ixmax=((*p)->n[1])+1;//ixGmax1+1; 
-                       ixmin=((*p)->n[1])+1;//ixmin1=ixGmax1+1                      
+                       ixmin=((*p)->n[1])-1;//ixmin1=ixGmax1+1                      
 
                       #ifdef USE_MULTIGPU
-			if(((*p)->mpiupperb[dir])==1) ixmin=((*p)->n[1])+1;//ixGmax1+1;
+			if(((*p)->fullgridini)==1    ||  ((*p)->mpiupperb[dir])==1) ixmin=((*p)->n[1])+1;//ixGmax1+1;
                       #endif
                      
                        ixe=ixmin-1; 
@@ -2212,6 +2241,11 @@ checkErrors_i("initgrid memory allocation");
                                                        }
                                                        ii1[1]=ixe;
                                                        ii2[1]=ixf; 
+
+
+
+
+
 						       ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))])-(abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
 						      //ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+abs(ixe-ix))* (wda[fencode3_i(*p,ii1,pos1+dir1)]);
 						  }
@@ -2223,10 +2257,10 @@ checkErrors_i("initgrid memory allocation");
                       //lower layers
 
                        ixmin=0;//ixmin1=ixGmin1-1;
-                       ixmax=1;//ixmax1=ixGmin1-1 
+                       ixmax=2;//ixmax1=ixGmin1-1 
 
                      #ifdef USE_MULTIGPU
-			if(((*p)->mpilowerb[dir])==1) ixmax=0;
+			if(((*p)->fullgridini)==1    ||  ((*p)->mpilowerb[dir])==1) ixmax=0;
                       #endif
                 
                        ixe=ixmax+1; 
@@ -2252,7 +2286,20 @@ checkErrors_i("initgrid memory allocation");
                                                        }
                                                        ii1[1]=ixe;
                                                        ii2[1]=ixf; 
+
+
+
+                                                        
+
 						       ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))])-(abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
+//write(*,*) jdim,ixe,ixf,ix,ixmin1,ixmax1,ixmin2,ixmax2, qx(ixmin1:ixmax1,ix,jdim),qx(ixmin1:ixmax1,&
+//                   ixe,jdim),qx(ixmin1:ixmax1,ixf,jdim)
+//if((*p)->ipe==0   && ii[0]==0)
+//                                                             printf("ixe, ix %d %d %d %d %d %d %16.20f %16.20f %16.20f\n",dir1,ixe,ixf,ix,ixmin,ixmax, ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)],ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))],ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
+//if((*p)->ipe==0   && ii[0]==0)
+//                                                             printf("ixe, ix %d %d %d %d %d %d %16.20f %16.20f %16.20f\n",dir1,ixe,ixf,ix,ixmin,ixmax, ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)],ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))],ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
+
+
 						  }
 
 				}
@@ -2265,7 +2312,7 @@ checkErrors_i("initgrid memory allocation");
 		     #ifdef USE_SAC_3D
 		     case 2:
                        ixmax=((*p)->n[2])+1;//ixGmax1+1; 
-                       ixmin=((*p)->n[2])+1;//ixmin1=ixGmax1+1                      
+                       ixmin=((*p)->n[2])-1;//ixmin1=ixGmax1+1                      
 
                       #ifdef USE_MULTIGPU
 			if(((*p)->mpiupperb[dir])==1) ixmin=((*p)->n[2])+1;//ixGmax1+1;
@@ -2310,10 +2357,10 @@ checkErrors_i("initgrid memory allocation");
                       //lower layers
 
                        ixmin=0;//ixmin1=ixGmin1-1;
-                       ixmax=1;//ixmax1=ixGmin1-1 
+                       ixmax=2;//ixmax1=ixGmin1-1 
 
                      #ifdef USE_MULTIGPU
-			if(((*p)->mpilowerb[dir])==1) ixmax=0;
+			if(((*p)->fullgridini)==1    ||  ((*p)->mpilowerb[dir])==1) ixmax=0;
                       #endif
                    
                        ixe=ixmax+1; 
@@ -2354,7 +2401,43 @@ checkErrors_i("initgrid memory allocation");
       }	
 
 
+kp=0;
 
+     for(dir=0;dir<NDIM;dir++)
+        for(ii[0]=0; ii[0]<((*p)->n[0]); ii[0]++)
+           for(ii[1]=0; ii[1]<((*p)->n[1]); ii[1]++)
+		#ifdef USE_SAC_3D
+		   for(ii[2]=0; ii[2]<((*p)->n[2]); ii[2]++)
+		#endif
+                {
+                        ip=ii[0]+1;
+                        jp=ii[1]+1;
+         		     #ifdef USE_SAC_3D
+                       kp=ii[2]+1;
+                     #endif                   
+                       
+	    switch(dir)
+	    {
+		     case 0:
+	                 (wda[fencode3_i(*p,ii,pos1)])=ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui)];
+                      //  if(ip==1)
+                      //  printf("delx 0 %d %d %16.20f  %16.20f \n",ii[0],ii[1],wda[(encode3_i(*p,ip-1,jp-1,kp,delx1))],wda[(encode3_i(*p,ip-1,jp-1,kp,delx2))]);
+		     break;
+	
+		     case 1:
+			  (wda[(fencode3_i(*p,ii,pos2))])=ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui1)];
+//if(ip==1)
+                 //       printf("delx 1 %d %d %16.20f  %16.20f \n",ii[0],ii[1],wda[(encode3_i(*p,ip-1,jp-1,kp,delx1))],wda[(encode3_i(*p,ip-1,jp-1,kp,delx2))]);
+
+		     break;
+		         
+		     #ifdef USE_SAC_3D
+		     case 2:
+			  (wda[(fencode3_i(*p,ii,pos3))])=ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui2)];
+		     break;			
+		     #endif
+	     }
+      }	
 
 
 
@@ -2417,58 +2500,23 @@ checkErrors_i("initgrid memory allocation");
 printf("dx=%g dy=%g\n",(*p)->dx[0], (*p)->dx[1] );
 
 
-kp=0;
 
-     for(dir=0;dir<NDIM;dir++)
-        for(ii[0]=0; ii[0]<((*p)->n[0]); ii[0]++)
-           for(ii[1]=0; ii[1]<((*p)->n[1]); ii[1]++)
-		#ifdef USE_SAC_3D
-		   for(ii[2]=0; ii[2]<((*p)->n[2]); ii[2]++)
-		#endif
-                {
-                        ip=ii[0]+1;
-                        jp=ii[1]+1;
-         		     #ifdef USE_SAC_3D
-                       kp=ii[2]+1;
-                     #endif                   
-                       
-	    switch(dir)
-	    {
-		     case 0:
-	                 (wda[fencode3_i(*p,ii,pos1)])=ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui)];
-                      //  if(ip==1)
-                      //  printf("delx 0 %d %d %16.20f  %16.20f \n",ii[0],ii[1],wda[(encode3_i(*p,ip-1,jp-1,kp,delx1))],wda[(encode3_i(*p,ip-1,jp-1,kp,delx2))]);
-		     break;
-	
-		     case 1:
-			  (wda[(fencode3_i(*p,ii,pos2))])=ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui1)];
-//if(ip==1)
-                 //       printf("delx 1 %d %d %16.20f  %16.20f \n",ii[0],ii[1],wda[(encode3_i(*p,ip-1,jp-1,kp,delx1))],wda[(encode3_i(*p,ip-1,jp-1,kp,delx2))]);
-
-		     break;
-		         
-		     #ifdef USE_SAC_3D
-		     case 2:
-			  (wda[(fencode3_i(*p,ii,pos3))])=ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui2)];
-		     break;			
-		     #endif
-	     }
-      }	
 
      kp=0;
 
-    if((*p)->ipe==2)
-     for(dir=0;dir<NDIM;dir++)
-        for(ii[0]=0; ii[0]<((*p)->n[0])+2; ii[0]++)
-           for(ii[1]=0; ii[1]<((*p)->n[1])+2; ii[1]++)
-             {
+   // if((*p)->ipe==3)
+    // for(dir=0;dir<NDIM;dir++)
+//for(ii[1]=0; ii[1]<((*p)->n[1])+2; ii[1]++)
+        //for(ii[0]=0; ii[0]<((*p)->n[0])+2; ii[0]++)
+           
+            // {
 
-                        ip=ii[0];
-                        jp=ii[1];
-                if(ii[0]==0)
-               ;// printf("delx 0 %d %d %16.20f  %16.20f  %16.20f  %16.20f \n",ii[0],ii[1],wda[(fencode3_i(*p,ii,pos1))],wda[(fencode3_i(*p,ii,pos2))],wda[(fencode3_i(*p,ii,delx1))],wda[(fencode3_i(*p,ii,delx2))]);
-
-              }
+              //          ip=ii[0];
+              //          jp=ii[1];
+                //if(ii[0]==0)
+              //  printf("delx %d %d %16.20f  %16.20f  %16.20f  %16.20f \n",ii[0],ii[1],wda[(fencode3_i(*p,ii,pos1))],wda[(fencode3_i(*p,ii,pos2))],wda[(fencode3_i(*p,ii,delx1))],wda[(fencode3_i(*p,ii,delx2))]);
+//printf("ttemp2 %d %d %16.20f  %16.20f  \n",ii[0],ii[1],ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui)],ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui1)]);
+            //  }
 
   //  cudaMemcpy(*d_w, *w, NVAR*dimp*sizeof(real), cudaMemcpyHostToDevice);
   //  cudaMemcpy(*d_wd, *wd, NDERV*dimp*sizeof(real), cudaMemcpyHostToDevice);

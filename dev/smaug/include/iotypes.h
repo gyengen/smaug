@@ -87,6 +87,7 @@ struct params {
 	int n[NDIM];
 	int ng[NDIM];
         int npgp[NDIM];
+        int fullgridini;
 
         real hdmean;
         real hdmax;

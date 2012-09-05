@@ -311,6 +311,11 @@ void ipe2iped(params *p)
 (p->mpilowerb[0])=(p->pipe[0])>0;
 (p->mpilowerb[1])=(p->pipe[1])>0;
 
+
+  if(p->ipe==0)
+    for(int i=0; i<2;i++)
+      printf("mpibc %d %d %d %d\n",i,p->pipe[i],p->mpiupperb[i],p->mpilowerb[i]);
+
 #endif
 
 

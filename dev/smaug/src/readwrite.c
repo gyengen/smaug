@@ -1011,7 +1011,7 @@ fscanf(fdt,"%d %lG %d %d %d\n",&(st->it),&(st->t),&ii1,&ii2,&ii3);
      freadl(fdt, &hlines[i]);
      printf("%s\n", hlines[i]);
    }
-printf("read header %d\n" , p.ipe);
+//printf("read header %d\n" , p.ipe);
   //fscanf(fdt,"%f",&val);
  //printf("%f",val);
 #ifdef USE_SAC_3D

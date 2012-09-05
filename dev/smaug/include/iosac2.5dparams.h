@@ -10,11 +10,11 @@ int ngk=2;
 #ifdef USE_SAC
 //vac ozt
 int ni;
-ni=124;    //OZT tests
+ni=122;    //OZT tests
 ni=ni+2*ngi;
 //ni=512;
 //real xmax = 6.2831853;  
-real xmax=1.0/2;
+real xmax=1.0;
 real dx = xmax/(ni);
 #endif
 
@@ -23,7 +23,7 @@ real dx = xmax/(ni);
 // Define the y domain
 #ifdef USE_SAC
 //vac ozt
-int nj = 124;  //OZT tests
+int nj = 122;  //OZT tests
 //int nj=2;  //BW test
 nj=nj+2*ngj;
 //nj=512;
@@ -151,8 +151,8 @@ p->divbfix=0.0;
 p->hyperdifmom=0.0;
 p->readini=1.0;
 p->cfgsavefrequency=1;
-
-
+p->noghost=0;
+p->fullgridini=1;
 p->xmax[0]=xmax;
 p->xmax[1]=ymax;
 p->nt=nt;
@@ -180,11 +180,13 @@ p->chyp[rho]=0.02;
 
 
 
-#ifdef USE_MPI
+#ifdef USE_MULTIGPU
 //number of procs in each dim mpi only
 p->pnpe[0]=2;
 p->pnpe[1]=2;
 p->pnpe[2]=1;
+
+p->npe=4;
 #endif
 
 

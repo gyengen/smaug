@@ -114,6 +114,8 @@ __global__ void update_parallel(struct params *p, struct state *s, real *w, real
 	{
             
                   w[fencode3_u(p,iia,f)]=wmod[fencode3_u(p,iia,f)];
+                          //   if(p->ipe==0    && f==rho)
+                          //      printf("wmod,w %d %d %lg %lg\n",iia[0],iia[1],wmod[fencode3_u(p,iia,f)],w[fencode3_u(p,iia,f)]);
 
 	}
 
@@ -174,7 +176,10 @@ int cuupdate(struct params **p, real **w, real **wmod,real **wtemp2, struct stat
    int numBlocks = (dimp+numThreadsPerBlock-1) / numThreadsPerBlock;
   // cudaMemcpy(*p, *d_p, sizeof(struct params), cudaMemcpyHostToDevice);
 cudaMemcpy(*d_p, *p, sizeof(struct params), cudaMemcpyHostToDevice);
-     update_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,*d_state,*d_w,*d_wmod);
+
+//no longer necessary as w field no longer used
+//just do a memcpy at end of this call
+ //    update_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,*d_state,*d_w,*d_wmod);
 	    //printf("called update\n"); 
    // cudaThreadSynchronize();
 //following comments removed from if def pragmas  if
@@ -267,7 +272,8 @@ cudaMemcpy(*d_p, *p, sizeof(struct params), cudaMemcpyHostToDevice);
          // free(wdt);
 #else
 
-    cudaMemcpy(*w, *d_w, NVAR*dimp*sizeof(real), cudaMemcpyDeviceToHost);
+    //cudaMemcpy(*w, *d_w, NVAR*dimp*sizeof(real), cudaMemcpyDeviceToHost);
+    cudaMemcpy(*wmod, *d_wmod, NVAR*dimp*sizeof(real), cudaMemcpyDeviceToHost);
 
 #endif
 

@@ -1567,7 +1567,7 @@ __global__ void computedervfields_parallel(struct params *p,   real *wmod, real 
     jp=iindex/ni;
    ip=iindex-(jp*ni);
 #endif     
-
+int dir=0;
 
 
 
@@ -1587,7 +1587,6 @@ if(order == 0)
        if(ii[0]<p->n[0] && ii[1]<p->n[1])
      #endif
 	{		
-
                for(int f=vel1; f<=pkb; f++)
                         wd[fencode3_cdf(p,ii,f)]=0; 
 		#ifdef USE_SAC_3D
@@ -1598,6 +1597,19 @@ if(order == 0)
 		  for(int f=rho; f<=b2; f++)
                   	wmod[fencode3_cdf(p,ii,f)+dimp*NVAR]=wmod[fencode3_cdf(p,ii,f)]; 
 		#endif               
+
+
+
+ for(int field=rho;field<=rho ; field++)
+if(  (p->ipe)==0  && ((p)->it)==1 && ( isnan(wmod[fencode3_cdf(p,ii,field)])|| wmod[fencode3_cdf(p,ii,field)]==0 ))
+//if(  /*(p->ipe)==0  &&*/ (  wmod[fencode3_cdf(p,ii,field)]==0 ))
+       { 
+    				printf("nant %d %d %d %d %lg %lg \n",ii[0],ii[1],field,dir, wmod[fencode3_cdf(p,ii,rho)],wmod[fencode3_cdf(p,ii,field)+dimp*NVAR] );
+;//wmod[fencode3_cdf(p,ii,rho)]=0.221049;
+;//wmod[fencode3_cdf(p,ii,field)+dimp*NVAR]=0.221049;
+}
+
+
 
         }
 

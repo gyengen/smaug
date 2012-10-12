@@ -30,8 +30,8 @@ LD_FLAGS =	-g
 #use -DUSE_IOME to enable IOME
 #CUDACCFLAGS = --ptxas-options=-v -maxrregcount=32 --device-emulation   -DUSE_REAL -DUSE_SAC -DUSE_SHOCKVISC  -DADIABHYDRO -DUSE_VAC -DD1D -DUSE_IOME -DUSE_USERSOURCE -DUSE_SAC_3D -DUSE_DORDER3
 #compiling with  -arch sm_13 enables double precision to be used
-CUDACCFLAGS = --ptxas-options=-v -arch sm_20  -maxrregcount=32 -DUSE_SAC  -DUSE_MPI
-CCFLAGS = -DUSE_SAC -DD1D -DUSE_MPI
+CUDACCFLAGS = --ptxas-options=-v -arch sm_20  -maxrregcount=32 -DUSE_SAC  -DUSE_MULTIGPU -DUSE_MPI
+CCFLAGS = -DUSE_SAC -DD1D -DUSE_MULTIGPU -DUSE_MPI
 
 
 

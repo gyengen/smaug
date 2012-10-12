@@ -715,8 +715,8 @@ for( j1=0;j1<nj;j1++)
                 w[(k1*ni*nj+j1*ni+i1)+(ni*nj*nk*(ifield-3))]=dbuffer[0];
     #else
                 w[(j1*ni+i1)+(ni*nj*(ifield-2))]=dbuffer[0]; 
-              if(ifield==2)
-                printf("%g ",w[(j1*ni+i1)+(ni*nj*(ifield-2))]);             
+              //if(ifield==2)
+              //  printf("%g ",w[(j1*ni+i1)+(ni*nj*(ifield-2))]);             
     #endif
 
                
@@ -735,8 +735,8 @@ for( j1=0;j1<nj;j1++)
 
 
         } 
-         if(ifield==2)
-        printf("\n");    
+        // if(ifield==2)
+       // printf("\n");    
       }
 
       // printf("read bin vac read fields\n");
@@ -1033,8 +1033,8 @@ for( i1=is;i1<(iif);i1++)
                          shift=(j1*ni+i1);
                          fscanf(fdt,"%lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG %lG\n",&wd[shift+(ni*nj*pos1)],&wd[shift+(ni*nj*pos2)],&w[shift],&w[shift+(ni*nj)],&w[shift+(ni*nj*2)],&w[shift+(ni*nj*3)],&w[shift+(ni*nj*4)],&w[shift+(ni*nj*5)],&w[shift+(ni*nj*6)],&w[shift+(ni*nj*7)],&w[shift+(ni*nj*8)],&w[shift+(ni*nj*9)]);
 
-//if(p.ipe==0)
-//printf("density %lG %lG %lG \n",x,y,w[shift]);
+//if(p.ipe==0  && w[shift]<=0)
+//printf("density %lG %lG %lG \n",wd[shift+(ni*nj*pos1)],wd[shift+(ni*nj*pos1)],w[shift]);
 
 
 #endif

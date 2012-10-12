@@ -86,6 +86,11 @@ ot:
 	cp ../models/init_user.cu.ot ../src/init_user.cu
 	cp ../models/boundary.cu.ot ../src/boundary.cu
 	cp ../models/usersource.cu.default ../src/usersource.cu
+ot_mpi:
+	cp ../models/iosac2.5dparams.h.ot_mpi ../include/iosac2.5dparams.h
+	cp ../models/init_user.cu.ot_mpi ../src/init_user.cu
+	cp ../models/boundary.cu.ot_mpi ../src/boundary.cu
+	cp ../models/usersource.cu.default ../src/usersource.cu
 kink1:
 	cp ../models/iosac2.5d_params.h.kink1 ../include/iosac2.5dparams.h
 	cp ../models/init_user.cu.kink1 ../src/init_user.cu

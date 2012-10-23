@@ -69,11 +69,11 @@ int cuboundary(struct params **p, struct bparams **bp,struct params **d_p, struc
  dim3 dimBlock(dimblock, 1);
 
 int numBlocks = ((dimproduct_b(*p)+numThreadsPerBlock-1)) / numThreadsPerBlock;
-if(p->boundtype[field][0]==0)
+if((*p)->boundtype[field][0]==0)
     boundary_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,*d_bp,*d_s, *d_wmod, order,0,field);
 
     cudaThreadSynchronize();
-if(p->boundtype[field][1]==0)
+if((*p)->boundtype[field][1]==0)
     boundary_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,*d_bp,*d_s, *d_wmod, order,1,field);
     cudaThreadSynchronize();
 }

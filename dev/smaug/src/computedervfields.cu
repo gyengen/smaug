@@ -1600,14 +1600,14 @@ if(order == 0)
 
 
 
- for(int field=rho;field<=rho ; field++)
-if(  (p->ipe)==0  && ((p)->it)==1 && ( isnan(wmod[fencode3_cdf(p,ii,field)])|| wmod[fencode3_cdf(p,ii,field)]==0 ))
+// for(int field=rho;field<=rho ; field++)
+//if(  (p->ipe)==0  && ((p)->it)==1 && ( isnan(wmod[fencode3_cdf(p,ii,field)])|| wmod[fencode3_cdf(p,ii,field)]==0 ))
 //if(  /*(p->ipe)==0  &&*/ (  wmod[fencode3_cdf(p,ii,field)]==0 ))
-       { 
-    				printf("nant %d %d %d %d %lg %lg \n",ii[0],ii[1],field,dir, wmod[fencode3_cdf(p,ii,rho)],wmod[fencode3_cdf(p,ii,field)+dimp*NVAR] );
-;//wmod[fencode3_cdf(p,ii,rho)]=0.221049;
-;//wmod[fencode3_cdf(p,ii,field)+dimp*NVAR]=0.221049;
-}
+//       { 
+//    				printf("nant %d %d %d %d %lg %lg \n",ii[0],ii[1],field,dir, wmod[fencode3_cdf(p,ii,rho)],wmod[fencode3_cdf(p,ii,field)+dimp*NVAR] );
+//;//wmod[fencode3_cdf(p,ii,rho)]=0.221049;
+//;//wmod[fencode3_cdf(p,ii,field)+dimp*NVAR]=0.221049;
+//}
 
 
 

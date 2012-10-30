@@ -486,9 +486,9 @@ if(p->boundtype[field][dir][0] !=0  )
 #endif
 {
    if((ii[0]==(p->n[0])-3) || (ii[0]==(p->n[0])-4)  && ii[1]>1   && ii[1]<(p->n[1])-2  )
-     ;//  grad=0;
+       grad=0;
    else if(ii[0]==2 || ii[0]==3  && ii[1]>1   && ii[1]<(p->n[1])-2  )
-    ;//   grad=0;
+       grad=0;
 }
 #endif
 
@@ -538,9 +538,9 @@ if(p->boundtype[field][dir][0] !=0  )
 #endif
 {
    if((ii[1]==(p->n[1])-3) || (ii[1]==(p->n[1])-4)  && ii[0]>1   && ii[0]<(p->n[0])-2  )
-      ;// grad=0;
+       grad=0;
    else if(ii[1]==2 || ii[1]==3  && ii[0]>1   && ii[0]<(p->n[0])-2  )
-    ;//   grad=0;
+       grad=0;
 }
 #endif
    break;

@@ -1195,17 +1195,31 @@ printf("mpi trans mpiwmod\n");
        /*********************************************************************************************************/
 	if((p->rkon)==0)
 	{
-	  ordero=0;
-	 
-	  cucomputedervfields(&p,&d_p,&d_wmod, &d_wd,order);
-	  order=1;
+	  ordero=1;
+	  order=0;
 
+	  cucomputedervfields(&p,&d_p,&d_wmod, &d_wd,order);
+	  
 	 for(int dir=0;dir<NDIM; dir++)
 	 {
-		  for(int f=rho; f<=(mom1+NDIM-1); f++)
+		 cucomputevels(&p,&d_p,&d_wmod, &d_wd,order,dir); 
+
+         }
+	 for(int dir=0;dir<NDIM; dir++)
+	 {
+		  
+		 for(int f=rho; f<=(mom1+NDIM-1); f++)
 		  { 
-		      if((f==mom1 && dir==0)  ||  (f==mom2 && dir==1)  || (f==mom2 && dir==2) )
+
+                  #ifdef USE_SAC_3D
+		      if((f==mom1 && dir==0)  ||  (f==mom2 && dir==1)  || (f==mom3 && dir==2) )
+                  #else
+		      if((f==mom1 && dir==0)  ||  (f==mom2 && dir==1)  )
+                  #endif
+                    {
 		       cucomputept(&p,&d_p,&d_wmod, &d_wd,order,dir);
+                       cucomputepbg(&p,&d_p,&d_wmod, &d_wd,order,dir);
+                     }
 		      cucentdiff1(&p,&d_p,&d_state,&d_wmod,&d_wmod, &d_dwn1, &d_wd,order,ordero,p->dt,f,dir);	     
 		  } //end looping over fields for cucentdiff1
 		   #ifndef ADIABHYDRO
@@ -1213,8 +1227,8 @@ printf("mpi trans mpiwmod\n");
 		   {
 		     if(f==energy)
 		     {
-			 cucomputevels(&p,&d_p,&d_wmod, &d_wd,order,dir);
-			 cucomputepbg(&p,&d_p,&d_wmod, &d_wd,order,dir);
+			;// cucomputevels(&p,&d_p,&d_wmod, &d_wd,order,dir);
+			 cucomputepbg(&p,&d_p,&d_wmod, &d_wd,ordero,dir);
 			 cucomputept(&p,&d_p,&d_wmod, &d_wd,order,dir);
 		     }	      
 		     cucentdiff2(&p,&d_p,&d_state,&d_wmod,&d_wmod, &d_dwn1, &d_wd,order, ordero,p->dt,f,dir);
@@ -1223,7 +1237,7 @@ printf("mpi trans mpiwmod\n");
 	  }//end loop over directions
 	   
 	 
-	  cugrav(&p,&d_p,&d_state,&d_wmod,&d_wmod, &d_dwn1, &d_wd,order, ordero,p->dt);//gravitational contributions
+	  ;//cugrav(&p,&d_p,&d_state,&d_wmod,&d_wmod, &d_dwn1, &d_wd,order, ordero,p->dt);//gravitational contributions
 
 	  if(p->divbon==1)
 		       cudivb(&p,&d_p,&d_w,&d_wmod, &d_dwn1, &d_wd,order,ordero,p->dt);
@@ -1381,9 +1395,9 @@ printf("mpi trans mpiwmod\n");
            /*********************************************************************************************************/
 
 	  //source terms
-          cusource(&p,&d_p,&d_state,&d_w,&d_wmod, &d_dwn1, &d_wd,order, ordero,p->dt);
+          ;//cusource(&p,&d_p,&d_state,&d_w,&d_wmod, &d_dwn1, &d_wd,order, ordero,p->dt);
 
-	  cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, ordero,0,0);
+	  ;//cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, ordero,0,0);
 
 	} //end of if((p->rkon)==0)
        /*********************************************************************************************************/

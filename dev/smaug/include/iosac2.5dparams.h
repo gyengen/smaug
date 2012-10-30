@@ -89,7 +89,7 @@ dt=0.0002;  //OZT test
 //nt=5000;
 //nt=200000;
 //nt=150000;
-nt=220;
+nt=21;
 
 
 real *t=(real *)calloc(nt,sizeof(real));
@@ -142,13 +142,13 @@ p->g[2]=0.0;
 p->cmax=0.02;
 
 p->rkon=0.0;
-p->sodifon=1.0;
+p->sodifon=0.0;
 p->moddton=0.0;
 p->divbon=0.0;
 p->divbfix=0.0;
-p->hyperdifmom=1.0;
+p->hyperdifmom=0.0;
 p->readini=1.0;
-p->cfgsavefrequency=10;
+p->cfgsavefrequency=1;
 
 
 p->xmax[0]=xmax;

@@ -1281,9 +1281,9 @@ printf("mpi trans mpiwmod\n");
              //energy hyperdiffusion term
 	     for(int dim=0; dim<=(NDIM-1); dim++)
 	     {
-	        cucomputec(&p,&d_p,&d_wmod, &d_wd,order,dim);
-		cucomputemaxc(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
-		   
+	        //cucomputec(&p,&d_p,&d_wmod, &d_wd,order,dim);
+		//cucomputemaxc(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
+		p->cmax=cmax[dim];
 		#ifdef USE_MPI
 		      mpiallreduce(&(p->cmax), MPI_MAX);
 		#endif
@@ -1304,9 +1304,9 @@ printf("mpi trans mpiwmod\n");
 	for(int dim=0; dim<=(NDIM-1); dim++)
 	       for(int f=0; f<=(NDIM-1); f++)		   	                 
 		{
-			  cucomputec(&p,&d_p,&d_wmod, &d_wd,order,dim);
-			  cucomputemaxc(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
-
+			  //cucomputec(&p,&d_p,&d_wmod, &d_wd,order,dim);
+			  //cucomputemaxc(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
+                          p->cmax=cmax[dim];
 			  #ifdef USE_MPI
 			      mpiallreduce(&(p->cmax), MPI_MAX);
 			  #endif
@@ -1348,9 +1348,9 @@ printf("mpi trans mpiwmod\n");
 		     for(int f=0; f<=(NDIM-1); f++) 
 		     if(f!=dim)           
 		     {
-			       cucomputec(&p,&d_p,&d_wmod, &d_wd,order,dim);
-			       cucomputemaxc(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
-
+			       //cucomputec(&p,&d_p,&d_wmod, &d_wd,order,dim);
+			       //cucomputemaxc(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
+			       p->cmax=cmax[dim];
 			       #ifdef USE_MPI
 			      		mpiallreduce(&(p->cmax), MPI_MAX);
 			       #endif

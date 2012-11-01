@@ -1591,11 +1591,13 @@ if(order == 0)
                         wd[fencode3_cdf(p,ii,f)]=0; 
 		#ifdef USE_SAC_3D
 		  for(int f=rho; f<=b3; f++)
-                  	wmod[fencode3_cdf(p,ii,f)+dimp*NVAR]=wmod[fencode3_cdf(p,ii,f)]; 
+                  	//wmod[fencode3_cdf(p,ii,f)+dimp*NVAR]=wmod[fencode3_cdf(p,ii,f)]; 
+                        wmod[fencode3_cdf(p,ii,f)]=wmod[fencode3_cdf(p,ii,f)+dimp*NVAR]; 
 
 		#else
 		  for(int f=rho; f<=b2; f++)
-                  	wmod[fencode3_cdf(p,ii,f)+dimp*NVAR]=wmod[fencode3_cdf(p,ii,f)]; 
+                  	//wmod[fencode3_cdf(p,ii,f)+dimp*NVAR]=wmod[fencode3_cdf(p,ii,f)]; 
+                         wmod[fencode3_cdf(p,ii,f)]=wmod[fencode3_cdf(p,ii,f)+dimp*NVAR];
 		#endif               
 
 

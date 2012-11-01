@@ -552,7 +552,7 @@ int cufinish(struct params **p, real **w, real **wnew, struct state **state, str
   cudaFree(*d_bp);
 //  cudaFree(*d_state);
 
-  cudaFree(*d_w);
+//  cudaFree(*d_w);
   cudaFree(*d_wnew);
  // cudaFree(*d_u);
 

@@ -241,8 +241,8 @@ char *method=NULL;
 
 		 wdnew=(real *)calloc(ni*nj*nk*NDERV,sizeof(real ));
 		 wd=(real *)calloc(((p)->n[0])*((p)->n[1])*((p)->n[2])*NDERV,sizeof(real ));
-		 wmod=(real *)calloc(((p)->n[0])*((p)->n[1])*((p)->n[2])*NVAR,sizeof(real ));
-		 w=(real *)calloc(((p)->n[0])*((p)->n[1])*((p)->n[2])*NVAR,sizeof(real ));
+		 wmod=(real *)calloc(2*(1+(((p)->rkon)==1))*((p)->n[0])*((p)->n[1])*((p)->n[2])*NVAR,sizeof(real ));
+		 //w=(real *)calloc(((p)->n[0])*((p)->n[1])*((p)->n[2])*NVAR,sizeof(real ));
 		 for(i=0;i<((p)->n[0])*((p)->n[1])*((p)->n[2])*NDERV;i++)
 		    wd[i]=0.0;
 		 for(i=0;i<ni*nj*nk*NDERV;i++)
@@ -252,9 +252,9 @@ char *method=NULL;
 
 		 wdnew=(real *)calloc(ni*nj*NDERV,sizeof(real ));
 		 wd=(real *)calloc(((p)->n[0])*((p)->n[1])*NDERV,sizeof(real ));
-		 wmod=(real *)calloc(((p)->n[0])*((p)->n[1])*NVAR,sizeof(real ));
+		 wmod=(real *)calloc(2*(1+(((p)->rkon)==1))*((p)->n[0])*((p)->n[1])*NVAR,sizeof(real ));
 
-		 w=(real *)calloc(((p)->n[0])*((p)->n[1])*NVAR,sizeof(real ));
+		 //w=(real *)calloc(((p)->n[0])*((p)->n[1])*NVAR,sizeof(real ));
 		 for(i=0;i<((p)->n[0])*((p)->n[1])*NDERV;i++)
 		    wd[i]=0.0;
 		 for(i=0;i<((p)->n[0])*((p)->n[1])*NDERV;i++)
@@ -527,16 +527,16 @@ char *method=NULL;
 
 
 
-        real *u,  *v,  *h;
+       // real *u,  *v,  *h;
 
-	h=w+(ni)*(nj)*rho;
-	u=w+(ni)*(nj)*mom1;
-	v=w+(ni)*(nj)*mom2;
+	//h=w+(ni)*(nj)*rho;
+	//u=w+(ni)*(nj)*mom1;
+	//v=w+(ni)*(nj)*mom2;
 
 
 
          d_gwnew=(real **)malloc((p->npe)*sizeof(real *));
-         d_gw=(real **)malloc(p->npe*sizeof(real *));
+         //d_gw=(real **)malloc(p->npe*sizeof(real *));
 	 d_gwtemp=(real **)malloc(p->npe*sizeof(real *));
 	 d_gwtemp1=(real **)malloc(p->npe*sizeof(real *));
 	 d_gwtemp2=(real **)malloc(p->npe*sizeof(real *));
@@ -570,7 +570,7 @@ char *method=NULL;
                 p->ipe=igid;
                 cusetgpu(&p);
         #endif
-        	cuinit(&p,&bp,&w,&wmod,&wnew,&wd,&state,&d_gp[igid],&d_gbp[igid],&d_gw[igid],&d_gwnew[igid],&d_gwmod[igid], &d_gdwn1[igid],  &d_gwd[igid], &d_gstate[igid],&d_gwtemp[igid],&d_gwtemp1[igid],&d_gwtemp2[igid]);
+        	cuinit(&p,&bp,&wmod,&wnew,&wd,&state,&d_gp[igid],&d_gbp[igid],&d_gwnew[igid],&d_gwmod[igid], &d_gdwn1[igid],  &d_gwd[igid], &d_gstate[igid],&d_gwtemp[igid],&d_gwtemp1[igid],&d_gwtemp2[igid]);
 
 //cuinit(&p,&bp,&w,&wnew,&wd,&state,&d_gp[igid],&d_bp,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
         #ifdef USE_GPUD
@@ -715,7 +715,7 @@ for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++)
 
  
 	//initgrid(&p,&w,&wnew,&state,&wd,&d_p,&d_gw[igid],&d_wnew,&d_wmod, &d_dwn1,  &d_gwd[igid], &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
-	initgrid(&p,&w,&wnew,&state,&wd,&d_gp[igid],&d_gw[igid],&d_gwnew[igid],&d_gwmod[igid], &d_gdwn1[igid],  &d_gwd[igid], &d_gstate[igid],&d_gwtemp[igid],&d_gwtemp1[igid],&d_gwtemp2[igid]);
+	initgrid(&p,&state,&wd,&d_gp[igid], &d_gdwn1[igid],  &d_gwd[igid], &d_gstate[igid],&d_gwtemp[igid],&d_gwtemp1[igid],&d_gwtemp2[igid]);
 printf("grid initialised\n");
 
 
@@ -843,7 +843,7 @@ printf("grid initialised\n");
       #ifndef USE_MULTIGPU
    int iii[2];
 
-        initgrid(&p,&w,&wnew,&state,&wd,&d_p,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
+        initgrid(&p,&state,&wd,&d_p, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
   /* for(iii[1]=0; iii[1]<((p)->n[1]); iii[1]++)
      for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++)                
              {
@@ -1203,7 +1203,7 @@ printf("mpi trans mpiwmod\n");
 	 for(int dir=0;dir<NDIM; dir++)
 	 {
 		 cucomputevels(&p,&d_p,&d_wmod, &d_wd,order,dir); 
-
+		      
          }
 	 for(int dir=0;dir<NDIM; dir++)
 	 {
@@ -1227,7 +1227,7 @@ printf("mpi trans mpiwmod\n");
 		   {
 		     if(f==energy)
 		     {
-			;// cucomputevels(&p,&d_p,&d_wmod, &d_wd,order,dir);
+			 cucomputevels(&p,&d_p,&d_wmod, &d_wd,order,dir);
 			 cucomputepbg(&p,&d_p,&d_wmod, &d_wd,ordero,dir);
 			 cucomputept(&p,&d_p,&d_wmod, &d_wd,order,dir);
 		     }	      
@@ -1237,7 +1237,7 @@ printf("mpi trans mpiwmod\n");
 	  }//end loop over directions
 	   
 	 
-	  ;//cugrav(&p,&d_p,&d_state,&d_wmod,&d_wmod, &d_dwn1, &d_wd,order, ordero,p->dt);//gravitational contributions
+	  cugrav(&p,&d_p,&d_state,&d_wmod,&d_wmod, &d_dwn1, &d_wd,order, ordero,p->dt);//gravitational contributions
 
 	  if(p->divbon==1)
 		       cudivb(&p,&d_p,&d_w,&d_wmod, &d_dwn1, &d_wd,order,ordero,p->dt);
@@ -1395,9 +1395,9 @@ printf("mpi trans mpiwmod\n");
            /*********************************************************************************************************/
 
 	  //source terms
-          ;//cusource(&p,&d_p,&d_state,&d_w,&d_wmod, &d_dwn1, &d_wd,order, ordero,p->dt);
+          cusource(&p,&d_p,&d_state,&d_w,&d_wmod, &d_dwn1, &d_wd,order, ordero,p->dt);
 
-	  ;//cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, ordero,0,0);
+	  cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, ordero,0,0);
 
 	} //end of if((p->rkon)==0)
        /*********************************************************************************************************/
@@ -1748,6 +1748,7 @@ printf("mpi trans mpiwmod\n");
 
          //cufinish(&p,&w,&wnew,&state,&d_p,&d_bp,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
          //printf("at cufinish end here %d\n",p->ipe);
+         printf("at cufinish end here\n");
          #ifdef USE_GPUD
          for(igid=0; igid<(p->npe); igid++)
          {
@@ -1788,8 +1789,8 @@ printf("mpi trans mpiwmod\n");
 	free(outfile);
 	free(formfile);
 
-free(d_gwnew);
-free(d_gw);
+//free(d_gwnew);
+//free(d_gw);
 free(d_gwtemp);
 free(d_gwtemp1);
 free(d_gwtemp2);

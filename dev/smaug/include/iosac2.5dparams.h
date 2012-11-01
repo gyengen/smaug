@@ -70,6 +70,7 @@ int finishsteering=0;
 //char *cfgfile="zero1_np020203.ini";
 //char *cfgfile="zero1_np0201.ini";
 char *cfgfile="zero1_ot_asc.ini";
+//char *cfgfile="zero1_ot_asc_2048.ini";
 //char *cfgfile="zero1_BW_bin.ini";
 //char *cfgout="zero1_np010203."
 char *cfgout="out/zeroOT";
@@ -89,7 +90,7 @@ dt=0.0002;  //OZT test
 //nt=5000;
 //nt=200000;
 //nt=150000;
-nt=21;
+nt=100;
 
 
 real *t=(real *)calloc(nt,sizeof(real));
@@ -146,7 +147,7 @@ p->sodifon=0.0;
 p->moddton=0.0;
 p->divbon=0.0;
 p->divbfix=0.0;
-p->hyperdifmom=0.0;
+p->hyperdifmom=1.0;
 p->readini=1.0;
 p->cfgsavefrequency=1;
 
@@ -175,7 +176,7 @@ p->chyp[mom1]=0.4;
 p->chyp[mom2]=0.4;
 p->chyp[rho]=0.02;
 
-
+p->npe=1;
 
 
 #ifdef USE_MPI

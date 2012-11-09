@@ -941,10 +941,10 @@ if(p->ipe==0)
 
         for(int idir=0; idir<NDIM;idir++)
         {
-
+//for runge kutta will need to run this several times  for each order 
  if(p->ipe==0)          
 printf("before mpi trans mpiwmod\n");
-          	 cucopywtompiwmod(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, 0,idir);
+          	 cucopywtompiwmod(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, 1,idir);
            
            gpusync();
  if(p->ipe==0)          
@@ -988,8 +988,8 @@ printf("mpi trans mpiwmod\n");
 
 
 
-           
-	   cucopywmodfrommpiw(&p,&w, &wmod,      &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,0,idir);
+//for runge kutta will need to run this several times  for each order         
+	   cucopywmodfrommpiw(&p,&w, &wmod,      &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,1,idir);
            gpusync();
 
          }
@@ -1397,7 +1397,7 @@ printf("mpi trans mpiwmod\n");
 	  //source terms
           cusource(&p,&d_p,&d_state,&d_w,&d_wmod, &d_dwn1, &d_wd,order, ordero,p->dt);
 
-	  cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, ordero,0,0);
+	  //cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, ordero,0,0);
 
 	} //end of if((p->rkon)==0)
        /*********************************************************************************************************/
@@ -1639,7 +1639,7 @@ printf("mpi trans mpiwmod\n");
              printf("%d %lg ",i,(gmpiw0[i]));
          printf("\n");*/
     // }
-
+        order=1;
         for(int idir=0; idir<NDIM;idir++)
         {
                   gpusync();

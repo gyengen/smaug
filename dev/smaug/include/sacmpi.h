@@ -1676,16 +1676,16 @@ void mpivisc( int idim,params *p, real *var1, real *var2, real *var3)
   for(i=0; i<2; i++)
      gmpirequest[i]=MPI_REQUEST_NULL;
      
-        if((p->mpiupperb[idim])==1) gnmpirequest++;
-        if((p->mpiupperb[idim])==1) gmpirequest[gnmpirequest]=comm.Irecv(gmpitgtbufferr[0],n,MPI_DOUBLE_PRECISION,p->pjpe[idim],10*(p->pjpe[idim]));
-        if((p->mpilowerb[idim])==1) gnmpirequest++;
-        if((p->mpilowerb[idim])==1) gmpirequest[gnmpirequest]=comm.Irecv(gmpitgtbufferl[0],n,MPI_DOUBLE_PRECISION,p->phpe[idim],10*(p->phpe[idim])+1);
+        if((p->mpiupperb[idim])==1  ) gnmpirequest++;
+        if((p->mpiupperb[idim])==1 ) gmpirequest[gnmpirequest]=comm.Irecv(gmpitgtbufferr[0],n,MPI_DOUBLE_PRECISION,p->pjpe[idim],10*(p->pjpe[idim]));
+        if((p->mpilowerb[idim])==1  ) gnmpirequest++;
+        if((p->mpilowerb[idim])==1  ) gmpirequest[gnmpirequest]=comm.Irecv(gmpitgtbufferl[0],n,MPI_DOUBLE_PRECISION,p->phpe[idim],10*(p->phpe[idim])+1);
         comm.Barrier();
         //  printf("vis1 proc %d %d %d   \n",p->ipe,p->pjpe[idim],p->phpe[idim]);
-        if((p->mpiupperb[idim])==1) comm.Rsend(gmpisrcbufferr[0], n, MPI_DOUBLE_PRECISION, p->pjpe[idim], 10*(p->ipe));
+        if((p->mpiupperb[idim])==1  ) comm.Rsend(gmpisrcbufferr[0], n, MPI_DOUBLE_PRECISION, p->pjpe[idim], 10*(p->ipe));
         //  printf("vis1 proc %d %d %d   \n",p->ipe,p->pjpe[idim],p->phpe[idim]);
 
-        if((p->mpilowerb[idim])==1) comm.Rsend(gmpisrcbufferl[0], n, MPI_DOUBLE_PRECISION, p->phpe[idim], 10*(p->ipe)+1);
+        if((p->mpilowerb[idim])==1  ) comm.Rsend(gmpisrcbufferl[0], n, MPI_DOUBLE_PRECISION, p->phpe[idim], 10*(p->ipe)+1);
      
         request.Waitall(gnmpirequest,gmpirequest);
 
@@ -1751,14 +1751,14 @@ void mpivisc( int idim,params *p, real *var1, real *var2, real *var3)
   for(i=0; i<2; i++)
      gmpirequest[i]=MPI_REQUEST_NULL;
      
-             if((p->mpiupperb[idim])==1) gnmpirequest++;
-        if((p->mpiupperb[idim])==1) gmpirequest[gnmpirequest]=comm.Irecv(gmpitgtbufferr[1],n,MPI_DOUBLE_PRECISION,p->pjpe[idim],10*(p->pjpe[idim]));
-        if((p->mpilowerb[idim])==1) gnmpirequest++;
-        if((p->mpilowerb[idim])==1) gmpirequest[gnmpirequest]=comm.Irecv(gmpitgtbufferl[1],n,MPI_DOUBLE_PRECISION,p->phpe[idim],10*(p->phpe[idim])+1);
+        if((p->mpiupperb[idim])==1  ) gnmpirequest++;
+        if((p->mpiupperb[idim])==1  ) gmpirequest[gnmpirequest]=comm.Irecv(gmpitgtbufferr[1],n,MPI_DOUBLE_PRECISION,p->pjpe[idim],10*(p->pjpe[idim]));
+        if((p->mpilowerb[idim])==1  ) gnmpirequest++;
+        if((p->mpilowerb[idim])==1  ) gmpirequest[gnmpirequest]=comm.Irecv(gmpitgtbufferl[1],n,MPI_DOUBLE_PRECISION,p->phpe[idim],10*(p->phpe[idim])+1);
         comm.Barrier();
           
-        if((p->mpiupperb[idim])==1) comm.Rsend(gmpisrcbufferr[1], n, MPI_DOUBLE_PRECISION, p->pjpe[idim], 10*(p->ipe));
-        if((p->mpilowerb[idim])==1) comm.Rsend(gmpisrcbufferl[1], n, MPI_DOUBLE_PRECISION, p->phpe[idim], 10*(p->ipe)+1);
+        if((p->mpiupperb[idim])==1  ) comm.Rsend(gmpisrcbufferr[1], n, MPI_DOUBLE_PRECISION, p->pjpe[idim], 10*(p->ipe));
+        if((p->mpilowerb[idim])==1  ) comm.Rsend(gmpisrcbufferl[1], n, MPI_DOUBLE_PRECISION, p->phpe[idim], 10*(p->ipe)+1);
      
         request.Waitall(gnmpirequest,gmpirequest);
       #ifdef USE_SAC3D
@@ -1818,14 +1818,14 @@ void mpivisc( int idim,params *p, real *var1, real *var2, real *var3)
   for(i=0; i<2; i++)
      gmpirequest[i]=MPI_REQUEST_NULL;
      
-             if((p->mpiupperb[idim])==1) gnmpirequest++;
-        if((p->mpiupperb[idim])==1) gmpirequest[gnmpirequest]=comm.Irecv(gmpitgtbufferr[2],n,MPI_DOUBLE_PRECISION,p->pjpe[idim],10*(p->pjpe[idim]));
-        if((p->mpilowerb[idim])==1) gnmpirequest++;
-        if((p->mpilowerb[idim])==1) gmpirequest[gnmpirequest]=comm.Irecv(gmpitgtbufferl[2],n,MPI_DOUBLE_PRECISION,p->phpe[idim],10*(p->phpe[idim])+1);
+        if((p->mpiupperb[idim])==1  ) gnmpirequest++;
+        if((p->mpiupperb[idim])==1  ) gmpirequest[gnmpirequest]=comm.Irecv(gmpitgtbufferr[2],n,MPI_DOUBLE_PRECISION,p->pjpe[idim],10*(p->pjpe[idim]));
+        if((p->mpilowerb[idim])==1  ) gnmpirequest++;
+        if((p->mpilowerb[idim])==1  ) gmpirequest[gnmpirequest]=comm.Irecv(gmpitgtbufferl[2],n,MPI_DOUBLE_PRECISION,p->phpe[idim],10*(p->phpe[idim])+1);
         comm.Barrier();
           
-        if((p->mpiupperb[idim])==1) comm.Rsend(gmpisrcbufferr[2], n, MPI_DOUBLE_PRECISION, p->pjpe[idim], 10*(p->ipe));
-        if((p->mpilowerb[idim])==1) comm.Rsend(gmpisrcbufferl[2], n, MPI_DOUBLE_PRECISION, p->phpe[idim], 10*(p->ipe)+1);
+        if((p->mpiupperb[idim])==1  ) comm.Rsend(gmpisrcbufferr[2], n, MPI_DOUBLE_PRECISION, p->pjpe[idim], 10*(p->ipe));
+        if((p->mpilowerb[idim])==1  ) comm.Rsend(gmpisrcbufferl[2], n, MPI_DOUBLE_PRECISION, p->phpe[idim], 10*(p->ipe)+1);
      
         request.Waitall(gnmpirequest,gmpirequest);
    //  tmp_nuI(ixFlo1:ixFhi1,ixFlo2:ixFhi2,ixFhi3+1)=tgtbufferR3(ixFlo1:ixFhi1,&

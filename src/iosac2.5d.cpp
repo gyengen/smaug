@@ -637,18 +637,26 @@ p->it=-1;
         // printf("\n");
      }*/
 
+
+
+
+
  		   cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order,0);
                    gpusync();
 		   mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2 ,p,0);
  		   gpusync();
 		   cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order,0);
 gpusync();
+
+
  		   cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order,1);
                    gpusync();
 		   mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2 ,p,1);
  		   gpusync();
 		   cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order,1);
+
 #ifdef USE_SAC3D
+
 gpusync();
  		   cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order,2);
                    gpusync();
@@ -657,7 +665,6 @@ gpusync();
 		   cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order,2);
 
 #endif
-
 
 
 
@@ -711,7 +718,9 @@ for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++)
 
          cuupdatehostwd(&p,&wd,&wmod,&temp2,&state,&d_gp[igid],&d_gwd[igid],&d_gwmod[igid],&d_gwtemp2[igid],  &d_gstate[igid],n);
 
- 
+
+
+
 
  
 	//initgrid(&p,&w,&wnew,&state,&wd,&d_p,&d_gw[igid],&d_wnew,&d_wmod, &d_dwn1,  &d_gwd[igid], &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
@@ -719,19 +728,20 @@ for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++)
 printf("grid initialised\n");
 
 
-/* if((p)->ipe==0)
+ 
+ if((p)->ipe==1)
   { 
    printf("ipe3 pos results after \n");
-          for(iii[1]=0; iii[1]<((p)->n[1]); iii[1]++)    
-        	for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++)       
+     for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++) 
+          for(iii[1]=0; iii[1]<((p)->n[1]); iii[1]++)           	      
              {
                //if(iii[0]==0)
  		
-               printf("delx %d %d %16.20f  %16.20f\n",iii[0],iii[1],wd[(fencode3_test(p,iii,pos1))],wd[(fencode3_test(p,iii,pos2))]);
+               printf("delx %d %d %16.20f  %16.20f\n",iii[0],iii[1],wd[(fencode3_test(p,iii,delx1))],wd[(fencode3_test(p,iii,delx2))]);
+               //printf("delx %d %d %16.20f  %16.20f\n",iii[0],iii[1],wd[(fencode3_test(p,iii,delx1))],wd[(fencode3_test(p,iii,delx2))]);
 
               }
-   }*/
-
+   }
 
 
 

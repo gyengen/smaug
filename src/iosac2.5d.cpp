@@ -729,7 +729,7 @@ printf("grid initialised\n");
 
 
  
- if((p)->ipe==1)
+/* if((p)->ipe==1)
   { 
    printf("ipe3 pos results after \n");
      for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++) 
@@ -741,7 +741,7 @@ printf("grid initialised\n");
                //printf("delx %d %d %16.20f  %16.20f\n",iii[0],iii[1],wd[(fencode3_test(p,iii,delx1))],wd[(fencode3_test(p,iii,delx2))]);
 
               }
-   }
+   }*/
 
 
 
@@ -1276,9 +1276,11 @@ printf("mpi trans mpiwmod\n");
 		      cmax[dim]=p->cmax;
 		      cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
 
-		      #ifdef USE_MPI
+		      #ifdef USE_MPIT
 			  cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
-			   mpivisc(dim,p,gmpivisc0,gmpivisc1,gmpivisc2);
+                          gpusync();
+			  mpivisc(dim,p,gmpivisc0,gmpivisc1,gmpivisc2);
+                          gpusync();
 			  cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 		      #endif
 		      cuhyperdifvisc1r(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
@@ -1295,7 +1297,7 @@ printf("mpi trans mpiwmod\n");
 		//cucomputemaxc(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
 		p->cmax=cmax[dim];
 		#ifdef USE_MPI
-		      mpiallreduce(&(p->cmax), MPI_MAX);
+		     ;// mpiallreduce(&(p->cmax), MPI_MAX);
 		#endif
 	        cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,energy,dim);
 
@@ -1318,13 +1320,13 @@ printf("mpi trans mpiwmod\n");
 			  //cucomputemaxc(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
                           p->cmax=cmax[dim];
 			  #ifdef USE_MPI
-			      mpiallreduce(&(p->cmax), MPI_MAX);
+			     ;// mpiallreduce(&(p->cmax), MPI_MAX);
 			  #endif
 		          cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,mom1+f,dim);
 		          #ifdef USE_MPI
 				  
                                   cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
-				  mpivisc(dim,p,gmpivisc0,gmpivisc1,gmpivisc2);
+				 mpivisc(dim,p,gmpivisc0,gmpivisc1,gmpivisc2);
 				  cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 	                 #endif
 			 cuhyperdifvisc1r(&p,&d_p,&d_wmod,&wd,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,mom1+f,dim);
@@ -1362,7 +1364,7 @@ printf("mpi trans mpiwmod\n");
 			       //cucomputemaxc(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
 			       p->cmax=cmax[dim];
 			       #ifdef USE_MPI
-			      		mpiallreduce(&(p->cmax), MPI_MAX);
+			      		;//mpiallreduce(&(p->cmax), MPI_MAX);
 			       #endif
 			       cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,b1+f,dim);
 
@@ -1783,14 +1785,7 @@ printf("mpi trans mpiwmod\n");
 	
         } //mode=0 clean up routine
 
-	#ifdef USE_MPI
-	     printf("at cumpifinish end here %d\n",p->ipe);
 
-	    cufinishmgpu(&p,&w, &wmod, &temp2,&gmpivisc0,&gmpivisc1,&gmpivisc2,   &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,   &d_w, &d_wmod,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2);
-            // mgpufinalize(p);
-
-
-	#endif
 	free(hlines);
 	free(p);
 	free(bp);
@@ -1819,7 +1814,14 @@ free(d_gbp);
 	#ifdef USE_MPI
           ;// mgpufinalize(p);
         #endif
+	#ifdef USE_MPI
+	     printf("at cumpifinish end here %d\n",p->ipe);
 
+	    cufinishmgpu(&p,&w, &wmod, &temp2,&gmpivisc0,&gmpivisc1,&gmpivisc2,   &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,   &d_w, &d_wmod,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2);
+            ;// mgpufinalize(p);
+
+
+	#endif
 		return 0;
 	}
 

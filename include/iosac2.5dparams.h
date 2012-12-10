@@ -12,6 +12,7 @@ int ngk=2;
 int ni;
 ni=122;    //OZT tests
 //ni=1018;    //OZT tests
+;//ni=1446;    //OZT tests
 ni=ni+2*ngi;
 //ni=512;
 //real xmax = 6.2831853;  
@@ -26,6 +27,7 @@ real dx = xmax/(ni);
 //vac ozt
 int nj = 122;  //OZT tests
 //int nj = 1018;  //OZT tests
+;//int nj = 1446;  //OZT tests
 //int nj=2;  //BW test
 nj=nj+2*ngj;
 //nj=512;
@@ -74,6 +76,7 @@ int finishsteering=0;
 //char *cfgfile="zero1_np0202_asc.ini";
 char *cfgfile="zero1_ot_asc.ini";
 ;//char *cfgfile="zero1_ot_2044_asc.ini";
+;//char *cfgfile="zero1_ot_2892_asc.ini";
 //char *cfgfile="zero1_BW_bin.ini";
 //char *cfgout="zero1_np010203."
 //char *cfgout="out/zeroOT";
@@ -94,7 +97,7 @@ dt=0.0002;  //OZT test
 //nt=5000;
 //nt=200000;
 //nt=150000;
-nt=120;
+nt=220;
 
 
 real *t=(real *)calloc(nt,sizeof(real));

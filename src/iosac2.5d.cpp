@@ -57,6 +57,10 @@ if(argc>2  && strcmp(argv[2],"scatter")==0)
   mode=1;
 }
 
+if(argc>2  && strcmp(argv[2],"init")==0)
+{
+  mode=3;
+}
 
 #ifdef USE_IOME
 if(argc>1)
@@ -129,7 +133,7 @@ printf("here\n");
 	   #endif
      }
 
-     if( mode==2)
+     if( mode==2 || mode==3)
      {
            //sprintf(configinfile,"test%s",cfgfile);
            ni=ni*(p->pnpe[0]);
@@ -327,6 +331,7 @@ char *method=NULL;
 
 
 
+      
 
 
 
@@ -336,11 +341,13 @@ char *method=NULL;
           on the host and on GPU host memory*/
        /*********************************************************************************************************/
 
-
+       if(mode !=3)
+       {
 		if((p->readini)==0)
 		 initconfig(p, &meta, wmod);
 		else
 		 readasciivacconfig(configinfile,*p,meta, state,wmod,wd,hlines,mode);
+       }
 
 
 	printf("after read\n");
@@ -550,6 +557,31 @@ char *method=NULL;
 	struct state **d_gstate=(struct state **)malloc(p->npe*sizeof(struct state *));
 	struct bparams **d_gbp=(struct bparams **)malloc(p->npe*sizeof(struct bparams *));
         int igid=0;  //the GPU id defaults to 0 for single GPU case or for MPI)
+
+
+        if(mode==3)
+        {
+           p->mode=mode;
+        #ifdef USE_MULTIGPU
+         if(p->ipe==0)
+         {
+        #endif
+          initconfig(p, &meta, wmod);
+
+        	cuinit(&p,&bp,&wmod,&wnew,&wd,&state,&d_gp[igid],&d_gbp[igid],&d_gwnew[igid],&d_gwmod[igid], &d_gdwn1[igid],  &d_gwd[igid], &d_gstate[igid],&d_gwtemp[igid],&d_gwtemp1[igid],&d_gwtemp2[igid]);  
+
+
+             //write the config file to ascii
+             writeasciivacconfig(configfile,*p, meta , wmod,wd,hlines,*state,mode);
+
+	         #ifdef USE_MULTIGPU
+		 }
+		#endif
+
+        }   
+
+
+
 
         if(mode==0)
         {

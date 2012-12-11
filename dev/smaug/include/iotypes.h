@@ -133,7 +133,7 @@ struct params {
         int divbfix;
         int cfgsavefrequency;
         int hyperdifmom; 
-
+        int mode;
         int readini;
         real courant;
         real maxviscoef;

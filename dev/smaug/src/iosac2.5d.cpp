@@ -60,6 +60,7 @@ if(argc>2  && strcmp(argv[2],"scatter")==0)
 if(argc>2  && strcmp(argv[2],"init")==0)
 {
   mode=3;
+  printf("init mode=3\n");
 }
 
 #ifdef USE_IOME
@@ -99,8 +100,27 @@ sprintf(configfile,"%s",cfgout);
      ipe2iped(p);     
      mgpuneighbours(0,p);
      mgpuneighbours(1,p);
+
+     p->xmax[0]=xmin+(1+(p->pipe[0]))*(xmax-xmin)/(p->pnpe[0]);
+     p->xmax[1]=ymin+(1+(p->pipe[1]))*(ymax-ymin)/(p->pnpe[1]);
+
+     p->xmin[0]=xmin+(p->pipe[0])*(xmax-xmin)/(p->pnpe[0]);
+     p->xmin[1]=ymin+(p->pipe[1])*(ymax-ymin)/(p->pnpe[1]);
+
+
+     p->gxmax[0]=xmax;
+     p->gxmin[0]=xmin;
+
+     p->gxmax[1]=ymax;
+     p->gxmin[1]=ymin;
+
      #ifdef USE_SAC3D
           mgpuneighbours(2,p);
+     p->xmax[2]=zmin+(1+(p->pipe[2]))*(zmax-zmin)/(p->pnpe[2]);
+     p->xmin[2]=zmin+(p->pipe[2])*(zmax-zmin)/(p->pnpe[2]);
+     p->gxmax[2]=zmax;
+     p->gxmin[2]=zmin;
+
      #endif
           sprintf(configinfile,"%s",cfgfile);
      #ifdef USE_MPI
@@ -133,7 +153,7 @@ printf("here\n");
 	   #endif
      }
 
-     if( mode==2 || mode==3)
+     if( mode==2)
      {
            //sprintf(configinfile,"test%s",cfgfile);
            ni=ni*(p->pnpe[0]);
@@ -142,7 +162,18 @@ printf("here\n");
 		   nk=nk*(p->pnpe[2]);
 	   #endif
      }
-     printf("config files\n%s \n %s\n",configinfile,configfile);
+
+
+     if(mode==3)
+     {
+                         p->n[0]=ni;
+                    p->n[1]=nj;
+
+                    #ifdef USE_SAC3D
+                      p->n[2]=nk;
+                    #endif
+     }
+     printf("config files\n%s \n %s %d %d\n",configinfile,configfile,p->n[0],p->n[1]);
   
      
 #else
@@ -239,7 +270,7 @@ char *method=NULL;
 
 
 
-          printf("allocating w and wnew\n");
+          //printf("allocating w and wnew %d\n",p->ipe);
 	  #ifdef USE_SAC_3D
 		 wnew=(real *)calloc(ni*nj*nk*NVAR,sizeof(real ));
 
@@ -247,10 +278,10 @@ char *method=NULL;
 		 wd=(real *)calloc(((p)->n[0])*((p)->n[1])*((p)->n[2])*NDERV,sizeof(real ));
 		 wmod=(real *)calloc(2*(1+(((p)->rkon)==1))*((p)->n[0])*((p)->n[1])*((p)->n[2])*NVAR,sizeof(real ));
 		 //w=(real *)calloc(((p)->n[0])*((p)->n[1])*((p)->n[2])*NVAR,sizeof(real ));
-		 for(i=0;i<((p)->n[0])*((p)->n[1])*((p)->n[2])*NDERV;i++)
-		    wd[i]=0.0;
-		 for(i=0;i<ni*nj*nk*NDERV;i++)
-		    wdnew[i]=0.0;
+		 ;//for(i=0;i<((p)->n[0])*((p)->n[1])*((p)->n[2])*NDERV;i++)
+		 ;//   wd[i]=0.0;
+		 ;//for(i=0;i<ni*nj*nk*NDERV;i++)
+		 ;//   wdnew[i]=0.0;
 	 #else
 		 wnew=(real *)calloc(ni*nj*NVAR,sizeof(real ));
 
@@ -259,12 +290,12 @@ char *method=NULL;
 		 wmod=(real *)calloc(2*(1+(((p)->rkon)==1))*((p)->n[0])*((p)->n[1])*NVAR,sizeof(real ));
 
 		 //w=(real *)calloc(((p)->n[0])*((p)->n[1])*NVAR,sizeof(real ));
-		 for(i=0;i<((p)->n[0])*((p)->n[1])*NDERV;i++)
-		    wd[i]=0.0;
-		 for(i=0;i<((p)->n[0])*((p)->n[1])*NDERV;i++)
-		    wdnew[i]=0.0;
+		 ;//for(i=0;i<((p)->n[0])*((p)->n[1])*NDERV;i++)
+		 ;//   wd[i]=0.0;
+		 ;//for(i=0;i<((p)->n[0])*((p)->n[1])*NDERV;i++)
+		 ;//   wdnew[i]=0.0;
 	 #endif
-
+         //printf("after allocating w and wnew %d\n",p->ipe);
         #ifdef USE_MULTIGPU
           int szw,szw0,szw1,szw2,szvisc0,szvisc1,szvisc2;
 	  #ifdef USE_SAC
@@ -343,14 +374,15 @@ char *method=NULL;
 
        if(mode !=3)
        {
-		if((p->readini)==0)
-		 initconfig(p, &meta, wmod);
+	       printf("init config\n");
+               if((p->readini)==0)
+		 initconfig(p, &meta, wmod,wd);
 		else
 		 readasciivacconfig(configinfile,*p,meta, state,wmod,wd,hlines,mode);
        }
 
 
-	printf("after read\n");
+	//printf("after read %d\n",p->ipe);
 	p->it=0;
 
 
@@ -558,24 +590,40 @@ char *method=NULL;
 	struct bparams **d_gbp=(struct bparams **)malloc(p->npe*sizeof(struct bparams *));
         int igid=0;  //the GPU id defaults to 0 for single GPU case or for MPI)
 
+/*FILE *fatmos;
+real ht,rho0;
+fatmos=fopen("test.dat","r+");
+fscanf(fatmos, " %G %G", &ht, &rho0);
+printf("main fatmos ipe=%d  %20.5e %20.5e\n",p->ipe,ht,rho0);
+fclose(fatmos);*/
+
+
+
 
         if(mode==3)
         {
+           //printf("mode=3 writing config %d\n",p->ipe);
            p->mode=mode;
+           
         #ifdef USE_MULTIGPU
-         if(p->ipe==0)
-         {
+ 	gpusync();
+        // if(p->ipe==0)
+        // {
         #endif
-          initconfig(p, &meta, wmod);
+          initconfig(p, &meta, wmod,wd);
 
-        	cuinit(&p,&bp,&wmod,&wnew,&wd,&state,&d_gp[igid],&d_gbp[igid],&d_gwnew[igid],&d_gwmod[igid], &d_gdwn1[igid],  &d_gwd[igid], &d_gstate[igid],&d_gwtemp[igid],&d_gwtemp1[igid],&d_gwtemp2[igid]);  
+        	//cuinit(&p,&bp,&wmod,&wnew,&wd,&state,&d_gp[igid],&d_gbp[igid],&d_gwnew[igid],&d_gwmod[igid], &d_gdwn1[igid],  &d_gwd[igid], &d_gstate[igid],&d_gwtemp[igid],&d_gwtemp1[igid],&d_gwtemp2[igid]);  
+            //readatmos(*p,wmod);
+             initialisation_user1(wmod,wd,p);
 
-
+            // initialisation_user2(wmod,wd,p);
              //write the config file to ascii
-             writeasciivacconfig(configfile,*p, meta , wmod,wd,hlines,*state,mode);
-
+             writeasciivacconfig(configinfile,*p, meta , wmod,wd,hlines,*state,mode);
+ //printf("mode=3  writing config %s %d\n", configinfile,p->ipe);
 	         #ifdef USE_MULTIGPU
-		 }
+		 //}
+                 gpusync();
+              //printf("mode=3 finsh writing config %d \n",p->ipe);
 		#endif
 
         }   
@@ -1666,7 +1714,9 @@ printf("mpi trans mpiwmod\n");
 	
         } //mode=0 clean up routine
 
-
+#ifdef USE_MPI
+	     printf("at cumpifinish end here %d\n",p->ipe);
+#endif
 	free(hlines);
 	free(p);
 	free(bp);

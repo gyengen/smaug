@@ -167,6 +167,10 @@ struct params {
                 
                 int gpemin[NDIM];
                 int gpemax[NDIM];
+
+                //global value of box dimensions
+		real gxmax[NDIM];
+		real gxmin[NDIM];
        #endif   
 };
 

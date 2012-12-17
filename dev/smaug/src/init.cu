@@ -167,7 +167,10 @@ int ni=p->n[0];
                  #endif
 
                    //init_user_i(w,p,ii);  //initilise using w field
-                   init_user_i(wmod,p,ii);
+
+                   //commented out because spicule problem
+                   //constructed on host
+                   ;//init_user_i(wmod,wd,p,ii);
            #endif
 
 	
@@ -822,6 +825,7 @@ bound*(           (((p->n[0])+2)*((p->n[1])+2))      )+   (  (ix+iy*((p->n[0])+2
 }
 
 
+#ifdef USE_MPI
 
      __device__ __host__ void mpiwtogpu(struct params *p,real *d_w,real *d_wmod,real *d_mpiw0,real *d_mpiwmod0,real *d_mpiw1,real *d_mpiwmod1,real *d_mpiw2,real *d_mpiwmod2,int *ii, int var, int dim)
     {
@@ -2140,6 +2144,8 @@ int dim;
                
 }
 
+#endif
+
 
 
 /////////////////////////////////////
@@ -2276,92 +2282,97 @@ int cuinit(struct params **p, struct bparams **bp, real **wmod,real **wnew, real
    
   dimp=(((*p)->n[0]))*(((*p)->n[1]))*(((*p)->n[2]));
 #endif  
+if((*p)->mode != 3)
+{
+	if(((*p)->rkon)==1)
+	  cudaMalloc((void**)d_wmod, 6*NVAR*dimp*sizeof(real));
+	else
+	  cudaMalloc((void**)d_wmod, 3*NVAR*dimp*sizeof(real));
 
-if(((*p)->rkon)==1)
-  cudaMalloc((void**)d_wmod, 6*NVAR*dimp*sizeof(real));
-else
-  cudaMalloc((void**)d_wmod, 3*NVAR*dimp*sizeof(real));
-
-  cudaMalloc((void**)d_dwn1, NVAR*dimp*sizeof(real));
-  cudaMalloc((void**)d_wd, NDERV*dimp*sizeof(real));
-  cudaMalloc((void**)d_wtemp, NTEMP*dimp*sizeof(real));
-
-
-  #ifdef USE_SAC
-  cudaMalloc((void**)d_wtemp1, NTEMP1*(((*p)->n[0])+1)* (((*p)->n[1])+1)*sizeof(real));
-  cudaMalloc((void**)d_wtemp2, NTEMP2*(((*p)->n[0])+2)* (((*p)->n[1])+2)*sizeof(real));
-  #endif
-  #ifdef USE_SAC_3D
-  cudaMalloc((void**)d_wtemp1, NTEMP1*(((*p)->n[0])+1)* (((*p)->n[1])+1)* (((*p)->n[2])+1)*sizeof(real));
-  cudaMalloc((void**)d_wtemp2, NTEMP2*(((*p)->n[0])+2)* (((*p)->n[1])+2)* (((*p)->n[2])+2)*sizeof(real));
-  #endif
-
-  //cudaMalloc((void**)&adw, NVAR*dimp*sizeof(real));
-  //cudaMalloc((void**)&adwnew, NVAR*dimp*sizeof(real));
-
-  cudaMalloc((void**)&adbp, sizeof(struct bparams));
-  cudaMalloc((void**)&adp, sizeof(struct params));
-  cudaMalloc((void**)&ads, sizeof(struct state));
- // checkErrors_i("memory allocation");
-
-printf("ni is %d\n",(*p)->n[1]);
-
-   // *d_b=adb;
-    *d_bp=adbp;
-    *d_p=adp;
-    //*d_w=adw;
-    //*d_wnew=adwnew;
-    *d_state=ads;
-
-     
-//printf("allocating %d %d %d %d\n",dimp,(*p)->n[0],(*p)->n[1],(*p)->n[2]);
-printf("allocating %d %d %d \n",dimp,(*p)->n[0],(*p)->n[1]);
+	  cudaMalloc((void**)d_dwn1, NVAR*dimp*sizeof(real));
+	  cudaMalloc((void**)d_wd, NDERV*dimp*sizeof(real));
+	  cudaMalloc((void**)d_wtemp, NTEMP*dimp*sizeof(real));
 
 
+	  #ifdef USE_SAC
+	  cudaMalloc((void**)d_wtemp1, NTEMP1*(((*p)->n[0])+1)* (((*p)->n[1])+1)*sizeof(real));
+	  cudaMalloc((void**)d_wtemp2, NTEMP2*(((*p)->n[0])+2)* (((*p)->n[1])+2)*sizeof(real));
+	  #endif
+	  #ifdef USE_SAC_3D
+	  cudaMalloc((void**)d_wtemp1, NTEMP1*(((*p)->n[0])+1)* (((*p)->n[1])+1)* (((*p)->n[2])+1)*sizeof(real));
+	  cudaMalloc((void**)d_wtemp2, NTEMP2*(((*p)->n[0])+2)* (((*p)->n[1])+2)* (((*p)->n[2])+2)*sizeof(real));
+	  #endif
 
+	  //cudaMalloc((void**)&adw, NVAR*dimp*sizeof(real));
+	  //cudaMalloc((void**)&adwnew, NVAR*dimp*sizeof(real));
 
-printf("here1\n");
+	  cudaMalloc((void**)&adbp, sizeof(struct bparams));
+	  cudaMalloc((void**)&adp, sizeof(struct params));
+	  cudaMalloc((void**)&ads, sizeof(struct state));
+	 // checkErrors_i("memory allocation");
+
+	printf("ni is %d\n",(*p)->n[1]);
+
+	   // *d_b=adb;
+	    *d_bp=adbp;
+	    *d_p=adp;
+	    //*d_w=adw;
+	    //*d_wnew=adwnew;
+	    *d_state=ads;
+
+	     
+	//printf("allocating %d %d %d %d\n",dimp,(*p)->n[0],(*p)->n[1],(*p)->n[2]);
+	printf("allocating %d %d %d \n",dimp,(*p)->n[0],(*p)->n[1]);
 
 
 
 
-
-
- 
-    printf("here2\n");
-
-    //cudaMemcpy(*d_w, *w, NVAR*dimp*sizeof(real), cudaMemcpyHostToDevice);
-    cudaMemcpy(*d_wmod, *wmod, 2*(1+(((*p)->rkon)==1))*NVAR*dimp*sizeof(real), cudaMemcpyHostToDevice);
-    cudaMemcpy(*d_wd, *wd, NDERV*dimp*sizeof(real), cudaMemcpyHostToDevice);
+	printf("here1\n");
 
 
 
 
 
 
-printf("here3\n");
+	 
+	    printf("here2\n");
+
+	    //cudaMemcpy(*d_w, *w, NVAR*dimp*sizeof(real), cudaMemcpyHostToDevice);
+	    cudaMemcpy(*d_wmod, *wmod, 2*(1+(((*p)->rkon)==1))*NVAR*dimp*sizeof(real), cudaMemcpyHostToDevice);
+	    cudaMemcpy(*d_wd, *wd, NDERV*dimp*sizeof(real), cudaMemcpyHostToDevice);
 
 
 
 
 
 
-   // cudaMemcpy(*d_wnew, *wnew, 8*((*p)->n[0])* ((*p)->n[1])*sizeof(real), cudaMemcpyHostToDevice);
-    printf("here\n");
-    cudaMemcpy(*d_p, *p, sizeof(struct params), cudaMemcpyHostToDevice);
-    cudaMemcpy(*d_state, *state, sizeof(struct state), cudaMemcpyHostToDevice);
-    
-    dim3 dimBlock(16, 1);
-    //dim3 dimGrid(((*p)->n[0])/dimBlock.x,((*p)->n[1])/dimBlock.y);
-    dim3 dimGrid(((*p)->n[0])/dimBlock.x,((*p)->n[1])/dimBlock.y);
-   int numBlocks = (dimp+numThreadsPerBlock-1) / numThreadsPerBlock;
-   
+	printf("here3\n");
 
-    printf("calling initialiser\n");
-     //init_parallel(struct params *p, real *b, real *u, real *v, real *h)
-    // init_parallel<<<dimGrid,dimBlock>>>(*d_p,*d_b,*d_u,*d_v,*d_h);
-    // init_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,*d_w, *d_wnew, *d_b);
-     init_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wnew, *d_wmod, *d_dwn1,  *d_wd, *d_wtemp, *d_wtemp1, *d_wtemp2);
+
+
+
+
+
+	   // cudaMemcpy(*d_wnew, *wnew, 8*((*p)->n[0])* ((*p)->n[1])*sizeof(real), cudaMemcpyHostToDevice);
+	    printf("here\n");
+	    cudaMemcpy(*d_p, *p, sizeof(struct params), cudaMemcpyHostToDevice);
+	    cudaMemcpy(*d_state, *state, sizeof(struct state), cudaMemcpyHostToDevice);
+	    
+	    dim3 dimBlock(16, 1);
+	    //dim3 dimGrid(((*p)->n[0])/dimBlock.x,((*p)->n[1])/dimBlock.y);
+	    dim3 dimGrid(((*p)->n[0])/dimBlock.x,((*p)->n[1])/dimBlock.y);
+	   int numBlocks = (dimp+numThreadsPerBlock-1) / numThreadsPerBlock;
+	   
+
+	    printf("calling initialiser\n");
+	     //init_parallel(struct params *p, real *b, real *u, real *v, real *h)
+	    // init_parallel<<<dimGrid,dimBlock>>>(*d_p,*d_b,*d_u,*d_v,*d_h);
+	    // init_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,*d_w, *d_wnew, *d_b);
+	     init_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wnew, *d_wmod, *d_dwn1,  *d_wd, *d_wtemp, *d_wtemp1, *d_wtemp2);
+
+
+}//end of if(p->mode !=3)
+
      //cudaThreadSynchronize();
      
 
@@ -2372,7 +2383,15 @@ printf("here3\n");
  
     //cudaMemcpy(*w, *d_w, NVAR*dimp*sizeof(real), cudaMemcpyDeviceToHost);
 
-
+/*if((*p)->mode==3)
+{
+  
+  int ii[3];
+  ii[0]=0;
+  ii[1]=0;
+  ii[2]=0;
+ init_user_i(*wmod,*wd,*p,ii);
+}*/
 
 
 
@@ -2401,9 +2420,11 @@ printf("here3\n");
 
 	    printf("called initialiser\n");
 	//cudaMemcpy(*w, *d_w, NVAR*dimp*sizeof(real), cudaMemcpyDeviceToHost);
-
+if((*p)->mode !=3)
+{
 	cudaMemcpy(*state, *d_state, sizeof(struct state), cudaMemcpyDeviceToHost);
         cudaMemcpy(*p, *d_p, sizeof(struct params), cudaMemcpyDeviceToHost);
+}
 
 
 //checkErrors_i("memory allocation");checkErrors_i("memory allocation");

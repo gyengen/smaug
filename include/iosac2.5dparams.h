@@ -10,9 +10,8 @@ int ngk=2;
 #ifdef USE_SAC
 //vac ozt
 int ni;
-ni=122;    //OZT tests
-//ni=1018;    //OZT tests
-;//ni=1446;    //OZT tests
+//ni=252;    //OZT tests
+ni=1016;    //OZT tests
 ni=ni+2*ngi;
 //ni=512;
 //real xmax = 6.2831853;  
@@ -25,9 +24,8 @@ real dx = xmax/(ni);
 // Define the y domain
 #ifdef USE_SAC
 //vac ozt
-int nj = 122;  //OZT tests
-//int nj = 1018;  //OZT tests
-;//int nj = 1446;  //OZT tests
+//int nj = 252;  //OZT tests
+int nj = 1016;  //OZT tests
 //int nj=2;  //BW test
 nj=nj+2*ngj;
 //nj=512;
@@ -72,17 +70,15 @@ int finishsteering=0;
 //char *cfgfile="zero1.ini";
 
 //char *cfgfile="zero1_np020203.ini";
-//char *cfgfile="zero1_ot_asc_np0201.ini";
-//char *cfgfile="zero1_np0202_asc.ini";
-char *cfgfile="zero1_ot_asc.ini";
-;//char *cfgfile="zero1_ot_2044_asc.ini";
-;//char *cfgfile="zero1_ot_2892_asc.ini";
+//char *cfgfile="zero1_np0201.ini";
+//char *cfgfile="zero1_ot_asc.ini";
+char *cfgfile="zero1_ot_1020_asc.ini";
+//char *cfgfile="zero1_ot_asc_2048.ini";
 //char *cfgfile="zero1_BW_bin.ini";
 //char *cfgout="zero1_np010203."
-//char *cfgout="out/zeroOT";
-char *cfgout="tmpout/zero1_.out";
-char *cfggathout="out/zero1_.out";
-//char *cfgout="zero1_np0202.out";
+char *cfgout="out/zeroOT";
+//char *cfgout="zero1_np0201.out";
+
 
 
 
@@ -97,7 +93,7 @@ dt=0.0002;  //OZT test
 //nt=5000;
 //nt=200000;
 //nt=150000;
-nt=220;
+nt=110;
 
 
 real *t=(real *)calloc(nt,sizeof(real));
@@ -150,15 +146,15 @@ p->g[2]=0.0;
 p->cmax=0.02;
 
 p->rkon=0.0;
-p->sodifon=1.0;
+p->sodifon=0.0;
 p->moddton=0.0;
 p->divbon=0.0;
 p->divbfix=0.0;
 p->hyperdifmom=1.0;
 p->readini=1.0;
-p->cfgsavefrequency=20;
-p->noghost=0;
-p->fullgridini=1;
+p->cfgsavefrequency=100;
+
+
 p->xmax[0]=xmax;
 p->xmax[1]=ymax;
 p->nt=nt;
@@ -183,16 +179,14 @@ p->chyp[mom1]=0.4;
 p->chyp[mom2]=0.4;
 p->chyp[rho]=0.02;
 
+p->npe=1;
 
 
-
-#ifdef USE_MULTIGPU
+#ifdef USE_MPI
 //number of procs in each dim mpi only
 p->pnpe[0]=2;
-p->pnpe[1]=2;
+p->pnpe[1]=1;
 p->pnpe[2]=1;
-
-p->npe=4;
 #endif
 
 

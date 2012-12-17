@@ -1162,7 +1162,8 @@ if(mode==0)
 	     #endif
      }
 
- 
+    // if(p.mode==3)
+    //    sprintf(configfile,"%s",cfgfile);
    #else
 
 
@@ -1179,7 +1180,8 @@ if(mode==0)
    //hlines=(char **)calloc(5, sizeof(char*));
 
    //printf("here %s\n",hlines[0]);
-   fprintf(fdt,"%s\n", hlines[0]);
+   //fprintf(fdt,"%s\n", hlines[0]);
+   fprintf(fdt,"%s\n", md.name);
    //read 5 header lines
 
       //*line2:
@@ -1195,18 +1197,36 @@ if(mode==0)
      printf("%d %g %d 7 %d\n", st.it,st.t,NDIM,NVAR);
     #else
      fprintf(fdt,"%d %lg %d 6 %d\n", st.it,st.t,NDIM,NVAR);
-     printf("%d %g %d 6 %d\n", st.it,st.t,NDIM,NVAR);
+     printf("ascii write %d %g %d 6 %d\n", st.it,st.t,NDIM,NVAR);
    #endif
 
-    
+       #ifdef USE_SAC
+      fprintf(fdt,"%d %d\n",ni,nj);
+    #endif
+    #ifdef USE_SAC_3D
+      fprintf(fdt,"%d %d %d\n",ni,nj,nk);
+    #endif 
 
+     //*line4:
+      //*   eqpar()     - equation parameters from filenameini (neqpar reals)
+      //sprintf(buffer,"%lg %lg %lg %lg %lg %lg\n",p.gamma,p.eta,p.g[0],p.g[1],0,0);
 
-   for(i=2;i<=4;i++)
-   {
-     fprintf(fdt,"%s\n", hlines[i]);
-     printf("%s\n",hlines[i]);
-    }
+    #ifdef USE_SAC
+      fprintf(fdt,"%lg %lg %lg %lg %d %d\n",p.gamma,p.eta,p.g[0],p.g[1],0,0);
+    #endif
+    #ifdef USE_SAC_3D
+      fprintf(fdt,"%lg %lg %lg %lg %lg %d %d\n",p.gamma,p.eta,p.g[0],p.g[1],p.g[2],0,0);
+    #endif
 
+      //*line5:
+      //*   varnames    - names of the coordinates, variables, equation parameters
+      //*                 eg. 'x y rho mx my e bx by  gamma eta' (character*79)
+
+    #ifdef USE_SAC_3D
+      fprintf(fdt,"x y z rho mx my mz e bx by bz gamma eta g1 g2 g3\n");
+    #else
+      fprintf(fdt,"x y rho mx my e bx by  gamma eta g1 g2\n");
+    #endif
 
 
 #ifdef USE_SAC_3D
@@ -1224,7 +1244,7 @@ for( k1=ks;k1<(kf);k1++)
                          //shift=(j1*ni+i1);
                          //fprintf(fdt,"%lE %lE %lE %lE %lE %lE %lE %lE %lE %lE %lE %lE\n",wd[shift+ni*nj*pos1],wd[shift+ni*nj*pos2],w[shift],w[shift+(ni*nj)],w[shift+(ni*nj*2)],w[shift+(ni*nj*3)],w[shift+(ni*nj*4)],w[shift+(ni*nj*5)],w[shift+(ni*nj*6)],w[shift+(ni*nj*7)],w[shift+(ni*nj*8)],w[shift+(ni*nj*9)]);
 
-
+                         //printf(" %g %d ",w[shift],shift);
 
 #ifdef USE_SAC_3D
                          shift=(k1*ni*nj+j1*ni+i1);
@@ -1389,6 +1409,39 @@ int oshift;
   #endif
   //free(hlines);
   return status;
+}
+
+
+void readatmos(params p,real *w)
+{
+int n=-1;
+int count;
+real h,rho0;
+char s1[100], s2[100];
+FILE *fatmos;
+if(fatmos=fopen("test.dat","r"))
+{
+//fprintf(fatmos,"%f %f %n\n",1.3,1.4);
+//rewind(fatmos);
+
+for(int i=0;i<4;i++)
+{
+count=fscanf(fatmos, " %s %s %n", s1, s2,&n);
+//freadl_ui(fatmos,&inbuf);
+if(-1 == n) printf("parse failed\n");
+printf("fatmos read   %s %s %d\n",s1,s2,count);
+}
+fclose(fatmos);
+}
+else
+{
+printf("failed\n");
+}
+
+
+
+
+
 }
 
 

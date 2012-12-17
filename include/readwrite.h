@@ -17,3 +17,4 @@ int readbinvacconfig(char *name,params p, meta md, real *w,real *wd, state st);
 int writeasciivacconfig(char *cfgfile, params p, meta md, real *w,real *wd, char **hlines, state st, int mode);
 int createconfigsegment(params p,  real *wnew,real *wdnew, real *w,real *wd);
 int gathersegment(params p,  real *wnew,real *wdnew, real *w,real *wd);
+void readatmos(params p,real *w);

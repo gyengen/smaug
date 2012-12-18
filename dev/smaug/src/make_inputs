@@ -12,8 +12,8 @@ Bin	=	../bin
 obj	=	../obj
 MYLIBS  =
 
-#CUDA = /usr/local/cuda
-CUDA = /usr/local/cuda-5.0
+CUDA = /usr/local/cuda
+#CUDA = /usr/local/cuda-5.0
 
 BASE = /usr/local/dx
 incDirs = -I$(BASE)/include  -I$(IOME_HOME)/include  -I/usr/local/include -I$(CUDA)/include -I$../include

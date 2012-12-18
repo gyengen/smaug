@@ -69,7 +69,7 @@ int finishsteering=0;
 
 //char *cfgfile="zero1_np020203.ini";
 //char *cfgfile="zero1_np0201.ini";
-char *cfgfile="zero1_ot_asc.ini";
+char *cfgfile="configs/zero1_ot_asc.ini";
 //char *cfgfile="zero1_ot_asc_2048.ini";
 //char *cfgfile="zero1_BW_bin.ini";
 //char *cfgout="zero1_np010203."

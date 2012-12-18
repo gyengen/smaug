@@ -56,7 +56,7 @@ INCLUDES = $(IOME_INLUDES)
 
 
 BASICEXOBJS	=\
-	iosac2.5d.o\
+	iosmaug.o\
 	initialisation.o\
 	dxroutines.o\
 	hyperdifmomsource1.o\

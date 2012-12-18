@@ -53,7 +53,7 @@ int steeringenabled=1;
 int finishsteering=0;
 char configfile[300];
 //char *cfgfile="zero1.ini";
-char *cfgfile="zero1_BW_asc.ini";
+char *cfgfile="configs/zero1_BW_asc.ini";
 //char *cfgfile="zero1_BW_bin.ini";
 char *cfgout="out/zeroOT";
 

@@ -11,8 +11,12 @@ oDir	=	.
 Bin	=	../bin
 obj	=	../obj
 MYLIBS  =
+
+#CUDA = /usr/local/cuda
+CUDA = /usr/local/cuda-5.0
+
 BASE = /usr/local/dx
-incDirs = -I$(BASE)/include  -I$(IOME_HOME)/include  -I/usr/local/include -I/usr/local/cuda/include -I$../include
+incDirs = -I$(BASE)/include  -I$(IOME_HOME)/include  -I/usr/local/include -I$(CUDA)/include -I$../include
 
 
 LD_FLAGS =	-g
@@ -36,7 +40,7 @@ CCFLAGS = -DUSE_SAC -DD1D
 
 
 
-LIBS	=	-L/usr/local/cuda/lib -L/usr/local/cuda/lib64 -L/usr/local/lib/nvidia-cuda/toolkit/4.0.17/lib64  -L../lib -L/usr/local/lib -lm $(IOMELIBS) -lcudart
+LIBS	=	-L$(CUDA)/lib -L$(CUDA)/lib64   -L../lib -L/usr/local/lib -lm $(IOMELIBS) -lcudart
 
 
 #C_FLAGS

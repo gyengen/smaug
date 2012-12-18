@@ -40,9 +40,11 @@ LIBS	=	-L/usr/local/lib/nvidia-cuda/toolkit/4.0.17/lib64 -L/usr/local/cuda/lib64
 
 #C_FLAGS
 #NVC_FLAGS	= -g -Dlinux -DBASE=\"$(BASE)\" -DIO_XERCESCVERSION=xercesc_2_8 -DIO_FORTRAN
-NVC_FLAGS	= -g -Dlinux -DBASE=\"$(BASE)\" 
+#NVC_FLAGS	= -g -Dlinux -DBASE=\"$(BASE)\" 
+NVC_FLAGS	= -O4 -Dlinux -DBASE=\"$(BASE)\" 
 
-C_FLAGS	= -g -Dlinux -DBASE=\"$(BASE)\"  -DIO_FORTRAN $(incDirs) $(IOME_C_FLAGS)
+##C_FLAGS	= -g -Dlinux -DBASE=\"$(BASE)\"  -DIO_FORTRAN $(incDirs) $(IOME_C_FLAGS)
+C_FLAGS	= -O4 -Dlinux -DBASE=\"$(BASE)\"  -DIO_FORTRAN $(incDirs) $(IOME_C_FLAGS)
 
 
 

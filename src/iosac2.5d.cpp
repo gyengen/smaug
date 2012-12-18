@@ -123,6 +123,9 @@ sprintf(configfile,"%s",cfgout);
 
      #endif
           sprintf(configinfile,"%s",cfgfile);
+
+     //adopt the sac MPI naming convention append the file name npXXYY where XX and YY are the
+     //number of processors in the x and y directions
      #ifdef USE_MPI
 	     #ifdef USE_SAC3D
 		      if(p->ipe>99)
@@ -390,7 +393,8 @@ char *method=NULL;
         //scatter/distribute configuration across each CPU
         if(mode==1)
         {
-	       if(p->ipe==0)
+	       gpusync();
+               if(p->ipe==0)
 	       {
 
 
@@ -450,6 +454,7 @@ char *method=NULL;
 
 		  }
 		}
+                gpusync();
         }
  
 
@@ -574,21 +579,11 @@ char *method=NULL;
 
 
 
-         d_gwnew=(real **)malloc((p->npe)*sizeof(real *));
-         //d_gw=(real **)malloc(p->npe*sizeof(real *));
-	 d_gwtemp=(real **)malloc(p->npe*sizeof(real *));
-	 d_gwtemp1=(real **)malloc(p->npe*sizeof(real *));
-	 d_gwtemp2=(real **)malloc(p->npe*sizeof(real *));
-         d_gwmod=(real **)malloc(p->npe*sizeof(real *));
-         d_gdwn1=(real **)malloc(p->npe*sizeof(real *));
-         d_gwd=(real **)malloc(p->npe*sizeof(real *));
+
 
 	int order=0;
 
-	struct params **d_gp=(struct params **)malloc(p->npe*sizeof(struct params *));
-	struct state **d_gstate=(struct state **)malloc(p->npe*sizeof(struct state *));
-	struct bparams **d_gbp=(struct bparams **)malloc(p->npe*sizeof(struct bparams *));
-        int igid=0;  //the GPU id defaults to 0 for single GPU case or for MPI)
+
 
 /*FILE *fatmos;
 real ht,rho0;
@@ -640,10 +635,17 @@ fclose(fatmos);*/
 
 
 
+//gpusync();
+//printf("proc init here1 %d\n",p->ipe);
+
+
+        	//cuinit(&p,&bp,&wmod,&wnew,&wd,&state,&d_gp[igid],&d_gbp[igid],&d_gwnew[igid],&d_gwmod[igid], &d_gdwn1[igid],  &d_gwd[igid], &d_gstate[igid],&d_gwtemp[igid],&d_gwtemp1[igid],&d_gwtemp2[igid]);
 
 
 
-        	cuinit(&p,&bp,&wmod,&wnew,&wd,&state,&d_gp[igid],&d_gbp[igid],&d_gwnew[igid],&d_gwmod[igid], &d_gdwn1[igid],  &d_gwd[igid], &d_gstate[igid],&d_gwtemp[igid],&d_gwtemp1[igid],&d_gwtemp2[igid]);
+cuinit(&p,&bp,&wmod,&wnew,&wd,&state,&d_p,&d_bp,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
+//gpusync();
+//printf("proc init here2 %d\n",p->ipe);
 
 //cuinit(&p,&bp,&w,&wnew,&wd,&state,&d_gp[igid],&d_bp,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
 
@@ -651,8 +653,8 @@ fclose(fatmos);*/
 
         
 
-        igid=0;
-        d_w=d_gw[igid];
+        //igid=0;
+        /*d_w=d_gw[igid];
         d_wnew=d_gwnew[igid];
         d_wmod=d_gwmod[igid];
         d_dwn1=d_gdwn1[igid];
@@ -664,13 +666,15 @@ fclose(fatmos);*/
 
         d_p=d_gp[igid];
         d_bp=d_gbp[igid];
-        d_state=d_gstate[igid];
+        d_state=d_gstate[igid];*/
         //same as the grid initialisation routine in SAC
         //ensures boundaries defined correctly
 	
-
+         
 
 	  #ifdef USE_MPI
+//gpusync();
+//printf("proc init here3 %d\n",p->ipe);
 
     cuinitmgpubuffers(&p, &w, &wmod, &temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,   &gmpiw0, &gmpiwmod0,   &gmpiw1, &gmpiwmod1,   &gmpiw2, &gmpiwmod2, &d_p, &d_w, &d_wmod,&d_wtemp2,  &d_gmpivisc0,  &d_gmpivisc1,  &d_gmpivisc2, &d_gmpiw0, &d_gmpiwmod0, &d_gmpiw1, &d_gmpiwmod1, &d_gmpiw2, &d_gmpiwmod2);
 
@@ -700,7 +704,7 @@ p->it=-1;
 
 
 
-
+         
 
  		   cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order,0);
                    gpusync();
@@ -727,6 +731,7 @@ gpusync();
 
 #endif
 
+         printf("proc init here3 %d\n",p->ipe);
 
 
 /*if((p)->ipe==0) 
@@ -771,15 +776,16 @@ for(iii[0]=0; iii[0]<((p)->n[0]); iii[0]++)
 
 
 
-         cuupdatehostwd(&p,&wd,&wmod,&temp2,&state,&d_gp[igid],&d_gwd[igid],&d_gwmod[igid],&d_gwtemp2[igid],  &d_gstate[igid],n);
-
+         //cuupdatehostwd(&p,&wd,&wmod,&temp2,&state,&d_gp[igid],&d_gwd[igid],&d_gwmod[igid],&d_gwtemp2[igid],  &d_gstate[igid],n);
+         cuupdatehostwd(&p,&wd,&wmod,&temp2,&state,&d_p,&d_wd,&d_wmod,&d_wtemp2,  &d_state,n);
 
 
 
 
  
 	//initgrid(&p,&w,&wnew,&state,&wd,&d_p,&d_gw[igid],&d_wnew,&d_wmod, &d_dwn1,  &d_gwd[igid], &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
-	initgrid(&p,&state,&wd,&d_gp[igid], &d_gdwn1[igid],  &d_gwd[igid], &d_gstate[igid],&d_gwtemp[igid],&d_gwtemp1[igid],&d_gwtemp2[igid]);
+	//initgrid(&p,&state,&wd,&d_gp[igid], &d_gdwn1[igid],  &d_gwd[igid], &d_gstate[igid],&d_gwtemp[igid],&d_gwtemp1[igid],&d_gwtemp2[igid]);
+initgrid(&p,&state,&wd,&d_p, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
 printf("grid initialised\n");
 
 
@@ -801,7 +807,7 @@ printf("grid initialised\n");
 
 
 
-        igid=0;
+//        igid=0;
         cusync(&p);
 
 
@@ -818,7 +824,7 @@ printf("grid initialised\n");
 	//initgrid(&p,&w,&wnew,&state,&wd,&d_gp[igid],&(d_gw[igid]),&d_gwnew[igid],&d_gwmod[igid], &d_gdwn1[igid],  &d_gwd[igid], &d_gstate[igid],&d_gwtemp[igid],&d_gwtemp1[igid],&d_gwtemp2[igid]);
 
 
-        igid=0;
+  //      igid=0;
         cusync(&p);
 
 
@@ -833,7 +839,7 @@ printf("grid initialised\n");
 	//initgrid(&p,&w,&wnew,&state,&wd,&d_p,&d_gw[igid],&d_wnew,&d_wmod, &d_dwn1,  &d_gwd[igid], &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
 	;//initgrid(&p,&w,&wnew,&state,&wd,&d_gp[igid],&d_gw[igid],&d_gwnew[igid],&d_gwmod[igid], &d_gdwn1[igid],  &d_gwd[igid], &d_gstate[igid],&d_gwtemp[igid],&d_gwtemp1[igid],&d_gwtemp2[igid]);
 
-        igid=0;
+       // igid=0;
         cusync(&p);
         #endif //use_MPI
 
@@ -1645,11 +1651,11 @@ printf("mpi trans mpiwmod\n");
         //initgrid(&p,&w,&wnew,&state,&wd,&d_p,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
         //cuupdate(&p,&w,&wmod,&temp2,&state,&d_gp[igid],&d_gw[igid],&d_gwmod[igid],&d_gwtemp2[igid],  &d_gstate[igid],n);
         //if(igid != 3)
-         cuupdate(&p,&w,&wmod,&temp2,&state,&d_gp[igid],&d_gw[igid],&d_gwmod[igid],&d_gwtemp2[igid],  &d_gstate[igid],n);
+         cuupdate(&p,&w,&wmod,&temp2,&state,&d_p,&d_w,&d_wmod,&d_wtemp2,  &d_state,n);
 	//initgrid(&p,&w,&wnew,&state,&wd,&d_p,&d_gw[igid],&d_wnew,&d_wmod, &d_dwn1,  &d_gwd[igid], &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
 	//initgrid(&p,&w,&wnew,&state,&wd,&d_gp[igid],&d_gw[igid],&d_gwnew[igid],&d_gwmod[igid], &d_gdwn1[igid],  &d_gwd[igid], &d_gstate[igid],&d_gwtemp[igid],&d_gwtemp1[igid],&d_gwtemp2[igid]);
 
-        igid=0;
+       // igid=0;
         cusync(&p);
 
 
@@ -1705,9 +1711,9 @@ printf("mpi trans mpiwmod\n");
          printf("at cufinish end here\n");
 
 
-        cufinish(&p,&w,&wnew,&state,&d_gp[igid],&d_gbp[igid],&d_gw[igid],&d_gwnew[igid],&d_gwmod[igid], &d_gdwn1[igid],  &d_gwd[igid], &d_gstate[igid],&d_gwtemp[igid],&d_gwtemp1[igid],&d_gwtemp2[igid]);
+        cufinish(&p,&w,&wnew,&state,&d_p,&d_bp,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
 
-        igid=0;
+        //igid=0;
         cusync(&p);
 
 
@@ -1727,7 +1733,7 @@ printf("mpi trans mpiwmod\n");
 
 //free(d_gwnew);
 //free(d_gw);
-free(d_gwtemp);
+/*free(d_gwtemp);
 free(d_gwtemp1);
 free(d_gwtemp2);
 free(d_gwmod);
@@ -1736,7 +1742,7 @@ free(d_gwd);
 
 free(d_gp);
 free(d_gstate);
-free(d_gbp);
+free(d_gbp);*/
 
 
 	#ifdef USE_IOME

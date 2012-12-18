@@ -1,7 +1,7 @@
 #Makefile for StarSimulation IoSimTestSimple
 
 ##### User configurable options #####
-include make_inputs_mpi
+include make_inputs
 ### End User configurable options ###
 
 
@@ -30,97 +30,97 @@ ALLBIN	=	$(Bin)/smaug
 ##all:	IoSimTestSimple
 
 fluxtube1:
-	cp ../models/iosac2.5d_params.h.fluxtube1 ../include/iosac2.5dparams.h
+	cp ../models/iosmaugparams.h.fluxtube1 ../include/iosmaugparams.h
 	cp ../models/init_user.cu.fluxtube1 ../src/init_user.cu
 	cp ../models/boundary.cu.fluxtube1 ../src/boundary.cu
 	cp ../models/usersource.cu.fluxtube1 ../src/usersource.cu
 	cp ../models/initialisation_user.h.default ../include/initialisation_user.h
 
 spiculejet1:
-	cp ../models/iosac2.5d_params.h.spiculejet1 ../include/iosac2.5dparams.h
+	cp ../models/iosmaugparams.h.spiculejet1 ../include/iosmaugparams.h
 	cp ../models/init_user.cu.spiculejet1 ../src/init_user.cu
 	cp ../models/boundary.cu.spiculejet1 ../src/boundary.cu
 	cp ../models/usersource.cu.spiculejet1 ../src/usersource.cu
 	cp ../models/initialisation_user.h.default ../include/initialisation_user.h
 
 spicule1:
-	cp ../models/iosac2.5d_params.h.spicule1 ../include/iosac2.5dparams.h
+	cp ../models/iosmaugparams.h.spicule1 ../include/iosmaugparams.h
 	cp ../models/init_user.cu.spicule1 ../src/init_user.cu
 	cp ../models/boundary.cu.spicule1 ../src/boundary.cu
 	cp ../models/usersource.cu.spicule1 ../src/usersource.cu
 	cp ../models/initialisation_user.h.default ../include/initialisation_user.h
 spicule1_mpi:
-	cp ../models/iosac2.5d_params.h.spicule1_mpi ../include/iosac2.5dparams.h
+	cp ../models/iosmaugparams.h.spicule1_mpi ../include/iosmaugparams.h
 	cp ../models/init_user.cu.spicule1_mpi ../src/init_user.cu
 	cp ../models/boundary.cu.spicule1_mpi ../src/boundary.cu
 	cp ../models/usersource.cu.spicule1_mpi ../src/usersource.cu
 	cp ../models/initialisation_user.h.spicule1_mpi ../include/initialisation_user.h
 sedov:
-	cp ../models/iosac2.5d_params.h.sedov ../include/iosac2.5dparams.h
+	cp ../models/iosmaugparams.h.sedov ../include/iosmaugparams.h
 	cp ../models/init_user.cu.sedov ../src/init_user.cu
 	cp ../models/boundary.cu.sedov ../src/boundary.cu
 	cp ../models/usersource.cu.default ../src/usersource.cu
 	cp ../models/initialisation_user.h.default ../include/initialisation_user.h
 
 bach:
-	cp ../models/iosac2.5d_params.h.bach ../include/iosac2.5dparams.h
+	cp ../models/iosmaugparams.h.bach ../include/iosmaugparams.h
 	cp ../models/init_user.cu.bach ../src/init_user.cu
 	cp ../models/boundary.cu.bach ../src/boundary.cu
 	cp ../models/usersource.cu.default ../src/usersource.cu
 	cp ../models/initialisation_user.h.default ../include/initialisation_user.h
 
 ah:
-	cp ../models/iosac2.5d_params.h.ah ../include/iosac2.5dparams.h
+	cp ../models/iosmaugparams.h.ah ../include/iosmaugparams.h
 	cp ../models/init_user.cu.ah ../src/init_user.cu
 	cp ../models/boundary.cu.ah ../src/boundary.cu
 	cp ../models/usersource.cu.default ../src/usersource.cu
 	cp ../models/initialisation_user.h.default ../include/initialisation_user.h
 
 bw:
-	cp ../models/iosac2.5d_params.h.bw ../include/iosac2.5dparams.h
+	cp ../models/iosmaugparams.h.bw ../include/iosmaugparams.h
 	cp ../models/init_user.cu.bw ../src/init_user.cu
 	cp ../models/boundary.cu.bw ../src/boundary.cu
 	cp ../models/usersource.cu.default ../src/usersource.cu
 	cp ../models/initialisation_user.h.default ../include/initialisation_user.h
 rt:
-	cp ../models/iosac2.5d_params.h.rt ../include/iosac2.5dparams.h
+	cp ../models/iosmaugparams.h.rt ../include/iosmaugparams.h
 	cp ../models/init_user.cu.rt ../src/init_user.cu
 	cp ../models/boundary.cu.rt ../src/boundary.cu
 	cp ../models/usersource.cu.default ../src/usersource.cu
 	cp ../models/initialisation_user.h.default ../include/initialisation_user.h
 kh:
-	cp ../models/iosac2.5d_params.h.kh ../include/iosac2.5dparams.h
+	cp ../models/iosmaugparams.h.kh ../include/iosmaugparams.h
 	cp ../models/init_user.cu.kh ../src/init_user.cu
 	cp ../models/boundary.cu.kh ../src/boundary.cu
 	cp ../models/usersource.cu.default ../src/usersource.cu
 	cp ../models/initialisation_user.h.default ../include/initialisation_user.h
 ot:
-	cp ../models/iosac2.5d_params.h.ot ../include/iosac2.5dparams.h
+	cp ../models/iosmaugparams.h.ot ../include/iosmaugparams.h
 	cp ../models/init_user.cu.ot ../src/init_user.cu
 	cp ../models/boundary.cu.ot ../src/boundary.cu
 	cp ../models/usersource.cu.default ../src/usersource.cu
 	cp ../models/initialisation_user.h.default ../include/initialisation_user.h
 ot_mpi:
-	cp ../models/iosac2.5dparams.h.ot_mpi ../include/iosac2.5dparams.h
+	cp ../models/iosmaugparams.h.ot_mpi ../include/iosmaugparams.h
 	cp ../models/init_user.cu.ot_mpi ../src/init_user.cu
 	cp ../models/boundary.cu.ot_mpi ../src/boundary.cu
 	cp ../models/usersource.cu.default ../src/usersource.cu
 	cp ../models/initialisation_user.h.default ../include/initialisation_user.h
 
 kink1:
-	cp ../models/iosac2.5d_params.h.kink1 ../include/iosac2.5dparams.h
+	cp ../models/iosmaugparams.h.kink1 ../include/iosmaugparams.h
 	cp ../models/init_user.cu.kink1 ../src/init_user.cu
 	cp ../models/boundary.cu.kink1 ../src/boundary.cu
 	cp ../models/usersource.cu.kink1 ../src/usersource.cu
 	cp ../models/initialisation_user.h.default ../include/initialisation_user.h
 kink2d:
-	cp ../models/iosac2.5d_params.h.kink2d ../include/iosac2.5dparams.h
+	cp ../models/iosmaugparams.h.kink2d ../include/iosmaugparams.h
 	cp ../models/init_user.cu.kink2d ../src/init_user.cu
 	cp ../models/boundary.cu.kink2d ../src/boundary.cu
 	cp ../models/usersource.cu.kink2d ../src/usersource.cu
 	cp ../models/initialisation_user.h.default ../include/initialisation_user.h
 alf:
-	cp ../models/iosac2.5d_params.h.alf ../include/iosac2.5dparams.h
+	cp ../models/iosmaugparams.h.alf ../include/iosmaugparams.h
 	cp ../models/init_user.cu.alf ../src/init_user.cu
 	cp ../models/boundary.cu.alf ../src/boundary.cu
 	cp ../models/usersource.cu.default ../src/usersource.cu
@@ -147,8 +147,8 @@ allsac:$(ALLOBJS)
 #ioshalloww:$(BASICEXOBJS)
 #	$(NVCC) --allow-multiple-defintion -g $(LIBS)  $(incDirs) -o $(Bin)/ioshalloww $(BASICEXOBJS) $(MYLIBS)
 smaug:$(BASICEXOBJS)
-	rm iosac2.5d.o
-	$(CC) $(C_FLAGS) $(CCFLAGS) $(incDirs) $(LINKFLAGS)  -o ../obj/iosac2.5d.o -c iosac2.5d.cpp
+	rm iosmaug.o
+	$(CC) $(C_FLAGS) $(CCFLAGS) $(incDirs) $(LINKFLAGS)  -o ../obj/iosmaug.o -c iosmaug.cpp
 	$(CC) -g $(LIBS)  $(incDirs) -o $(Bin)/smaug $(ALLOBJS) $(MYLIBS)
 
 

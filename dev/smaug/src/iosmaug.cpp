@@ -36,6 +36,12 @@ char *outfile=(char *)calloc(500,sizeof(char));
 char *formfile=(char *)calloc(500,sizeof(char));
 
 char configinfile[300];
+
+ real tcom,tcom1, tcom2,tv,tcal,tc;
+
+tcom=0.0;
+tcal=0.0;
+
 #include "../include/defs.h"
 #include "../include/iosmaugparams.h"
 
@@ -1081,7 +1087,7 @@ printf("mpi trans mpiwmod\n");
 
 
 
-
+ 
 
 	    if(((n-1)%(p->cfgsavefrequency))==0)
 	    {
@@ -1114,7 +1120,7 @@ printf("mpi trans mpiwmod\n");
 		  printf("\n******\n next proc \n*******\n");
           }*/
 	 
-     
+                printf("finished write routine\n");
 	    }
 
 
@@ -1124,7 +1130,7 @@ printf("mpi trans mpiwmod\n");
 	    order=0;
 	    t1=second();
 
-            printf("finished write routine\n");
+            
 
 
        /*********************************************************************************************************/
@@ -1132,6 +1138,7 @@ printf("mpi trans mpiwmod\n");
        /*********************************************************************************************************/
 	   if(p->moddton==1.0)
 	   {
+                tc=second();
 		p->maxcourant=0.0;
 		courantmax=0.0;
 		for(int dim=0; dim<=(NDIM-1); dim++)
@@ -1147,9 +1154,12 @@ printf("mpi trans mpiwmod\n");
 
 		if(n>1)
 		   cugetdtvisc1(&p,&d_p,&d_wmod, &wd,&d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2);
+                tcal+=(second()-tc);
 		#ifdef USE_MPI
+                   tv=second();
                    gpusync();
 		   mpiallreduce(&(p->maxviscoef), MPI_MAX);
+                   tcom+=(second()-tv);
 		#endif
 
 		printf("dtdiffvisc %20.10g  %20.10g\n",p->maxviscoef,p->dtdiffvisc);
@@ -1175,7 +1185,7 @@ printf("mpi trans mpiwmod\n");
 	{
 	  ordero=1;
 	  order=0;
-
+         tc=second();
 	  cucomputedervfields(&p,&d_p,&d_wmod, &d_wd,order);
 	  
 	 for(int dir=0;dir<NDIM; dir++)
@@ -1219,42 +1229,52 @@ printf("mpi trans mpiwmod\n");
 
 	  if(p->divbon==1)
 		       cudivb(&p,&d_p,&d_w,&d_wmod, &d_dwn1, &d_wd,order,ordero,p->dt);
-
+          tcal+=(second()-tc);
 
            /*********************************************************************************************************/
            /* Start  of hyperdiffusion contributions for single step*/
            /*********************************************************************************************************/
 	   if(p->hyperdifmom==1)
 	   {
+            tc=second();
 	    dt=(p->dt);
 		     p->maxviscoef=0.0;
 	    
 	    #ifdef USE_SHOCKVISC
 	       cunushk1(&p,&d_p,&d_wmod, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2);
 	    #endif
+            tcal+=(second()-tc);
             //density hyperdiffusion term
 	    for(int dim=0; dim<=(NDIM-1); dim++)
 	    {
-		      cucomputec(&p,&d_p,&d_wmod, &d_wd,order,dim);
-		      cucomputemaxc(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
+			tc=second();		      
+			cucomputec(&p,&d_p,&d_wmod, &d_wd,order,dim);
+			cucomputemaxc(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
+			 tcal+=(second()-tc);
 		      #ifdef USE_MPI
+			      tv=second();
                               gpusync();
 			      mpiallreduce(&(p->cmax), MPI_MAX);
+                              tcom+=(second()-tv);
 		      #endif
 		      cmax[dim]=p->cmax;
 		      cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
 
 		      #ifdef USE_MPIT
+                          tv=second();
 			  cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
                           gpusync();
 			  mpivisc(dim,p,gmpivisc0,gmpivisc1,gmpivisc2);
                           gpusync();
 			  cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
+			  tcom+=(second()-tv);
 		      #endif
+                      tc=second();
 		      cuhyperdifvisc1r(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
 		      cuhyperdifvisc1l(&p,&d_p,&d_wmod,&wd,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
 
 	              cuhyperdifrhosource1(&p,&d_p,&d_wmod, &d_dwn1, &d_wd,order,ordero,&d_wtemp,rho,dim,p->dt);
+                      tcal+=(second()-tc);
 	     } //end of rho hyperdif contributions for each direction
 
 
@@ -1263,21 +1283,25 @@ printf("mpi trans mpiwmod\n");
 	     {
 	        //cucomputec(&p,&d_p,&d_wmod, &d_wd,order,dim);
 		//cucomputemaxc(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
+                tc=second();
 		p->cmax=cmax[dim];
 		#ifdef USE_MPI
 		     ;// mpiallreduce(&(p->cmax), MPI_MAX);
 		#endif
 	        cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,energy,dim);
-
+                tcal+=(second()-tc);
 		#ifdef USE_MPI
+                        tv=second();
 			cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 			mpivisc(dim,p,gmpivisc0,gmpivisc1,gmpivisc2);
 			cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
+                        tcom+=(second()-tv);
 		#endif
-
+                tc=second();
 		cuhyperdifvisc1r(&p,&d_p,&d_wmod,&wd,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,energy,dim);
 		cuhyperdifvisc1l(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,energy,dim);	       
-	        cuhyperdifesource1(&p,&d_p,&d_wmod, &d_dwn1, &d_wd,order,ordero,&d_wtemp,energy,dim,dt);   
+	        cuhyperdifesource1(&p,&d_p,&d_wmod, &d_dwn1, &d_wd,order,ordero,&d_wtemp,energy,dim,dt); 
+                tcal+=(second()-tc);  
 	     }
 
         //momentum hyperdiffusion term
@@ -1290,13 +1314,17 @@ printf("mpi trans mpiwmod\n");
 			  #ifdef USE_MPI
 			     ;// mpiallreduce(&(p->cmax), MPI_MAX);
 			  #endif
+                          tc=second();
 		          cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,mom1+f,dim);
+                          tcal+=(second()-tc);
 		          #ifdef USE_MPI
-				  
+				  tv=second();
                                   cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 				 mpivisc(dim,p,gmpivisc0,gmpivisc1,gmpivisc2);
 				  cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
+                        tcom+=(second()-tv);
 	                 #endif
+                          tc=second();
 			 cuhyperdifvisc1r(&p,&d_p,&d_wmod,&wd,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,mom1+f,dim);
 			 cuhyperdifvisc1l(&p,&d_p,&d_wmod,&wd,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,mom1+f,dim);
 
@@ -1318,6 +1346,7 @@ printf("mpi trans mpiwmod\n");
 				  else
 				    cuhyperdifmomsourcene1(&p,&d_p,&d_wmod, &d_dwn1, &d_wd,order,ordero,&d_wtemp,f,dim,ii,ii0,p->dt);
 		        }
+                        tcal+=(second()-tc);
 		     }  //end of loop over dimensions and fields
 
 
@@ -1334,13 +1363,17 @@ printf("mpi trans mpiwmod\n");
 			       #ifdef USE_MPI
 			      		;//mpiallreduce(&(p->cmax), MPI_MAX);
 			       #endif
+                          tc=second();
 			       cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,b1+f,dim);
-
+                tcal+=(second()-tc);
 			       #ifdef USE_MPI
+                                  tv=second();
 				  cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 				  mpivisc(dim,p,gmpivisc0,gmpivisc1,gmpivisc2);
-				  cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);		 
+				  cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);	
+                        tcom+=(second()-tv);	 
 		               #endif
+                          tc=second();
 			       cuhyperdifvisc1r(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,b1+f,dim);
 			       cuhyperdifvisc1l(&p,&d_p,&d_wmod, &wd, &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,b1+f,dim);
 
@@ -1367,6 +1400,7 @@ printf("mpi trans mpiwmod\n");
 					  else
 					     cuhyperdifbsourcene1(&p,&d_p,&d_wmod, &d_dwn1, &d_wd,order,ordero,&d_wtemp,f,dim,jj,ii0,mm,sb,p->dt);		
 				}//end of compute cross-product term of b field hyperdiffusion terms
+                              tcal+=(second()-tc);
 		      }//end of loop over fields and dimensions
 
 	   }//closes if(p->hyperdifmom==1)
@@ -1375,8 +1409,9 @@ printf("mpi trans mpiwmod\n");
            /*********************************************************************************************************/
 
 	  //source terms
+          tc=second();
           cusource(&p,&d_p,&d_state,&d_w,&d_wmod, &d_dwn1, &d_wd,order, ordero,p->dt);
-
+                tcal+=(second()-tc);
 	  //cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, ordero,0,0);
 
 	} //end of if((p->rkon)==0)
@@ -1451,7 +1486,7 @@ printf("mpi trans mpiwmod\n");
 			#endif
 		  
 			cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
-			#ifdef USE_MPI
+			#ifdef USE_MPIT
 				cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
 				mpivisc(dim,p,gmpivisc0,gmpivisc1,gmpivisc2);
 				cucopyfrommpivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
@@ -1620,6 +1655,8 @@ printf("mpi trans mpiwmod\n");
          printf("\n");*/
     // }
         order=1;
+       
+        tcom1=second();
         for(int idir=0; idir<NDIM;idir++)
         {
                   gpusync();
@@ -1639,6 +1676,8 @@ printf("mpi trans mpiwmod\n");
  gpusync();
 
    }
+     tcom2=second()-tcom1;
+     tcom+=tcom2;
 	   
 	  #endif
 
@@ -1651,7 +1690,9 @@ printf("mpi trans mpiwmod\n");
         //initgrid(&p,&w,&wnew,&state,&wd,&d_p,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
         //cuupdate(&p,&w,&wmod,&temp2,&state,&d_gp[igid],&d_gw[igid],&d_gwmod[igid],&d_gwtemp2[igid],  &d_gstate[igid],n);
         //if(igid != 3)
+         tc=second();
          cuupdate(&p,&w,&wmod,&temp2,&state,&d_p,&d_w,&d_wmod,&d_wtemp2,  &d_state,n);
+                tcal+=(second()-tc);
 	//initgrid(&p,&w,&wnew,&state,&wd,&d_p,&d_gw[igid],&d_wnew,&d_wmod, &d_dwn1,  &d_gwd[igid], &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
 	//initgrid(&p,&w,&wnew,&state,&wd,&d_gp[igid],&d_gw[igid],&d_gwnew[igid],&d_gwmod[igid], &d_gdwn1[igid],  &d_gwd[igid], &d_gstate[igid],&d_gwtemp[igid],&d_gwtemp1[igid],&d_gwtemp2[igid]);
 
@@ -1676,7 +1717,7 @@ printf("mpi trans mpiwmod\n");
 
 	   t2=second()-t1;
 	   ttot+=t2;
-	   printf("step %d total time %f\n",n,ttot);
+	   printf("step %d time total=%f com=%f cal=%f\n",n,ttot,tcom,tcal);
 
 	   state->it=n;
 	   state->t=time+(p->dt);

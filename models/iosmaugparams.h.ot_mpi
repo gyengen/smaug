@@ -17,6 +17,7 @@ ni=ni+2*ngi;
 //ni=512;
 //real xmax = 6.2831853;  
 real xmax=1.0;
+real xmin=0.0;
 real dx = xmax/(ni);
 #endif
 
@@ -32,7 +33,8 @@ int nj = 122;  //OZT tests
 nj=nj+2*ngj;
 //nj=512;
 //real ymax = 6.2831853; 
-real ymax = 1.0;   
+real ymax = 1.0;
+real ymin=0.0;   
 real dy = ymax/(nj);    
 //nj=41;
 #endif
@@ -97,7 +99,7 @@ dt=0.0002;  //OZT test
 //nt=5000;
 //nt=200000;
 //nt=150000;
-nt=2020;
+nt=100;
 
 
 real *t=(real *)calloc(nt,sizeof(real));
@@ -156,7 +158,7 @@ p->divbon=0.0;
 p->divbfix=0.0;
 p->hyperdifmom=1.0;
 p->readini=1.0;
-p->cfgsavefrequency=20;
+p->cfgsavefrequency=1;
 p->noghost=0;
 p->fullgridini=1;
 p->xmax[0]=xmax;

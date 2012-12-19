@@ -87,13 +87,13 @@ char *cfgfile="2D_spicule_tube_8184_2044_asc.ini";
 //char *cfgout="/fastdata/cs1mkg/smaug/spicule_nohydros/zerospic1";
 //char *cfgout="/fastdata/cs1mkg/smaug/spicule2/zerospic1";
 //char *cfgout="/fastdata/cs1mkg/smaug/spicule3/zerospic1";
-char *cfgout="/fastdata/cs1mkg/smaug/spicule4/zerospic1";
+char *cfgout="/fastdata/cs1mkg/smaug/spicule1/zerospic1_.out";
 char *cfggathout="out/zero1_.out";
 //char *cfgout="zero1_np0201.out";
 
 #ifdef USE_SAC
 dt=0.0018;  //OZT test
-dt=0.00025;
+dt=0.0125;
 #endif
 
 
@@ -101,7 +101,7 @@ dt=0.00025;
 //nt=5000;
 //nt=200000;
 //nt=150000;
-nt=600000;
+nt=101;
 //nt=10000;
 
 
@@ -210,11 +210,19 @@ for(int ii=0; ii<NVAR; ii++)
 for(int idir=0; idir<NDIM; idir++)
 for(int ibound=0; ibound<2; ibound++)
 {
- (p->boundtype[ii][idir][ibound])=5;   
+ (p->boundtype[ii][idir][ibound])=0;   
   //(p->boundtype[ii][idir][ibound])=0;  //period=0 mpi=1 mpiperiod=2  cont=3 contcd4=4 fixed=5 symm=6 asymm=7
 }
 
 
+//fixed BC's in y direction
+for(int ii=0; ii<NVAR; ii++)
+for(int ibound=0; ibound<2; ibound++)
+{
+ int idir=0;
+ (p->boundtype[ii][idir][ibound])=5;   
+  //(p->boundtype[ii][idir][ibound])=0;  //period=0 mpi=1 mpiperiod=2  cont=3 contcd4=4 fixed=5 symm=6 asymm=7
+}
 
 
 

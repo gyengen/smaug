@@ -748,28 +748,39 @@ char *method=NULL;
 		{
 			cucomputec(&p,&d_p,&d_wmod, &d_wd,order,dim);
 			cucomputemaxc(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
-			cucomputemaxcourant(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
+			cucomputemaxcourant(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);  //potential bottleneck here
 		}
+
+		#ifdef USE_MPI
+                   tv=second();
+                   gpusync();
+		   mpiallreduce(&(p->maxcourant), MPI_MAX);
+                   tcom+=(second()-tv);
+		#endif
 	
 		if(     ((  (p->courant)/(p->maxcourant)  ))>1.0e-8  )
 		       p->dt=(p->courant)/(p->maxcourant);
-		printf("new dt is %g %g\n",(p->courant)/(p->maxcourant),p->dt);
+		//printf("new dt is %g %g\n",(p->courant)/(p->maxcourant),p->dt);
 
 		if(n>1)
 		   cugetdtvisc1(&p,&d_p,&d_wmod, &wd,&d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2);
                 tcal+=(second()-tc);
+                //printf("ipe %d dtdiffvisc %20.10g  %20.10g\n",p->ipe,p->maxviscoef,p->dtdiffvisc);
 		#ifdef USE_MPI
                    tv=second();
                    gpusync();
-		   mpiallreduce(&(p->maxviscoef), MPI_MAX);
+		   mpiallreduce(&(p->dtdiffvisc), MPI_MIN);
                    tcom+=(second()-tv);
 		#endif
 
-		printf("dtdiffvisc %20.10g  %20.10g\n",p->maxviscoef,p->dtdiffvisc);
-		if(1/(p->dtdiffvisc)>1.0e-8 && (p->dt)>((p->dtdiffvisc)) )
+		
+		if((p->dtdiffvisc)>1.0e-8 && (p->dt)>((p->dtdiffvisc)) )
 			                      			p->dt=(p->dtdiffvisc);
-		printf(" modified dt is %20.10g \n",p->dt);
-
+		#ifdef USE_MPI
+			printf(" on pe %d modified dt is %20.10g \n",p->ipe,p->dt);
+		#else
+			printf("modified dt is %20.10g \n",p->dt);
+		#endif
 		//include gravitational modification
 	   } 
        /*********************************************************************************************************/
@@ -863,7 +874,7 @@ char *method=NULL;
 		      cmax[dim]=p->cmax;
 		      cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
 
-		      #ifdef USE_MPIT
+		      #ifdef USE_MPI
                           tv=second();
 			  cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
                           gpusync();

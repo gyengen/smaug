@@ -72,11 +72,12 @@ name='zeroOT_'
 ;ndim=2
 ;n1=800
 ;n2=6
+pic=10
 for ipic=pic,pic do begin
 ;while not(eof(1)) do begin
 
-
-outfile=directory+name+strtrim(string(ipic),2)+'.out'
+picid=100L*ipic
+outfile=directory+name+strtrim(string(picid),2)+'.out'
 openr,1,outfile
 readu,1,headline
 readu,1,it,time,ndim,neqpar,nw
@@ -404,7 +405,7 @@ endcase
 
 image_p = TVRD_24()
 ;write_png,'/home/mikeg/proj/sac2.5d-cuda/'+indexss+'.png',image_p, red,green, blue
-write_png,'all'+indexss+'.png',image_p, red,green, blue
+;write_png,'all'+indexss+'.png',image_p, red,green, blue
 ;stop
 ;endwhile
 close,1

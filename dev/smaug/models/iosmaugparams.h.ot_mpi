@@ -1,6 +1,17 @@
 
+real cmax[NDIM];
+real courantmax;                
+char configfile[300];
+int nt;
+
+struct params *d_p;
+struct params *p=(struct params *)malloc(sizeof(struct params));
+
+struct state *d_state;
+struct state *state=(struct state *)malloc(sizeof(struct state));
 
 
+//number of ghost cells in each direction
 int ngi=2;
 int ngj=2;
 int ngk=2;
@@ -44,16 +55,7 @@ real dy = ymax/(nj);
 
 
 
-real cmax[NDIM];
-real courantmax;                
-char configfile[300];
-int nt;
 
-struct params *d_p;
-struct params *p=(struct params *)malloc(sizeof(struct params));
-
-struct state *d_state;
-struct state *state=(struct state *)malloc(sizeof(struct state));
 
 
   
@@ -77,7 +79,7 @@ int finishsteering=0;
 
 //char *cfgfile="zero1_np020203.ini";
 //char *cfgfile="zero1_ot_asc_np0201.ini";
-char *cfgfile="configs/zero1_ot_asc_252.ini";
+char *cfgfile="configfs/zero1_ot_asc_252.ini";
 //char *cfgfile="zero1_ot_asc.ini";
 ;//char *cfgfile="zero1_ot_2044_asc.ini";
 ;//char *cfgfile="zero1_ot_2892_asc.ini";
@@ -101,7 +103,7 @@ dt=0.0002;  //OZT test
 //nt=5000;
 //nt=200000;
 //nt=150000;
-nt=420;
+nt=50;
 
 
 real *t=(real *)calloc(nt,sizeof(real));
@@ -152,15 +154,15 @@ p->g[2]=0.0;
 #endif
 //p->cmax=1.0;
 p->cmax=0.02;
-
+p->courant=0.2;
 p->rkon=0.0;
 p->sodifon=1.0;
-p->moddton=0.0;
+p->moddton=1.0;
 p->divbon=0.0;
 p->divbfix=0.0;
 p->hyperdifmom=1.0;
 p->readini=1.0;
-p->cfgsavefrequency=20;
+p->cfgsavefrequency=1;
 p->noghost=0;
 p->fullgridini=1;
 p->xmax[0]=xmax;
@@ -203,6 +205,7 @@ p->npe=4;
 iome elist;
 meta meta;
 
+//should use enumeration to set boundary types
 //set boundary types
 for(int ii=0; ii<NVAR; ii++)
 for(int idir=0; idir<NDIM; idir++)

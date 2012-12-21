@@ -23,9 +23,9 @@ endif else begin
 loadct,0
 tek_color
 endelse
+pic=2
 
-
-
+for ipic=pic,pic do begin
 
 mass=dblarr(1)
 egas=dblarr(1)
@@ -71,18 +71,37 @@ close,2
 ;openr,1,'/home/mikeg/proj/sac2.5d-cuda/zero1_BW.ini',/f77_unf
 ;openr,1,'/home/mikeg/proj/sac2.5d-cuda/test_OT.out'
 ;directory='/home/mikeg/proj/sac2.5d-cuda/out_OT_withhyper/'
+;directory='../newout/'
+;directory='/fastdata/cs1mkg/smaug/spicule4/'
 directory='../out/'
+;directory='../tmpout/'
 ;pic=999
-name='zeroOT_'
+;name='zeroOT_'
+;name='zero1_ot_asc_np0801_000'
+;name='zeroOT1_np0201_00'
+;name='zero1_3_np0202_00'
+name='zero1_'
+;name='zero1_.out_'
+;name='zeroOT10'
+;name='zerospic1_'
 ;ndim=2
 ;n1=800
 ;n2=6
-for ipic=pic,pic do begin
+
 ;while not(eof(1)) do begin
 
 ;picid=ipic*5+4
+;picid=ipic*20L
 picid=ipic
+;picid=0
+;outfile='../zero1_ot_bin.ini'
+;outfile='../zero1_ot_bin.ini'
+;outfile='../zero1_ot_bin_np0202_003.ini'
+;outfile='../out/zero1_1_np0202_000.out'
 outfile=directory+name+strtrim(string(picid),2)+'.out'
+;outfile=directory+name+'.out'
+;outfile=directory+name+'.ini'
+;openr,1,outfile,/f77_unf
 openr,1,outfile
 readu,1,headline
 readu,1,it,time,ndim,neqpar,nw
@@ -104,19 +123,23 @@ yout=dblarr(2)
 
 n1=nx(0)
 n2=nx(1)
+
 x=dblarr(n1,n2,ndim)
 if (nn eq 0) then w=dblarr(n2,n1,nw)   ;was n1,n2,nw
 wi=dblarr(n1,n2)
+w=dblarr(n1,n2,nw)
 ;e2=dblarr(n1,n2)
 readu,1,x
 ;readu,1,e2
 ;e2=rotate(e2,1)
 for iw=0,nw-1 do begin
  readu,1,wi
- w(*,*,iw)=rotate(wi,1)
+ ;w(*,*,iw)=rotate(wi,1)
+  w(*,*,iw)=wi
 endfor
 
-
+;n1=nx(1)
+;n2=nx(0)
 
 Vt=dblarr(n1,n2)
 B=dblarr(n1,n2)
@@ -174,30 +197,42 @@ if (ii eq 1) then begin
 
 ;tvframe,reform(w(*,*,1)/(w(*,*,0)+w(*,*,7))),/bar,/sample, title='Vx', xtitle='x', ytitle='z',charsize=2.0    
 ;tvframe,reform(w(*,*,2)/(w(*,*,0)+w(*,*,7))),/bar,/sample, title='Vy', xtitle='x', ytitle='z',charsize=2.0   
-
+tvframe,(w(*,*,1)),/bar,/sample, title='Vx', xtitle='x', ytitle='z',charsize=2.0    
+tvframe,(w(*,*,2)),/bar,/sample, title='Vy', xtitle='x', ytitle='z',charsize=2.0
 
 
 ;tvframe,w(*,*,7)+w(*,*,0), /bar,title='log rho_b',/sample, xtitle='x', ytitle='y',charsize=2.0  
 
 ;stop
-tvframe,w(*,*,1)/(w(*,*,7)+w(*,*,0)), /bar,title='v1',/sample, xtitle='x', ytitle='y',charsize=2.0  
-tvframe,w(*,*,2)/(w(*,*,7)+w(*,*,0)), /bar,title='v2',xtitle='x',/sample, ytitle='z',charsize=2.0 
+;tvframe,rotate(w(*,*,1)/(w(*,*,7)+w(*,*,0)),1), /bar,title='v1',/sample, xtitle='x', ytitle='y',charsize=2.0 ,brange=[-200,200] 
+;tvframe,rotate(w(*,*,2)/(w(*,*,7)+w(*,*,0)),1), /bar,title='v2',xtitle='x',/sample, ytitle='z',charsize=2.0,brange=[-200,200]
 ;tvframe,w(200:220,120:140,1)/(w(200:220,120:140,7)+w(200:220,120:140,0)), /bar,title='v1',/sample, xtitle='x', ytitle='y',charsize=2.0  
 ;tvframe,w(200:220,120:140,2)/(w(200:220,120:140,7)+w(200:220,120:140,0)), /bar,title='v2',xtitle='x',/sample, ytitle='z',charsize=2.0 
 
 
 ;tvframe,w(*,*,1), /bar,title='v1',/sample, xtitle='x', ytitle='y',charsize=2.0  
 ;tvframe,w(*,*,2), /bar,title='v2',xtitle='x',/sample, ytitle='z',charsize=2.0 
-tvframe,w(*,*,3)+w(*,*,6),/bar,/sample, title='e', xtitle='x', ytitle='z', charsize=2.0                                                                                                   
+;tvframe,rotate(w(*,*,3)+w(*,*,6),1),/bar,/sample, title='e', xtitle='x', ytitle='z', charsize=2.0,brange=[0.2,0.415]
+tvframe,w(*,*,3)+w(*,*,6),/bar,/sample, title='e', xtitle='x', ytitle='z', charsize=2.0,brange=[0.2,0.415]
+;tvframe,rotate(w(*,*,3),1),/bar,/sample, title='e', xtitle='x', ytitle='z', charsize=2.0;,brange=[-1,14]
+
+
 
 ;;tvframe,w(*,*,6),/bar,/sample, title='eb',  xtitle='x', ytitle='z', charsize=2.0
-tvframe,w(*,*,7)+w(*,*,0), /bar,title='log rho_b',/sample, xtitle='x', ytitle='y',charsize=2.0
-;tvframe,w(*,*,0),/bar,/sample, title='rho',  xtitle='x', ytitle='z', charsize=2.0
+;;tvframe,rotate(w(*,*,7)+w(*,*,0),1), /bar,title='log rho_b',/sample, xtitle='x', ytitle='y',charsize=2.0,brange=[0.2,1.4] 
+;tvframe,rotate(w(*,*,0),1),/bar,/sample, title='rho',  xtitle='x', ytitle='z', charsize=2.0;,brange=[-2.0d-7,2.5d-7]
+tvframe,w(*,*,0),/bar,/sample, title='rho',  xtitle='x', ytitle='z', charsize=2.0;,brange=[0.22086,0.22134]
+;tvframe,w(*,124:132,0),/bar,/sample, title='rho',  xtitle='x', ytitle='z', charsize=2.0;,brange=[0.22086,0.22134]
 
-;tvframe,w(*,*,4),/bar,/sample, title='b_z',  xtitle='x', ytitle='z', charsize=2.0
-;tvframe,w(*,*,5),/bar,/sample, title='b_x',  xtitle='x', ytitle='z', charsize=2.0
-tvframe,w(*,*,4)+w(*,*,8),/bar,/sample, title='b_z',  xtitle='x', ytitle='z', charsize=2.0
-tvframe,w(*,*,5)+w(*,*,9),/bar,/sample, title='b_x',  xtitle='x', ytitle='z', charsize=2.0
+;tvframe,rotate(w(100:150,*,0),1),/bar,/sample, title='rho',  xtitle='x', ytitle='z', charsize=2.0;,brange=[-2.0d-7,2.5d-7]
+;velovect,rebin(rotate(w(*,*,2),1),8,16),rebin(rotate(w(*,*,1),1),8,16),length=3
+;plot_field,rotate(w(*,*,2),1),rotate(w(*,*,1),1),length=2,n=100,aspect=0.5
+;tvframe,rotate(w(*,*,4),1),/bar,/sample, title='b_z',  xtitle='x', ytitle='z', charsize=2.0;,brange=[-0.0004,0.0004]
+;tvframe,rotate(w(*,*,5),1),/bar,/sample, title='b_x',  xtitle='x', ytitle='z', charsize=2.0;,brange=[-0.0003,0.0003]
+tvframe,(w(*,*,4)),/bar,/sample, title='b_z',  xtitle='x', ytitle='z', charsize=2.0;,brange=[-0.0004,0.0004]
+tvframe,(w(*,*,5)),/bar,/sample, title='b_x',  xtitle='x', ytitle='z', charsize=2.0;,brange=[-0.0003,0.0003]
+;tvframe,rotate(w(*,*,4)+w(*,*,8),1),/bar,/sample, title='b_z',  xtitle='x', ytitle='z', charsize=2.0,brange=[-0.3,0.3] 
+;tvframe,rotate(w(*,*,5)+w(*,*,9),1),/bar,/sample, title='b_x',  xtitle='x', ytitle='z', charsize=2.0,brange=[-0.3,0.3]
 ;tvframe,w(*,*,8),/bar,/sample, title='bg_z',  xtitle='x', ytitle='z', charsize=2.0
 ;tvframe,w(*,*,9),/bar,/sample, title='bg_x',  xtitle='x', ytitle='z', charsize=2.0
 
@@ -399,18 +434,21 @@ indexs=strtrim(nn,2)
 maxa=[maxa,max(Vt)]
 
 
-indexs=strtrim(nn,2)
+indexs=strtrim(picid,2)
 
 a = strlen(indexs)                                                  
 case a of                                                           
- 1:indexss='0000'+indexs                                             
- 2:indexss='000'+indexs                                              
- 3:indexss='00'+indexs                                               
- 4:indexss='0'+indexs                                               
+ 1:indexss='0000000'+indexs                                             
+ 2:indexss='000000'+indexs                                              
+ 3:indexss='00000'+indexs                                               
+ 4:indexss='0000'+indexs 
+ 5:indexss='000'+indexs                                               
+ 6:indexss='00'+indexs  
+ 7:indexss='0'+indexs                                                           
 endcase   
 
-;image_p = TVRD_24()
-;write_png,'/home/mikeg/proj/sac2.5d-cuda/'+indexss+'.png',image_p, red,green, blue
+image_p = TVRD_24()
+;write_png,'/data/cs1mkg/smaug_mpi/Idl/images_ot/'+indexss+'.png',image_p, red,green, blue
 ;stop
 ;endwhile
 close,1

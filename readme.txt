@@ -36,10 +36,10 @@ SMAUG can be downloaded in 3 ways
 Method 1:
 
 Download the distribution
-http://smaug.googlecode.com/files/smaug_v1_rev255.tgz
+http://smaug.googlecode.com/files/smaug_v1_rev257.tgz
 
 Copy the distribution to a suitable directory in your working area and extract the distribution
-tar -zxvf smaug_v1_rev255.tgz
+tar -zxvf smaug_v1_rev256.tgz
 
 
 Method 2:

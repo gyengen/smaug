@@ -23,9 +23,15 @@ endif else begin
 loadct,0
 tek_color
 endelse
-pic=2
+npic=6002
+mxt=dblarr(npic)
+myt=dblarr(npic)
+et=dblarr(npic)
+rhot=dblarr(npic)
 
+;pic=5000L
 for ipic=pic,pic do begin
+;for ipic=0L,1000L do begin
 
 mass=dblarr(1)
 egas=dblarr(1)
@@ -71,19 +77,14 @@ close,2
 ;openr,1,'/home/mikeg/proj/sac2.5d-cuda/zero1_BW.ini',/f77_unf
 ;openr,1,'/home/mikeg/proj/sac2.5d-cuda/test_OT.out'
 ;directory='/home/mikeg/proj/sac2.5d-cuda/out_OT_withhyper/'
-;directory='../newout/'
-;directory='/fastdata/cs1mkg/smaug/spicule4/'
-directory='../out/'
-;directory='../tmpout/'
+;directory='/home/mike/swat/out_kep_h/'
+;directory='../../swat/out_kep_noh/'
+directory='../../iceberg/out_smaug_noh/'
+
+
+;directory='/fastdata/cs1mkg/smaug/ot_512/'
 ;pic=999
-;name='zeroOT_'
-;name='zero1_ot_asc_np0801_000'
-;name='zeroOT1_np0201_00'
-;name='zero1_3_np0202_00'
-name='zero1_'
-;name='zero1_.out_'
-;name='zeroOT10'
-;name='zerospic1_'
+name='zeroOT_'
 ;ndim=2
 ;n1=800
 ;n2=6
@@ -91,17 +92,9 @@ name='zero1_'
 ;while not(eof(1)) do begin
 
 ;picid=ipic*5+4
-;picid=ipic*20L
+;picid=ipic*10
 picid=ipic
-;picid=0
-;outfile='../zero1_ot_bin.ini'
-;outfile='../zero1_ot_bin.ini'
-;outfile='../zero1_ot_bin_np0202_003.ini'
-;outfile='../out/zero1_1_np0202_000.out'
 outfile=directory+name+strtrim(string(picid),2)+'.out'
-;outfile=directory+name+'.out'
-;outfile=directory+name+'.ini'
-;openr,1,outfile,/f77_unf
 openr,1,outfile
 readu,1,headline
 readu,1,it,time,ndim,neqpar,nw
@@ -123,27 +116,43 @@ yout=dblarr(2)
 
 n1=nx(0)
 n2=nx(1)
-
 x=dblarr(n1,n2,ndim)
 if (nn eq 0) then w=dblarr(n2,n1,nw)   ;was n1,n2,nw
 wi=dblarr(n1,n2)
-w=dblarr(n1,n2,nw)
 ;e2=dblarr(n1,n2)
 readu,1,x
 ;readu,1,e2
 ;e2=rotate(e2,1)
 for iw=0,nw-1 do begin
  readu,1,wi
- ;w(*,*,iw)=rotate(wi,1)
-  w(*,*,iw)=wi
+ w(*,*,iw)=rotate(wi,1)
 endfor
-
-;n1=nx(1)
-;n2=nx(0)
+mxt(ipic)=total(w(*,*,1))
+myt(ipic)=total(w(*,*,2))
+et(ipic)=total(w(*,*,3)+w(*,*,6))
+rhot(ipic)=total(w(*,*,0)+w(*,*,7))
 
 Vt=dblarr(n1,n2)
 B=dblarr(n1,n2)
 B_bg=dblarr(n1,n2)
+divb=dblarr(n1,n2)
+
+
+for i1=0,n1-1 do begin
+ for i2=0,n2-1 do begin
+   divb(i1,i2)=0.0
+endfor
+endfor
+
+
+for i1=2,n1-3 do begin
+ for i2=2,n2-3 do begin
+   divb(i1,i2)=(1.d0/12.D0/(x(i1+1,i2,0)-x(i1,i2,0)))*(8.d0*w(i1+1,i2,4)-8.d0*w(i1-1,i2,4)-w(i1+2,i2,4)+w(i1-2,i2,4))
+   divb(i1,i2)=divb(i1,i2) + (1.d0/12.D0/(x(i1,i2+1,1)-x(i1,i2,1)))*(8.d0*w(i1,i2+1,5)-8.d0*w(i1,i2-1,5)-w(i1,i2+2,5)+w(i1,i2-2,5))
+endfor
+endfor
+
+
 
 p=dblarr(n1,n2,1)
 ;e2=dblarr(n1,n2)
@@ -197,42 +206,30 @@ if (ii eq 1) then begin
 
 ;tvframe,reform(w(*,*,1)/(w(*,*,0)+w(*,*,7))),/bar,/sample, title='Vx', xtitle='x', ytitle='z',charsize=2.0    
 ;tvframe,reform(w(*,*,2)/(w(*,*,0)+w(*,*,7))),/bar,/sample, title='Vy', xtitle='x', ytitle='z',charsize=2.0   
-tvframe,(w(*,*,1)),/bar,/sample, title='Vx', xtitle='x', ytitle='z',charsize=2.0    
-tvframe,(w(*,*,2)),/bar,/sample, title='Vy', xtitle='x', ytitle='z',charsize=2.0
+
 
 
 ;tvframe,w(*,*,7)+w(*,*,0), /bar,title='log rho_b',/sample, xtitle='x', ytitle='y',charsize=2.0  
 
 ;stop
-;tvframe,rotate(w(*,*,1)/(w(*,*,7)+w(*,*,0)),1), /bar,title='v1',/sample, xtitle='x', ytitle='y',charsize=2.0 ,brange=[-200,200] 
-;tvframe,rotate(w(*,*,2)/(w(*,*,7)+w(*,*,0)),1), /bar,title='v2',xtitle='x',/sample, ytitle='z',charsize=2.0,brange=[-200,200]
+tvframe,w(*,*,1)/(w(*,*,7)+w(*,*,0)), /bar,title='v1',/sample, xtitle='x', ytitle='y',charsize=2.0  
+tvframe,w(*,*,2)/(w(*,*,7)+w(*,*,0)), /bar,title='v2',xtitle='x',/sample, ytitle='z',charsize=2.0 
 ;tvframe,w(200:220,120:140,1)/(w(200:220,120:140,7)+w(200:220,120:140,0)), /bar,title='v1',/sample, xtitle='x', ytitle='y',charsize=2.0  
 ;tvframe,w(200:220,120:140,2)/(w(200:220,120:140,7)+w(200:220,120:140,0)), /bar,title='v2',xtitle='x',/sample, ytitle='z',charsize=2.0 
 
 
 ;tvframe,w(*,*,1), /bar,title='v1',/sample, xtitle='x', ytitle='y',charsize=2.0  
 ;tvframe,w(*,*,2), /bar,title='v2',xtitle='x',/sample, ytitle='z',charsize=2.0 
-;tvframe,rotate(w(*,*,3)+w(*,*,6),1),/bar,/sample, title='e', xtitle='x', ytitle='z', charsize=2.0,brange=[0.2,0.415]
-tvframe,w(*,*,3)+w(*,*,6),/bar,/sample, title='e', xtitle='x', ytitle='z', charsize=2.0,brange=[0.2,0.415]
-;tvframe,rotate(w(*,*,3),1),/bar,/sample, title='e', xtitle='x', ytitle='z', charsize=2.0;,brange=[-1,14]
-
-
-
+tvframe,w(*,*,3)+w(*,*,6),/bar,/sample, title='e', xtitle='x', ytitle='z', charsize=2.0                                                                                                   
+;tvframe,divb(*,*),/bar,/sample, title='divb', xtitle='x', ytitle='z', charsize=2.0             
 ;;tvframe,w(*,*,6),/bar,/sample, title='eb',  xtitle='x', ytitle='z', charsize=2.0
-;;tvframe,rotate(w(*,*,7)+w(*,*,0),1), /bar,title='log rho_b',/sample, xtitle='x', ytitle='y',charsize=2.0,brange=[0.2,1.4] 
-;tvframe,rotate(w(*,*,0),1),/bar,/sample, title='rho',  xtitle='x', ytitle='z', charsize=2.0;,brange=[-2.0d-7,2.5d-7]
-tvframe,w(*,*,0),/bar,/sample, title='rho',  xtitle='x', ytitle='z', charsize=2.0;,brange=[0.22086,0.22134]
-;tvframe,w(*,124:132,0),/bar,/sample, title='rho',  xtitle='x', ytitle='z', charsize=2.0;,brange=[0.22086,0.22134]
+tvframe,w(*,*,7)+w(*,*,0), /bar,title='log rho_b',/sample, xtitle='x', ytitle='y',charsize=2.0
+;tvframe,w(*,*,0),/bar,/sample, title='rho',  xtitle='x', ytitle='z', charsize=2.0
 
-;tvframe,rotate(w(100:150,*,0),1),/bar,/sample, title='rho',  xtitle='x', ytitle='z', charsize=2.0;,brange=[-2.0d-7,2.5d-7]
-;velovect,rebin(rotate(w(*,*,2),1),8,16),rebin(rotate(w(*,*,1),1),8,16),length=3
-;plot_field,rotate(w(*,*,2),1),rotate(w(*,*,1),1),length=2,n=100,aspect=0.5
-;tvframe,rotate(w(*,*,4),1),/bar,/sample, title='b_z',  xtitle='x', ytitle='z', charsize=2.0;,brange=[-0.0004,0.0004]
-;tvframe,rotate(w(*,*,5),1),/bar,/sample, title='b_x',  xtitle='x', ytitle='z', charsize=2.0;,brange=[-0.0003,0.0003]
-tvframe,(w(*,*,4)),/bar,/sample, title='b_z',  xtitle='x', ytitle='z', charsize=2.0;,brange=[-0.0004,0.0004]
-tvframe,(w(*,*,5)),/bar,/sample, title='b_x',  xtitle='x', ytitle='z', charsize=2.0;,brange=[-0.0003,0.0003]
-;tvframe,rotate(w(*,*,4)+w(*,*,8),1),/bar,/sample, title='b_z',  xtitle='x', ytitle='z', charsize=2.0,brange=[-0.3,0.3] 
-;tvframe,rotate(w(*,*,5)+w(*,*,9),1),/bar,/sample, title='b_x',  xtitle='x', ytitle='z', charsize=2.0,brange=[-0.3,0.3]
+;tvframe,w(*,*,4),/bar,/sample, title='b_z',  xtitle='x', ytitle='z', charsize=2.0
+;tvframe,w(*,*,5),/bar,/sample, title='b_x',  xtitle='x', ytitle='z', charsize=2.0
+tvframe,w(*,*,4)+w(*,*,8),/bar,/sample, title='b_z',  xtitle='x', ytitle='z', charsize=2.0
+tvframe,w(*,*,5)+w(*,*,9),/bar,/sample, title='b_x',  xtitle='x', ytitle='z', charsize=2.0
 ;tvframe,w(*,*,8),/bar,/sample, title='bg_z',  xtitle='x', ytitle='z', charsize=2.0
 ;tvframe,w(*,*,9),/bar,/sample, title='bg_x',  xtitle='x', ytitle='z', charsize=2.0
 
@@ -424,7 +421,7 @@ endelse
 ;plot,mass, charsize=2.0, ystyle=1, title='mass'
 ;plot,egas, charsize=2.0, ystyle=1, title='egas'
 
-indexs=strtrim(nn,2)
+indexs=strtrim(ipic,2)
 
  ss='time ='+strTrim(string(time),1)+' it ='+strTrim(string(it),1)+'  nn = '+strTrim(string(nn),1)
  xyouts,50,2, ss, /device, color=200
@@ -434,25 +431,38 @@ indexs=strtrim(nn,2)
 maxa=[maxa,max(Vt)]
 
 
-indexs=strtrim(picid,2)
+indexs=strtrim(ipic,2)
 
 a = strlen(indexs)                                                  
 case a of                                                           
- 1:indexss='0000000'+indexs                                             
- 2:indexss='000000'+indexs                                              
- 3:indexss='00000'+indexs                                               
- 4:indexss='0000'+indexs 
- 5:indexss='000'+indexs                                               
- 6:indexss='00'+indexs  
- 7:indexss='0'+indexs                                                           
+ 1:indexss='0000'+indexs                                             
+ 2:indexss='000'+indexs                                              
+ 3:indexss='00'+indexs                                               
+ 4:indexss='0'+indexs                                               
 endcase   
 
 image_p = TVRD_24()
-;write_png,'/data/cs1mkg/smaug_mpi/Idl/images_ot/'+indexss+'.png',image_p, red,green, blue
+write_png,'/data/cs1mkg/smaug/Idl/imagesot512/'+indexss+'.png',image_p, red,green, blue
 ;stop
 ;endwhile
 close,1
 endfor
+
+
+filename='test.out'
+
+openw,1,filename
+
+;npic=2010
+for iw=0,npic-1 do begin
+
+	printf,1,rhot(iw),mxt(iw),myt(iw),et(iw)
+
+endfor
+
+
+close,1
+
 
 
 end

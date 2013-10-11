@@ -21,10 +21,11 @@ int ngk=2;
 #ifdef USE_SAC
 //vac ozt
 int ni;
-ni=122;    //OZT tests
+ni = 122;
+//ni=250;    //OZT tests
 //ni=506;
 //ni=1018;    //OZT tests
-;//ni=1446;    //OZT tests
+//ni=1446;    //OZT tests
 ni=ni+2*ngi;
 //ni=512;
 //real xmax = 6.2831853;  
@@ -79,8 +80,9 @@ int finishsteering=0;
 
 //char *cfgfile="zero1_np020203.ini";
 //char *cfgfile="zero1_ot_asc_np0201.ini";
-char *cfgfile="configfs/zero1_ot_asc_252.ini";
-//char *cfgfile="zero1_ot_asc.ini";
+//char *cfgfile="configs/zero1_ot_asc_252.ini";
+//char *cfgfile="ot_508b252_asc.ini";
+char *cfgfile="zero1_ot_asc_252.ini";
 ;//char *cfgfile="zero1_ot_2044_asc.ini";
 ;//char *cfgfile="zero1_ot_2892_asc.ini";
 //char *cfgfile="zero1_BW_bin.ini";
@@ -98,12 +100,12 @@ char *cfggathout="out/zero1_.out";
 dt=0.0002;  //OZT test
 #endif
 
-
+nt=20;
 //nt=3000;
 //nt=5000;
 //nt=200000;
 //nt=150000;
-nt=50;
+//nt=300;
 
 
 real *t=(real *)calloc(nt,sizeof(real));

@@ -1416,7 +1416,7 @@ char *method=NULL;
          printf("at cufinish end here\n");
 
 
-        cufinish(&p,&w,&wnew,&state,&d_p,&d_bp,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
+        
 
         //igid=0;
         cusync(&p);
@@ -1425,16 +1425,7 @@ char *method=NULL;
 	
         } //mode=0 clean up routine
 
-#ifdef USE_MPI
-	     printf("at cumpifinish end here %d\n",p->ipe);
-#endif
-	free(hlines);
-	free(p);
-	free(bp);
-	free(sdir);
-	free(name);
-	free(outfile);
-	free(formfile);
+
 
 //free(d_gwnew);
 //free(d_gw);
@@ -1456,14 +1447,28 @@ free(d_gbp);*/
 	#ifdef USE_MPI
           ;// mgpufinalize(p);
         #endif
-	#ifdef USE_MPI
+
+cufinish(&p,&w,&wnew,&state,&d_p,&d_bp,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
+#ifdef USE_MPI
 	     printf("at cumpifinish end here %d\n",p->ipe);
+#endif
+	free(hlines);
+	free(p);
+	free(bp);
+	free(sdir);
+	free(name);
+	free(outfile);
+	free(formfile);
 
-	    cufinishmgpu(&p,&w, &wmod, &temp2,&gmpivisc0,&gmpivisc1,&gmpivisc2,   &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,   &d_w, &d_wmod,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2);
-            ;// mgpufinalize(p);
+	#ifdef USE_MPI
+	    // printf("at cumpifinish end here %d\n",p->ipe);
 
+	   ;// cufinishmgpu(&p,&w, &wmod, &temp2,&gmpivisc0,&gmpivisc1,&gmpivisc2,   &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,   &d_w, &d_wmod,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2);
+            ;// mgpufinalize();
+            ;//MPI::Finalize();
 
 	#endif
+
 		return 0;
 	}
 

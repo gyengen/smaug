@@ -403,7 +403,12 @@ void mgpuneighbours(int dir, params *p)
      {
              
              (p->phpe[i])=(p->pipe[i])-(dir==i);
-             (p->pjpe[i])=(p->pipe[i])+(dir==i);             
+             (p->pjpe[i])=(p->pipe[i])+(dir==i); 
+ 		#ifdef USE_SAC_3D
+                	(p->pkpe[i])=(p->pipe[i])+(dir==i);
+		#endif       
+
+            
      }
      //printf("pcoords %d %d %d\n",p->ipe,p->pipe[0],p->pipe[1]);
      for(i=0; i<NDIM;i++)
@@ -411,13 +416,24 @@ void mgpuneighbours(int dir, params *p)
               if((p->phpe[i])<0) (p->phpe[i])=(p->pnpe[i])-1; 
               if((p->pjpe[i])<0) (p->pjpe[i])=(p->pnpe[i])-1; 
               if((p->phpe[i])>=(p->pnpe[i])) (p->phpe[i])=0; 
-              if((p->pjpe[i])>=(p->pnpe[i])) (p->pjpe[i])=0;                     
+              if((p->pjpe[i])>=(p->pnpe[i])) (p->pjpe[i])=0; 
+ 	      #ifdef USE_SAC_3D
+              	if((p->pkpe[i])<0) (p->pkpe[i])=(p->pnpe[i])-1; 
+                if((p->pkpe[i])>=(p->pnpe[i])) (p->pkpe[i])=0; 
+	      #endif       
+                    
      }
  // printf("lpcoords %d %d %d\n",p->ipe,p->phpe[0],p->phpe[1]);
 //printf("rpcoords %d %d %d\n",p->ipe,p->pjpe[0],p->pjpe[1]);
    
      iped2ipe(p->phpe,p->pnpe,&(p->hpe));
      iped2ipe(p->pjpe,p->pnpe,&(p->jpe));
+ 	#ifdef USE_SAC_3D
+        	iped2ipe(p->pkpe,p->pnpe,&(p->kpe));
+	#endif       
+
+
+
 }
 
 //!==============================================================================
@@ -514,7 +530,7 @@ void mpisend(int nvar,real *var, int *ixmin, int *ixmax  ,int qipe,int iside, in
 		#ifdef USE_SAC3D
 		   for(ivar=0; ivar<nvar;ivar++)
                      for(i3=0;i3<=1;i3++)
-                     for(i2=0;p->n[1];i2++)
+                     for(i2=0;i2<p->n[1];i2++)
 		     for(i1=0;i1<p->n[0];i1++)
 		      		
 						
@@ -732,8 +748,13 @@ gnmpirequest++;
 
 //gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(iside*gnmpibuffer),nrecv,MPI_DOUBLE_PRECISION,qipe,10*(p->ipe)+iside);
 //gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(iside*gnmpibuffer),nrecv,MPI_DOUBLE_PRECISION,qipe,MPI_ANY_TAG);
+
+//with ni <> nj code fails at this point
+// the second commented line "fixes" this memory issue
 gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(2*iside*gnmpibuffer),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
-//gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer,nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
+//gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(iside*gnmpibuffer),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
+
+
 }
 
 
@@ -779,8 +800,14 @@ gnmpirequest++;
 
 //gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(iside*gnmpibuffer),nrecv,MPI_DOUBLE_PRECISION,qipe,10*(p->ipe)+iside);
 //gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(iside*gnmpibuffer),nrecv,MPI_DOUBLE_PRECISION,qipe,MPI_ANY_TAG);
+
+
+//with ni <> nj code fails at this point
+// the second commented line "fixes" this memory issue
 gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(2*iside*gnmpibuffermod),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
-//gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer,nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
+//gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(iside*gnmpibuffermod),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
+
+
 }
 
 
@@ -817,7 +844,11 @@ void mpibuffer2var(int iside,int nvar,real *var, int *ixmin, int *ixmax, int dim
                         //bound=i1+iside+2*(iside>0);
                         bound=i1+2*(iside==0?1:0);
 			// var[sacencodempiw0 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n/*+iside*gnmpibuffer*/];
+
+//with ni <> nj code fails at this point
+// the second commented line "fixes" this memory issue
  			var[sacencodempiw0 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffer];
+			//var[sacencodempiw0 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+(iside==0?1:0)*gnmpibuffer];
                         //n++;
                        //iside=1;
                        //if(/*iside==0  && p->it != -1 &&*/ p->ipe==0  && ivar==rho /*&& (100+10*dim+(iside==0?1:0))==101*/)
@@ -850,7 +881,11 @@ void mpibuffer2var(int iside,int nvar,real *var, int *ixmin, int *ixmax, int dim
 		      {
 			
                         bound=i2+2*(iside==0?1:0);
+//with ni <> nj code fails at this point
+// the second commented line "fixes" this memory issue
 			 var[sacencodempiw1 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffer];
+			// var[sacencodempiw1 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+(iside==0?1:0)*gnmpibuffer];
+
 
 
                       // if(/*iside==0  && p->it != -1 &&*/ p->ipe==0  && ivar==rho /*&& (100+10*dim+(iside==0?1:0))==101*/)
@@ -874,7 +909,12 @@ void mpibuffer2var(int iside,int nvar,real *var, int *ixmin, int *ixmax, int dim
 		      {
 			
                         bound=i3+2*(iside==0?1:0);
+
+//with ni <> nj code fails at this point
+// the second commented line "fixes" this memory issue
 			 var[sacencodempiw2 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffer];
+                      //var[sacencodempiw2 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+(iside==0?1:0)*gnmpibuffer];
+
                           n++;
 		      }
 
@@ -921,7 +961,12 @@ void mpibuffer2varmod(int iside,int nvar,real *var, int *ixmin, int *ixmax, int 
 			// var[sacencodempiw0 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n/*+iside*gnmpibuffer*/];
  			//var[sacencodempiw0 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+(iside==0?1:0)*gnmpibuffer/nvar];
                        // var[sacencodempiw0 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffer];
+
+//with ni <> nj code fails at this point
+// the second commented line "fixes" this memory issue
                         var[sacencodempiw0 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffermod];
+ 			//var[sacencodempiw0 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+(iside==0?1:0)*gnmpibuffermod];
+
                         //n++;
                        //iside=1;
                       // if(/*iside==0  && p->it != -1 &&*/ p->ipe==0  && ivar==rho /*&& (100+10*dim+(iside==0?1:0))==101*/){
@@ -958,8 +1003,12 @@ void mpibuffer2varmod(int iside,int nvar,real *var, int *ixmin, int *ixmax, int 
 		      {
 			
                         bound=i2+2*(iside==0?1:0);
-			// var[sacencodempiw1 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffer];
+
+
+//with ni <> nj code fails at this point
+// the second commented line "fixes" this memory issue
 			var[sacencodempiw1 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffermod];
+			//var[sacencodempiw1 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+(iside==0?1:0)*gnmpibuffermod];
 
 
                        //if(/*iside==0  && p->it != -1 &&*/ p->ipe==0  && ivar==rho /*&& (100+10*dim+(iside==0?1:0))==101*/){
@@ -989,7 +1038,12 @@ void mpibuffer2varmod(int iside,int nvar,real *var, int *ixmin, int *ixmax, int 
 			
                         bound=i3+2*(iside==0?1:0);
 			// var[sacencodempiw2 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffer];
+
+//with ni <> nj code fails at this point
+// the second commented line "fixes" this memory issue
  			var[sacencodempiw2 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffermod];
+			//var[sacencodempiw2 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+(iside==0?1:0)*gnmpibuffermod];
+
                           n++;
 		      }
 

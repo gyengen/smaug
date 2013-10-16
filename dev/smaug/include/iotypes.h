@@ -165,7 +165,10 @@ struct params {
                 int pjpe[NDIM];
                 int hpe;
                 int jpe;
-                
+ 		#ifdef USE_SAC_3D
+                	int pkpe[NDIM];
+			int kpe;
+		#endif               
                 int gpemin[NDIM];
                 int gpemax[NDIM];
 

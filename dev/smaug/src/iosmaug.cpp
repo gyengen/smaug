@@ -268,14 +268,14 @@ char *method=NULL;
        #ifdef USE_MULTIGPU
        if(mode==0)
        {
-		if((p->pipe[0])==0) (p->n[0])+=ngi;
-		if((p->pipe[0])==((p->pnpe[0])-1)) (p->n[0])+=ngi;
-		if((p->pipe[1])==0) (p->n[1])+=ngj;
-		if((p->pipe[1])==((p->pnpe[1])-1)) (p->n[1])+=ngj;
+		if( ((p->pnpe[0])>1) &&  (p->pipe[0])==0) (p->n[0])+=ngi;
+		if( ((p->pnpe[0])>1) &&  (p->pipe[0])==((p->pnpe[0])-1)) (p->n[0])+=ngi;
+		if( ((p->pnpe[1])>1) &&  (p->pipe[1])==0) (p->n[1])+=ngj;
+		if( ((p->pnpe[1])>1) &&  (p->pipe[1])==((p->pnpe[1])-1)) (p->n[1])+=ngj;
 
 		#ifdef USE_SAC_3D
-			if((p->pipe[2])==0) (p->n[2])+=ngk;
-			if((p->pipe[2])==((p->pnpe[2])-1)) (p->n[2])+=ngk;
+			if( ((p->pnpe[2])>1) &&  (p->pipe[2])==0) (p->n[2])+=ngk;
+			if( ((p->pnpe[2])>1) &&  (p->pipe[2])==((p->pnpe[2])-1)) (p->n[2])+=ngk;
 		#endif
 	}
        #endif

@@ -382,21 +382,24 @@ int writevacgatherconfig(char *name,int n,params p, meta md, real *w, real *wd, 
   int ibuffer[5];
   char ext[3];
 
- istart=2*((p.noghost)>0);
- jstart=2*((p.noghost)>0);
- kstart=2*((p.noghost)>0);
+ istart=2*((p.noghost)>0)*(p.npe[0]>1);
+ jstart=2*((p.noghost)>0)*(p.npe[1]>1);
+
+#ifdef USE_SAC_3D
+ 	kstart=2*((p.noghost)>0)*(p.npe[2]>1);
+#endif
 
 
 
   ni=p.n[0];//-4*((p.noghost)>0);
   nj=p.n[1];//-4*((p.noghost)>0);
 
- ifin=ni-2*((p.noghost)>0);
- jfin=nj-2*((p.noghost)>0);
+ ifin=ni-2*((p.noghost)>0)*(p.npe[0]>1);
+ jfin=nj-2*((p.noghost)>0)*(p.npe[1]>1);
 
     #ifdef USE_SAC_3D
   nk=p.n[2];//-4*((p.noghost)>0);
-  kfin=nk+2*((p.noghost)>0);
+  kfin=nk+2*((p.noghost)>0)*(p.npe[2]>1);
     #endif
 
 
@@ -1005,14 +1008,14 @@ int readasciivacconfig(char *cfgfile, params p, meta md,state *st, real *w, real
     if(mode==0)
     {
        #ifdef USE_MULTIGPU
-		if((p.pipe[0])==0) iif=ni -2;
-		if((p.pipe[0])==((p.pnpe[0])-1)) is=2;
-		if((p.pipe[1])==0) jf=nj-2;
-		if((p.pipe[1])==((p.pnpe[1])-1)) js=2;
+		if((p.pipe[0])==0  && (p.pnpe[0]>1)) iif=ni -2;
+		if((p.pipe[0])==((p.pnpe[0])-1)  && (p.pnpe[0]>1)  ) is=2;
+		if((p.pipe[1])==0 && (p.pnpe[1]>1)) jf=nj-2;
+		if((p.pipe[1])==((p.pnpe[1])-1) && (p.pnpe[1]>1)) js=2;
 
 	  #ifdef USE_SAC_3D
-		if((p.pipe[2])==0) kf=nk-2;
-		if((p.pipe[2])==((p.pnpe[2])-1)) ks=2;
+		if((p.pipe[2])==0  && (p.pnpe[2]>1)) kf=nk-2;
+		if((p.pipe[2])==((p.pnpe[2])-1)  && (p.pnpe[2]>1)) ks=2;
           #endif
 	
         #endif
@@ -1035,7 +1038,7 @@ fscanf(fdt,"%d %lG %d %d %d\n",&(st->it),&(st->t),&ii1,&ii2,&ii3);
      freadl(fdt, &hlines[i]);
      printf("%s\n", hlines[i]);
    }
-//printf("read header %d\n" , p.ipe);
+printf("read ascii header %d %d %d %d %d\n" , p.ipe, is,iif, js,jf);
   //fscanf(fdt,"%f",&val);
  //printf("%f",val);
 #ifdef USE_SAC_3D
@@ -1118,14 +1121,14 @@ sprintf(configfile,"%s",cfgfile);
 if(mode==0)
 {
       #ifdef USE_MULTIGPU
-		if((p.pipe[0])==0) iif=ni -2;
-		if((p.pipe[0])==((p.pnpe[0])-1)) is=2;
-		if((p.pipe[1])==0) jf=nj-2;
-		if((p.pipe[1])==((p.pnpe[1])-1)) js=2;
+		if((p.pipe[0])==0 &&  (p.npe[0]>1)) iif=ni -2;
+		if((p.pipe[0])==((p.pnpe[0])-1) &&  (p.npe[0]>1)  ) is=2;
+		if((p.pipe[1])==0  &&  (p.npe[1]>1)  ) jf=nj-2;
+		if((p.pipe[1])==((p.pnpe[1])-1)   &&  (p.npe[1]>1)  ) js=2;
 
 	  #ifdef USE_SAC_3D
-		if((p.pipe[2])==0) kf=nk-2;
-		if((p.pipe[2])==((p.pnpe[2])-1)) ks=2;
+		if((p.pipe[2])==0  &&  (p.npe[2]>1)  ) kf=nk-2;
+		if((p.pipe[2])==((p.pnpe[2])-1)    &&  (p.npe[2]>1)) ks=2;
           #endif
 	
         #endif

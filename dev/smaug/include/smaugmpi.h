@@ -296,7 +296,7 @@ void mgpusetnpediped(params *p, char *string)
 
 void ipe2iped(params *p)
 {
-
+int ib;
 #ifdef USE_SAC_3D
 //qipe1 = qipe - npe1*(qipe/npe1)
 //qipe2 = qipe/npe1 - npe2*(qipe/(npe1*npe2)) 
@@ -339,9 +339,9 @@ void ipe2iped(params *p)
 (p->mpilowerb[1])=(p->pipe[1])>0;
 
 
-  if(p->ipe==0)
+  //if(p->ipe==0)
     for(int i=0; i<2;i++)
-      printf("mpibc %d %d %d %d\n",i,p->pipe[i],p->mpiupperb[i],p->mpilowerb[i]);
+      printf("mpibc %d %d %d %d %d\n",p->ipe,i,p->pipe[i],p->mpiupperb[i],p->mpilowerb[i]);
 
 #endif
 
@@ -352,18 +352,33 @@ void ipe2iped(params *p)
     for(int idir=0; idir<NDIM; idir++)
     for(int ibound=0; ibound<2; ibound++)
     {
-       if( ((p->boundtype[ii][idir][ibound])==0) && ((p->pnpe[idir])>0) )
+
+       if( ((p->boundtype[ii][idir][ibound])==0)   && (p->pipe[idir])==((p->pnpe[idir])-1)    && ((p->pnpe[idir])>0) && ibound==1     )
                                      p->boundtype[ii][idir][ibound]=2;
-       else if( (((p->mpiupperb[idir])==1) && (p->pipe[idir])<((p->pnpe[idir])-1) )  ||  ((p->mpiupperb[idir])!=1)  && ((p->pipe[idir])>0) )
+	else
+                                     p->boundtype[ii][idir][ibound]=1;
+
+
+       if( ((p->boundtype[ii][idir][ibound])==0)   && (p->pipe[idir])==0    && ((p->pnpe[idir])>0) && ibound==0     )
+                                     p->boundtype[ii][idir][ibound]=2;
+	else
                                      p->boundtype[ii][idir][ibound]=1;
 
 
 
+	ib=p->boundtype[ii][idir][ibound];
+       if( ((p->boundtype[ii][idir][ibound])>1)   && (p->pipe[idir])==((p->pnpe[idir])-1)    && ((p->pnpe[idir])>0) && ibound==1     )
+                                     p->boundtype[ii][idir][ibound]=ib;
+	else
+                                     p->boundtype[ii][idir][ibound]=1;
 
-      /* if( ((p->boundtype[ii][idir][ibound])==0) && ((p->pnpe[idir])>0) )
-                                     p->boundtype[ii][idir][ibound]=2;
-       else if( ((p->mpiupperb[idir])==1)    ||  ((p->mpilowerb[idir])==1) )
-                                     p->boundtype[ii][idir][ibound]=1;*/
+	ib=p->boundtype[ii][idir][ibound];
+       if( ((p->boundtype[ii][idir][ibound])>1)   && (p->pipe[idir])==0    && ((p->pnpe[idir])>0) && ibound==0     )
+                                     p->boundtype[ii][idir][ibound]=ib;
+	else
+                                     p->boundtype[ii][idir][ibound]=1;
+
+		
 
 
 

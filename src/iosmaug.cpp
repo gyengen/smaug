@@ -562,7 +562,9 @@ char *method=NULL;
 
 		cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order,1);
 		gpusync();
+                printf("call mpibound %d\n",p->ipe);
 		mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2 ,p,1);
+	        printf("leave mpibound %d\n",p->ipe);
 		gpusync();
 		cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order,1);
 
@@ -632,6 +634,7 @@ char *method=NULL;
 		//for runge kutta will need to run this several times  for each order 
 		if(p->ipe==0)          
 		printf("before mpi trans mpiwmod\n");
+          // if(idir==1)
 		 cucopywtompiwmod(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, 1,idir);
 
 		gpusync();
@@ -640,7 +643,8 @@ char *method=NULL;
 
 		mpiboundmod(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p,idir);
 		gpusync();
-		//for runge kutta will need to run this several times  for each order         
+		//for runge kutta will need to run this several times  for each order  
+           //if(idir==1)       
 		cucopywmodfrommpiw(&p,&w, &wmod,      &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,1,idir);
 		gpusync();
          }
@@ -769,7 +773,8 @@ char *method=NULL;
                       writevacconfig(configfile,n,*p, meta , wmod,wd,*state);
 		#else
 		   //  writeasciivacconfig(configfile,*p, meta , w,wd,hlines,*state,mode);
-                    writeasciivacconfig(configfile,*p, meta , wmod,wd,hlines,*state,mode);
+                   ;// writeasciivacconfig(configfile,*p, meta , wmod,wd,hlines,*state,mode);
+                    writevacconfig(configfile,n,*p, meta , wmod,wd,*state);
                  #endif
 		//writevacconfig(configfile,n,*p, meta , w,wd,*state);
 
@@ -1325,6 +1330,7 @@ char *method=NULL;
         {
                   gpusync();
 		 //  cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order,idir);
+              //if(idir==1)
 		   cucopywtompiwmod(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order,idir);
 
                  gpusync();
@@ -1336,6 +1342,7 @@ char *method=NULL;
  gpusync();
 
 		//   cucopywfrommpiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order,idir);	
+		// if(idir==1)
 		   cucopywmodfrommpiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order,idir);	
  gpusync();
 

@@ -19,6 +19,9 @@ real **gmpitgtbufferr;
 
 
 int gnmpirequest,gnmpibuffer,gnmpibuffermod;
+int gnmpibuffer0,gnmpibuffer1,gnmpibuffer2;
+int gnmpibuffermod0,gnmpibuffermod1,gnmpibuffermod2;
+
 MPI::Request *gmpirequest;
 
 
@@ -128,6 +131,18 @@ void mgpuinit(params *p)
      p->ipe=comm.Get_rank();
 
 #ifdef USE_SAC3D
+
+gnmpibuffer0=NDERV*(p->n[2])*(p->n[1])*(p->ng[0]);
+gnmpibuffer1=NDERV*(p->n[0])*(p->n[2])*(p->ng[1]);
+gnmpibuffer2=NDERV*(p->n[0])*(p->n[1])*(p->ng[2]);
+
+gnmpibuffermod0=NVAR*(p->n[2])*(p->n[1])*(p->ng[0]);
+gnmpibuffermod1=NVAR*(p->n[0])*(p->n[2])*(p->ng[1]);
+gnmpibuffermod2=NVAR*(p->n[0])*(p->n[1])*(p->ng[2]);
+
+
+
+
    if((p->n[0])>=(p->n[1])  && (p->n[0])>=(p->n[2]))
    {
      if((p->n[1])>(p->n[2]))
@@ -151,6 +166,14 @@ void mgpuinit(params *p)
    }
 
 #else
+
+
+gnmpibuffer0=NDERV*(p->n[1])*(p->ng[0]);
+gnmpibuffer1=NDERV*(p->n[0])*(p->ng[1]);
+gnmpibuffermod0=NVAR*(p->n[1])*(p->ng[0]);
+gnmpibuffermod1=NVAR*(p->n[0])*(p->ng[1]);
+
+
    if((p->n[0])>(p->n[1]))
     nmpibuffer=NDERV*(p->n[0])*(p->ng[0]);
    else
@@ -274,7 +297,7 @@ void mgpusetnpediped(params *p, char *string)
 
 void ipe2iped(params *p)
 {
-
+int ib;
 #ifdef USE_SAC_3D
 //qipe1 = qipe - npe1*(qipe/npe1)
 //qipe2 = qipe/npe1 - npe2*(qipe/(npe1*npe2)) 
@@ -332,20 +355,47 @@ void ipe2iped(params *p)
     {
        if( ((p->boundtype[ii][idir][ibound])==0) && ((p->pnpe[idir])>0) )
                                      p->boundtype[ii][idir][ibound]=2;
-       else if( (((p->mpiupperb[idir])==1) && (p->pipe[idir])<((p->pnpe[idir])-1) )  ||  ((p->mpiupperb[idir])!=1)  && ((p->pipe[idir])>0) )
+       ;//else if( (((p->mpiupperb[idir])==1) && (p->pipe[idir])<((p->pnpe[idir])-1) )  ||  ((p->mpiupperb[idir])!=1)  && ((p->pipe[idir])>0) )
+       ;//                              p->boundtype[ii][idir][ibound]=1;
+
+    }
+
+
+/*    
+//ensure boundary set correctly 
+    for(int ii=0; ii<NVAR; ii++)
+    for(int idir=0; idir<NDIM; idir++)
+    for(int ibound=0; ibound<2; ibound++)
+    {
+
+       if( ((p->boundtype[ii][idir][ibound])==0)   && (p->pipe[idir])==((p->pnpe[idir])-1)    && ((p->pnpe[idir])>0) && ibound==1     )
+                                     p->boundtype[ii][idir][ibound]=2;
+	else
+                                     p->boundtype[ii][idir][ibound]=1;
+
+
+       if( ((p->boundtype[ii][idir][ibound])==0)   && (p->pipe[idir])==0    && ((p->pnpe[idir])>0) && ibound==0     )
+                                     p->boundtype[ii][idir][ibound]=2;
+	else
                                      p->boundtype[ii][idir][ibound]=1;
 
 
 
+	ib=p->boundtype[ii][idir][ibound];
+       if( ((p->boundtype[ii][idir][ibound])>1)   && (p->pipe[idir])==((p->pnpe[idir])-1)    && ((p->pnpe[idir])>0) && ibound==1     )
+                                     p->boundtype[ii][idir][ibound]=ib;
+	else
+                                     p->boundtype[ii][idir][ibound]=1;
 
-      /* if( ((p->boundtype[ii][idir][ibound])==0) && ((p->pnpe[idir])>0) )
-                                     p->boundtype[ii][idir][ibound]=2;
-       else if( ((p->mpiupperb[idir])==1)    ||  ((p->mpilowerb[idir])==1) )
-                                     p->boundtype[ii][idir][ibound]=1;*/
+	ib=p->boundtype[ii][idir][ibound];
+       if( ((p->boundtype[ii][idir][ibound])>1)   && (p->pipe[idir])==0    && ((p->pnpe[idir])>0) && ibound==0     )
+                                     p->boundtype[ii][idir][ibound]=ib;
+	else
+                                     p->boundtype[ii][idir][ibound]=1;
+
+    }*/
 
 
-
-    }
 
 
 
@@ -726,6 +776,8 @@ int nrecv;
 			#else
 			   nrecv = 2*nvar* (p->n[1]);
 			#endif
+			gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(2*iside*gnmpibuffer0),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
+
 		break;
 		case 1:
 			#ifdef USE_SAC3D
@@ -733,11 +785,15 @@ int nrecv;
 			#else
 			   nrecv = 2*nvar* (p->n[0]);
 			#endif
+			gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(2*iside*gnmpibuffer1),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
+
 		break;
 		case 2:
 			#ifdef USE_SAC3D
 			   nrecv = 2*nvar* (p->n[1])*(p->n[0]);
 			#endif
+
+			gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(2*iside*gnmpibuffer2),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
 		break;
 	}
 
@@ -751,7 +807,7 @@ gnmpirequest++;
 
 //with ni <> nj code fails at this point
 // the second commented line "fixes" this memory issue
-gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(2*iside*gnmpibuffer),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
+//gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(2*iside*gnmpibuffer),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
 //gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(iside*gnmpibuffer),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
 
 
@@ -778,6 +834,7 @@ int nrecv;
 			#else
 			   nrecv = 2*nvar* (p->n[1]);
 			#endif
+			gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(2*iside*gnmpibuffermod0),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
 		break;
 		case 1:
 			#ifdef USE_SAC3D
@@ -785,11 +842,13 @@ int nrecv;
 			#else
 			   nrecv = 2*nvar* (p->n[0]);
 			#endif
+			gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(2*iside*gnmpibuffermod1),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
 		break;
 		case 2:
 			#ifdef USE_SAC3D
 			   nrecv = 2*nvar* (p->n[1])*(p->n[0]);
 			#endif
+			gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(2*iside*gnmpibuffermod2),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
 		break;
 	}
 
@@ -804,7 +863,7 @@ gnmpirequest++;
 
 //with ni <> nj code fails at this point
 // the second commented line "fixes" this memory issue
-gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(2*iside*gnmpibuffermod),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
+//gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(2*iside*gnmpibuffermod),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
 //gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(iside*gnmpibuffermod),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
 
 
@@ -847,7 +906,7 @@ void mpibuffer2var(int iside,int nvar,real *var, int *ixmin, int *ixmax, int dim
 
 //with ni <> nj code fails at this point
 // the second commented line "fixes" this memory issue
- 			var[sacencodempiw0 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffer];
+ 			var[sacencodempiw0 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffer0];
 			//var[sacencodempiw0 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+(iside==0?1:0)*gnmpibuffer];
                         //n++;
                        //iside=1;
@@ -883,7 +942,7 @@ void mpibuffer2var(int iside,int nvar,real *var, int *ixmin, int *ixmax, int dim
                         bound=i2+2*(iside==0?1:0);
 //with ni <> nj code fails at this point
 // the second commented line "fixes" this memory issue
-			 var[sacencodempiw1 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffer];
+			 var[sacencodempiw1 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffer1];
 			// var[sacencodempiw1 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+(iside==0?1:0)*gnmpibuffer];
 
 
@@ -912,7 +971,7 @@ void mpibuffer2var(int iside,int nvar,real *var, int *ixmin, int *ixmax, int dim
 
 //with ni <> nj code fails at this point
 // the second commented line "fixes" this memory issue
-			 var[sacencodempiw2 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffer];
+			 var[sacencodempiw2 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffer2];
                       //var[sacencodempiw2 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+(iside==0?1:0)*gnmpibuffer];
 
                           n++;
@@ -964,7 +1023,7 @@ void mpibuffer2varmod(int iside,int nvar,real *var, int *ixmin, int *ixmax, int 
 
 //with ni <> nj code fails at this point
 // the second commented line "fixes" this memory issue
-                        var[sacencodempiw0 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffermod];
+                        var[sacencodempiw0 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffermod0];
  			//var[sacencodempiw0 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+(iside==0?1:0)*gnmpibuffermod];
 
                         //n++;
@@ -1007,7 +1066,7 @@ void mpibuffer2varmod(int iside,int nvar,real *var, int *ixmin, int *ixmax, int 
 
 //with ni <> nj code fails at this point
 // the second commented line "fixes" this memory issue
-			var[sacencodempiw1 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffermod];
+			var[sacencodempiw1 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffermod1];
 			//var[sacencodempiw1 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+(iside==0?1:0)*gnmpibuffermod];
 
 
@@ -1041,7 +1100,7 @@ void mpibuffer2varmod(int iside,int nvar,real *var, int *ixmin, int *ixmax, int 
 
 //with ni <> nj code fails at this point
 // the second commented line "fixes" this memory issue
- 			var[sacencodempiw2 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffermod];
+ 			var[sacencodempiw2 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+2*(iside==0?1:0)*gnmpibuffermod2];
 			//var[sacencodempiw2 (p,i1, i2, i3, ivar,bound)]=gmpirecvbuffer[n+(iside==0?1:0)*gnmpibuffermod];
 
                           n++;

@@ -924,7 +924,7 @@ k=0;
                 //or an mpi period 
 
 
-                if((i==0 || i==1) && dim==0  && ( ((p->mpilowerb[dim])==1) || ((p->boundtype[0][dim][0])==2))    )
+                if((i==0 || i==1) && dim==0 /* && ( ((p->mpilowerb[dim])==1) || ((p->boundtype[0][dim][0])==2))  */  )
                 {              
                     bound=i;
                     d_wmod[order*ntot+encode3_i(p,i,j,k,var)]=d_mpiwmod0[encodempiw0(p,i,j,k,var,bound)];
@@ -934,7 +934,7 @@ k=0;
        
       
                 }
-                else if((( i>=((p->n[0])-2)   ))  && dim==0  && ( ((p->mpiupperb[dim])==1) || ((p->boundtype[0][dim][0])==2)) )               
+                else if((( i>=((p->n[0])-2)   ))  && dim==0 /* && ( ((p->mpiupperb[dim])==1) || ((p->boundtype[0][dim][0])==2)) */)               
                 {
                     bound=2*(i==((p->n[0])-1))+(p->n[0])-i;
                     d_wmod[order*ntot+encode3_i(p,i,j,k,var)]=d_mpiwmod0[encodempiw0(p,i,j,k,var,bound)];  
@@ -950,19 +950,21 @@ k=0;
 
               
 
-                if((j==0 || j==1) && dim==1  && ( ((p->mpilowerb[dim])==1) || ((p->boundtype[0][dim][0])==2))   )              
+                if((j==0 || j==1) && dim==1  /*&& ( ((p->mpilowerb[dim])==1) || ((p->boundtype[0][0][0])==2))*/   )              
                 {              
                     bound=j;
                     d_wmod[order*ntot+encode3_i(p,i,j,k,var)]=d_mpiwmod1[encodempiw1(p,i,j,k,var,bound)]; 
-
-
+//if(i>=0 && i<10  &&  var==rhob)
+//printf("nani %d %d %d %d  %lg %lg %d  \n",p->ipe,order,i,j, d_mpiwmod1[encodempiw1(p,i,j,k,var,bound)],d_wmod[order*ntot+encode3_i(p,i,j,k,var)],bound );
 
              
                 }            
-                 else if((( j>=((p->n[1])-2)   ))  && dim==1   && ( ((p->mpiupperb[dim])==1) || ((p->boundtype[0][dim][0])==2))    )               
+                 else if((( j>=((p->n[1])-2)   ))  && dim==1  /* && ( ((p->mpiupperb[dim])==1) || ((p->boundtype[0][0][0])==2)) */   )               
                 {
                    bound=2*(j==((p->n[1])-1))+(p->n[1])-j;
                     d_wmod[order*ntot+encode3_i(p,i,j,k,var)]=d_mpiwmod1[encodempiw1(p,i,j,k,var,bound)]; 
+//if(i>=0 && i<10  &&  var==rhob)
+//printf("nani %d %d %d %d  %lg %lg %d  \n",p->ipe,order,i,j, d_mpiwmod1[encodempiw1(p,i,j,k,var,bound)],d_wmod[order*ntot+encode3_i(p,i,j,k,var)],bound );
 
   
 
@@ -971,12 +973,12 @@ k=0;
 
        #ifdef USE_SAC_3D
                k=ii[2];
-                if((k==0 || k==1) && dim==2   && ( ((p->mpilowerb[dim])==1) || ((p->boundtype[0][dim][0])==2))   )              
+                if((k==0 || k==1) && dim==2  /* && ( ((p->mpilowerb[dim])==1) || ((p->boundtype[0][dim][0])==2))  */ )              
                 {              
                     bound=k;
                     d_wmod[order*ntot+encode3_i(p,i,j,k,var)]=d_mpiwmod2[encodempiw2(p,i,j,k,var,bound)];              
                 }        
-                 else if((( k>=((p->n[2])-2)   ))  && dim==2   && ( ((p->mpiupperb[dim])==1) || ((p->boundtype[0][dim][0])==2))   )               
+                 else if((( k>=((p->n[2])-2)   ))  && dim==2  /* && ( ((p->mpiupperb[dim])==1) || ((p->boundtype[0][dim][0])==2))  */ )               
                 {
                     bound=2*(k==((p->n[2])-1))+(p->n[2])-k;
                     d_wmod[order*ntot+encode3_i(p,i,j,k,var)]=d_mpiwmod2[encodempiw2(p,i,j,k,var,bound)];              
@@ -1007,7 +1009,7 @@ k=0;
 
 
  
-                if((i==0 || i==1) && dim==0   &&  ((p->mpilowerb[dim])==1))
+                if((i==0 || i==1) && dim==0  /* &&  ((p->mpilowerb[dim])==1)*/)
                 {              
                     bound=i;
                     d_wd[encode3_i(p,i,j,k,var)]=d_mpiw0[encodempiw0(p,i,j,k,var,bound)];
@@ -1015,7 +1017,7 @@ k=0;
                     //    printf(" %d %d %d %d actual %d  mpi data%d %g\n",i,j,bound,dim,var,encodempiw0(p,i,j,k,var,bound),d_mpiwmod0[encodempiw0(p,i,j,k,var,bound)]);        
       
                 }
-                else if((( i>=((p->n[0])-2)   ))  && dim==0  &&  ((p->mpiupperb[dim])==1))               
+                else if((( i>=((p->n[0])-2)   ))  && dim==0 /* &&  ((p->mpiupperb[dim])==1)*/)               
                 {
                     bound=2*(i==((p->n[0])-1))+(p->n[0])-i;
                     d_wd[encode3_i(p,i,j,k,var)]=d_mpiw0[encodempiw0(p,i,j,k,var,bound)];
@@ -1023,12 +1025,12 @@ k=0;
 
               
 
-                if((j==0 || j==1) && dim==1   &&  ((p->mpilowerb[dim])==1))              
+                if((j==0 || j==1) && dim==1  /* &&  ((p->mpilowerb[dim])==1)*/)              
                 {              
                     bound=j;
                     d_wd[encode3_i(p,i,j,k,var)]=d_mpiw1[encodempiw1(p,i,j,k,var,bound)];
                 }            
-                 else if((( j>=((p->n[1])-2)   ))  && dim==1  &&  ((p->mpiupperb[dim])==1))               
+                 else if((( j>=((p->n[1])-2)   ))  && dim==1 /* &&  ((p->mpiupperb[dim])==1)*/)               
                 {
                    bound=2*(j==((p->n[1])-1))+(p->n[1])-j;
                     d_wd[encode3_i(p,i,j,k,var)]=d_mpiw1[encodempiw1(p,i,j,k,var,bound)];
@@ -1643,17 +1645,30 @@ int iindex = blockIdx.x * blockDim.x + threadIdx.x;
                     //bound=2*(i==((p->n[0])-1))+(p->n[0])-i;
                     /*bound=i;
                     var=f;
-                    d_mpiwmod0[encodempiw0(p,i,j,k,var,bound)]=d_wmod[encode3_i(p,i+2,j,k,var)];
-
-
-                 if( f==rho && (p->ipe)==0  && (  d_wmod[fencode3_i(p,iia,f)]==0 )   && i<=1)
-                       if(idir==0)
-    				printf("nani0 %d %d  %lg  \n",iia[0],iia[1], d_mpiwmod0[encodempiw0(p,i,j,k,f,bound)] );*/
+                    d_mpiwmod0[encodempiw0(p,i,j,k,var,bound)]=d_wmod[encode3_i(p,i+2,j,k,var)];*/
 
 
 
-                 mpiwmodtogpu(p,d_w,d_wmod,d_mpiw0,d_mpiwmod0,d_mpiw1,d_mpiwmod1,d_mpiw2,d_mpiwmod2,iia,f,idir,order);
 
+
+ mpiwmodtogpu(p,d_w,d_wmod,d_mpiw0,d_mpiwmod0,d_mpiw1,d_mpiwmod1,d_mpiw2,d_mpiwmod2,iia,f,idir,order);
+
+                
+		/*int bound;
+                 if( f==rhob /*&& (p->ipe)==0  && (  d_wmod[fencode3_i(p,iia,f)]==0 )*/ /*  && (j==0 || j==513)   && i>=0 && i<20)
+                       if(idir==1)
+                       {
+
+			if(j==0 || j==1)
+				bound=j;
+
+                           if(j>=((p->n[1])-2))
+ 				bound=2*(j==((p->n[1])-1))+(p->n[1])-j;
+
+
+    				printf("nani %d %d %d  %lg %lg %d  \n",p->ipe,iia[0],iia[1], d_mpiwmod1[encodempiw1(p,i,j,k,f,bound)],d_wmod[encode3_i(p,i+2,j,k,f)],bound );
+				
+                       }*/
 
 
                 // if( f==rho && (p->ipe)==0  && (  d_wmod[fencode3_i(p,iia,f)]==0 ))
@@ -2327,7 +2342,7 @@ if((*p)->mode != 3)
 
 
 
-	printf("here1\n");
+	//printf("here1\n");
 
 
 
@@ -2335,7 +2350,7 @@ if((*p)->mode != 3)
 
 
 	 
-	    printf("here2\n");
+	    //printf("here2\n");
 
 	    //cudaMemcpy(*d_w, *w, NVAR*dimp*sizeof(real), cudaMemcpyHostToDevice);
 	    cudaMemcpy(*d_wmod, *wmod, 2*(1+(((*p)->rkon)==1))*NVAR*dimp*sizeof(real), cudaMemcpyHostToDevice);
@@ -2346,7 +2361,7 @@ if((*p)->mode != 3)
 
 
 
-	printf("here3\n");
+	//printf("here3\n");
 
 
 
@@ -2354,7 +2369,7 @@ if((*p)->mode != 3)
 
 
 	   // cudaMemcpy(*d_wnew, *wnew, 8*((*p)->n[0])* ((*p)->n[1])*sizeof(real), cudaMemcpyHostToDevice);
-	    printf("here\n");
+	   // printf("here\n");
 	    cudaMemcpy(*d_p, *p, sizeof(struct params), cudaMemcpyHostToDevice);
 	    cudaMemcpy(*d_state, *state, sizeof(struct state), cudaMemcpyHostToDevice);
 	    
@@ -2624,7 +2639,7 @@ checkErrors_i("initgrid memory allocation");
 	    switch(dir)
 	    {
 		     case 0:
- 			    ixmax=((*p)->n[0])+1;//ixGmax1+1;
+                       ixmax=((*p)->n[0])+1;//ixGmax1+1; 
                        ixmin=((*p)->n[0])-1;//ixmin1=ixGmax1+1                      
 
                       #ifdef USE_MULTIGPU
@@ -2639,8 +2654,6 @@ checkErrors_i("initgrid memory allocation");
 			     for(dir1=0;dir1<NDIM;dir1++)
 			     {
 				     for(ii[0]=ixmin; ii[0]<=ixmax; ii[0]++)
-				     //for(ii[0]=ixmin; ii[0]<ixmax; ii[0]++)
-
 				     for(ii[1]=0; ii[1]<((*p)->n[1])+2; ii[1]++)
 				     		 #ifdef USE_SAC_3D
 						   for(ii[2]=0; ii[2]<((*p)->n[2])+2; ii[2]++)
@@ -2673,8 +2686,7 @@ checkErrors_i("initgrid memory allocation");
                       //lower layers
 
                        ixmin=0;//ixmin1=ixGmin1-1;
-                      // ixmax=2;//ixmax1=ixGmin1-1 
-                        ixmax=1;//ixmax1=ixGmin1-1 
+                       ixmax=2;//ixmax1=ixGmin1-1 
 
                      #ifdef USE_MULTIGPU
 			if(((*p)->fullgridini)==1    ||  ((*p)->mpilowerb[dir])==1) ixmax=0;
@@ -2686,7 +2698,6 @@ checkErrors_i("initgrid memory allocation");
 
 			     for(dir1=0;dir1<NDIM;dir1++)
 			     {
-                                //for(ii[0]=ixmin; ii[0]<ixmax; ii[0]++)
 				     for(ii[0]=ixmin; ii[0]<=ixmax; ii[0]++)
 				     for(ii[1]=0; ii[1]<((*p)->n[1])+2; ii[1]++)
 				     		 #ifdef USE_SAC_3D
@@ -2706,8 +2717,11 @@ checkErrors_i("initgrid memory allocation");
                                                        ii1[0]=ixe;
                                                        ii2[0]=ixf;
 
+
+
+
  
-    ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+fabs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))])-(fabs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
+    ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))])-(abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
 // ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]= (ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))])+ (ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
    // qx(ix,ixmin2:ixmax2,jdim)=(1+abs(ixe-ix))*qx(ixe,ixmin2:ixmax2,jdim)- abs(ixe-ix) *qx(ixf,ixmin2:ixmax2,jdim)
 
@@ -2763,7 +2777,7 @@ checkErrors_i("initgrid memory allocation");
 
 
 
-						       ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+fabs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))])-(fabs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
+						       ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))])-(abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
 						      //ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+abs(ixe-ix))* (wda[fencode3_i(*p,ii1,pos1+dir1)]);
 						  }
 
@@ -2808,7 +2822,7 @@ checkErrors_i("initgrid memory allocation");
 
                                                         
 
-						       ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+fabs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))])-(fabs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
+						       ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))])-(abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
 //write(*,*) jdim,ixe,ixf,ix,ixmin1,ixmax1,ixmin2,ixmax2, qx(ixmin1:ixmax1,ix,jdim),qx(ixmin1:ixmax1,&
 //                   ixe,jdim),qx(ixmin1:ixmax1,ixf,jdim)
 //if((*p)->ipe==0   && ii[0]==0)
@@ -2862,7 +2876,7 @@ checkErrors_i("initgrid memory allocation");
                                                        }
                                                        ii1[2]=ixe;
                                                        ii2[2]=ixf; 
-						       ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+fabs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))])-(fabs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
+						       ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))])-(abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
 						      //ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+abs(ixe-ix))* (wda[fencode3_i(*p,ii1,pos1+dir1)]);
 						  }
 
@@ -2905,7 +2919,7 @@ checkErrors_i("initgrid memory allocation");
                                                        }
                                                        ii1[2]=ixe;
                                                        ii2[2]=ixf; 
-						       ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+fabs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))])-(fabs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
+						       ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui+dir1)]=(1+abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii1,tmpnui+dir1))])-(abs(ixe-ix))* (ttemp2[(fencode3p2_i(*p,ii2,tmpnui+dir1))]);
 						  }
 
 				}
@@ -2943,7 +2957,7 @@ kp=0;
 	
 		     case 1:
 			  (wda[(fencode3_i(*p,ii,pos2))])=ttemp2[encode3p2_i(*p,ip,jp,kp,tmpnui1)];
-                 //if(ip==1)
+//if(ip==1)
                  //       printf("delx 1 %d %d %16.20f  %16.20f \n",ii[0],ii[1],wda[(encode3_i(*p,ip-1,jp-1,kp,delx1))],wda[(encode3_i(*p,ip-1,jp-1,kp,delx2))]);
 
 		     break;
@@ -2986,16 +3000,14 @@ kp=0;
 	    switch(dir)
 	    {
 		     case 0:
-	               (wda[(encode3_i(*p,ip-1,jp-1,kpo,delx1))])=/*(*p)->dx[0];//*/0.5*(ttemp2[encode3p2_i(*p,ip+1,jp,kp,tmpnui)]-ttemp2[encode3p2_i(*p,ip-1,jp,kp,tmpnui)]);
-                      //(wda[(encode3_i(*p,ip-1,jp-1,kpo,delx1))])=/*(*p)->dx[0];//*/0.5*(ttemp2[encode3p2_i(*p,ip+1,jp,kp,tmpnui)]-ttemp2[encode3p2_i(*p,ip-1,jp,kp,tmpnui)]);
+	               // (wda[(encode3_i(*p,ip-1,jp-1,kpo,delx1))])=/*(*p)->dx[0];//*/0.5*(ttemp2[encode3p2_i(*p,ip+1,jp,kp,tmpnui)]-ttemp2[encode3p2_i(*p,ip-1,jp,kp,tmpnui)]);
+                  (wda[(encode3_i(*p,ip-1,jp-1,kpo,delx1))])=/*(*p)->dx[0];//*/0.5*(ttemp2[encode3p2_i(*p,ip+1,jp,kp,tmpnui)]-ttemp2[encode3p2_i(*p,ip-1,jp,kp,tmpnui)]);
 	              //  if(ip==128  && jp==128 && kp==128)
                       //  printf("delx 0 %d %d %d %16.20f  %16.20f   %16.20f \n",ii[0]-1,ii[1]-1,ii[2]-1,wda[(encode3_i(*p,ip-1,jp-1,kp-1,delx1))],wda[(encode3_i(*p,ip-1,jp-1,kp-1,delx2))],wda[(encode3_i(*p,ip-1,jp-1,kp-1,delx3))]);
 		     break;
 	
 		     case 1:
 			(wda[(encode3_i(*p,ip-1,jp-1,kpo,delx2))])=/*(*p)->dx[1];//*/0.5*(ttemp2[encode3p2_i(*p,ip,jp+1,kp,tmpnui1)]-ttemp2[encode3p2_i(*p,ip,jp-1,kp,tmpnui1)]);
-			//(wda[(encode3_i(*p,ip-1,jp-1,kpo,delx2))])=/*(*p)->dx[1];//*/0.5*(ttemp2[encode3p2_i(*p,ip,jp+1,kp,tmpnui1)]-ttemp2[encode3p2_i(*p,ip,jp-1,kp,tmpnui1)]);
-
 	               // if(ip==128  && jp==128 && kp==128)
                        //   printf("delx 1 %d %d %d %16.20f  %16.20f   %16.20f \n",ii[0]-1,ii[1]-1,ii[2]-1,wda[(encode3_i(*p,ip-1,jp-1,kp-1,delx1))],wda[(encode3_i(*p,ip-1,jp-1,kp-1,delx2))],wda[(encode3_i(*p,ip-1,jp-1,kp-1,delx3))]);
 
@@ -3821,14 +3833,6 @@ int cucopywmodfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw0
 
 real *tgmpiwmod0=*gmpiwmod0;
 real *tgmpiwmod1=*gmpiwmod1;
- /*  if(idir==0 && (*p)->ipe==0     &&  idir==0 )
-    {
-        printf("ipe2 mpiw0 after bound \n");
-        for(int j=0; j<4;j++)
-         for(int i=0; i<((*p)->n[1]);i++)           
-             printf("%d %d %lg %lg\n",i,j, (tgmpiwmod0[4*rho*((*p)->n[0]) +i+j*((*p)->n[0])]), (tgmpiwmod1[4*rho*((*p)->n[0]) +i+j*((*p)->n[0])]));
-         printf("\n");
-     }*/
 
 
    
@@ -3906,10 +3910,32 @@ if(idir==2)
 }    
          #endif
 
+
+  if(idir==1 /*&& (*p)->ipe==0     &&  idir==0*/ )
+    {
+        ;//printf("ipe2 mpiw0 after bound \n");
+        
+        ;//for(int j=0; j<4;j++)
+         //for(int i=0; i<((*p)->n[1]);i++) 
+        ;// for(int i=0; i<10;i++)              
+         ;//    printf("%d %d %lg %lg\n",i,j, (tgmpiwmod0[4*rhob*((*p)->n[0]) +i+j*((*p)->n[0])]), (tgmpiwmod1[4*rhob*((*p)->n[0]) +i+j*((*p)->n[0])]));
+         ;//printf("\n");
+     }
+
+
+
     //printf("call mpiwtogpu\n");
 
      mpiwmodtogpu_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,*d_w,*d_wmod,*d_gmpiw0,*d_gmpiwmod0,*d_gmpiw1,*d_gmpiwmod1,*d_gmpiw2,*d_gmpiwmod2,idir,order);
      cudaThreadSynchronize();
+
+
+
+
+
+
+
+
 }
 
 

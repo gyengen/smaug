@@ -1010,8 +1010,17 @@ int readasciivacconfig(char *cfgfile, params p, meta md,state *st, real *w, real
        #ifdef USE_MULTIGPU
 		if((p.pipe[0])==0  && (p.pnpe[0]>1)) iif=ni -2;
 		if((p.pipe[0])==((p.pnpe[0])-1)  && (p.pnpe[0]>1)  ) is=2;
-		if((p.pipe[1])==0 && (p.pnpe[1]>1)) jf=nj-2;
-		if((p.pipe[1])==((p.pnpe[1])-1) && (p.pnpe[1]>1)) js=2;
+		if((p.pipe[1])==0 && (p.pnpe[1]>1)  ) 
+              {
+		jf=nj-2;
+              printf("aread ifinish %d %d %d\n",p.ipe,p.pipe[1],jf);
+		}
+		if((p.pipe[1])==((p.pnpe[1])-1) && (p.pnpe[1]>1))
+		{
+              js=2;
+              printf("aread istart %d %d %d\n",p.ipe,p.pipe[1],js);		
+		 
+		}
 
 	  #ifdef USE_SAC_3D
 		if((p.pipe[2])==0  && (p.pnpe[2]>1)) kf=nk-2;

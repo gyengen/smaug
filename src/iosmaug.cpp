@@ -117,6 +117,8 @@ if(argc>1)
 
         p->dx[0]=(p->xmax[0]-p->xmin[0])/(p->n[0]);
 	p->dx[1]=(p->xmax[1]-p->xmin[1])/(p->n[1]);
+
+
 	//store global values for max and min domain dimensions
 	p->gxmax[0]=xmax;
 	p->gxmin[0]=xmin;
@@ -544,12 +546,6 @@ char *method=NULL;
         //same as the grid initialisation routine in SAC
         //ensures boundaries defined correctly
 	#ifdef USE_MPI
-              /*i1=0; 
-		j1=513;
-              j1=513;
-              printf("wmod %d %d %d %d %g\n",p->ipe,j1,p->n[0], p->n[1],wmod[(j1*(p->n[0])+i1)+7*(p->n[0])*(p->n[1])]);
-             j1=0;
-              printf("wmod %d %d %d %d %g\n",p->ipe,j1,p->n[0], p->n[1],wmod[(j1*(p->n[0])+i1)+7*(p->n[0])*(p->n[1])]);*/
 
 		cuinitmgpubuffers(&p, &w, &wmod, &temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,   &gmpiw0, &gmpiwmod0,   &gmpiw1, &gmpiwmod1,   &gmpiw2, &gmpiwmod2, &d_p, &d_w, &d_wmod,&d_wtemp2,  &d_gmpivisc0,  &d_gmpivisc1,  &d_gmpivisc2, &d_gmpiw0, &d_gmpiwmod0, &d_gmpiw1, &d_gmpiwmod1, &d_gmpiw2, &d_gmpiwmod2);
 
@@ -570,8 +566,9 @@ char *method=NULL;
 
 		cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order,1);
 		gpusync();
+                printf("call mpibound %d\n",p->ipe);
 		mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2 ,p,1);
-printf("dim1");
+	        printf("leave mpibound %d\n",p->ipe);
 		gpusync();
 		cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order,1);
 
@@ -596,13 +593,11 @@ printf("dim1");
 		cusync(&p);
         #endif //use_MPI
 
-//printf("inint grid");
+
       #ifndef USE_MULTIGPU
 	int iii[2];
 	initgrid(&p,&state,&wd,&d_p, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
       #endif
-
-//printf("done init grid\n");
        /*********************************************************************************************************/
        /* End of grid initialisation */
        /*********************************************************************************************************/
@@ -637,39 +632,14 @@ printf("dim1");
 
         #ifdef USE_MPI
 
-         /* printf("before init bounds corrected\n");
-              int bound;
-
-              i1=0;
-              j1=513;
-             //if(j1==0  || j1==1)
-             // bound==1;
-             if(j1 >= ((p->n[1])-2))
-              bound=2*(j1==((p->n[1])-1))+(p->n[1])-j1;
-
-             // printf("wmod %d %d %d %d %g\n",p->ipe,j1,p->n[0], p->n[1],gmpiwmod1[(j1*(p->n[0])+i1)+7*(p->n[0])*(p->n[1])]);
-	      printf("wmod-a %d %d %d %d %d %g %d\n",p->ipe,i1,j1,p->n[0], p->n[1],gmpiwmod1[sacencodempiw1 (p,i1, j1, 0, 7,bound)],bound);
-             j1=0;
-             
-             if(j1==0  || j1==1)
-              bound=j1;
-             //if(j1 >= ((p->n[1])-2))
-             // bound=2*(j1==((p->n[1])-1))+(p->n[1])-j1;
-
-              printf("wmod-a %d %d %d %d %d %g %d\n",p->ipe,i1,j1,p->n[0], p->n[1],gmpiwmod1[sacencodempiw1 (p,i1, j1, 0, 7,bound)],bound);*/
-
-
-
-
-
-
-
+        for(int ordert=0; ordert<=1; ordert++)
         for(int idir=0; idir<NDIM;idir++)
         {
 		//for runge kutta will need to run this several times  for each order 
 		if(p->ipe==0)          
 		printf("before mpi trans mpiwmod\n");
-		 cucopywtompiwmod(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, 0,idir);
+          // if(idir==1)
+		 cucopywtompiwmod(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, ordert,idir);
 
 		gpusync();
 		if(p->ipe==0)          
@@ -677,23 +647,12 @@ printf("dim1");
 
 		mpiboundmod(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p,idir);
 		gpusync();
-		//for runge kutta will need to run this several times  for each order         
-		cucopywmodfrommpiw(&p,&w, &wmod,      &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,0,idir);
+		//for runge kutta will need to run this several times  for each order  
+           //if(idir==1)       
+		cucopywmodfrommpiw(&p,&w, &wmod,      &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,ordert,idir);
 		gpusync();
          }
 
-
-
-
-
-
-cuupdate(&p,&w,&wmod,&temp2,&state,&d_p,&d_w,&d_wmod,&d_wtemp2,  &d_state,n);
-     /*      printf("after init bounds corrected\n");
-              i1=0;
-              j1=513;
-              printf("wmod %d %d %d %d %g\n",p->ipe,j1,p->n[0], p->n[1],wmod[(j1*(p->n[0])+i1)+7*(p->n[0])*(p->n[1])]);
-             j1=0;
-              printf("wmod %d %d %d %d %g\n",p->ipe,j1,p->n[0], p->n[1],wmod[(j1*(p->n[0])+i1)+7*(p->n[0])*(p->n[1])]);*/
 
 
 
@@ -819,8 +778,9 @@ cuupdate(&p,&w,&wmod,&temp2,&state,&d_p,&d_w,&d_wmod,&d_wtemp2,  &d_state,n);
 		#else
 		   //  writeasciivacconfig(configfile,*p, meta , w,wd,hlines,*state,mode);
                     writeasciivacconfig(configfile,*p, meta , wmod,wd,hlines,*state,mode);
+                  ;//  writevacconfig(configfile,n,*p, meta , wmod,wd,*state);
                  #endif
-		;//writevacconfig(configfile,n,*p, meta , wmod,wd,*state);
+		//writevacconfig(configfile,n,*p, meta , w,wd,*state);
 
 
 	 
@@ -844,15 +804,14 @@ cuupdate(&p,&w,&wmod,&temp2,&state,&d_p,&d_w,&d_wmod,&d_wtemp2,  &d_state,n);
 			cucomputemaxc(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);
 			cucomputemaxcourant(&p,&d_p,&d_wmod, &d_wd,order,dim,&wd,&d_wtemp);  //potential bottleneck here
 		}
-                tcal+=(second()-tc);
-		
+
 		#ifdef USE_MPI
                    tv=second();
                    gpusync();
 		   mpiallreduce(&(p->maxcourant), MPI_MAX);
                    tcom+=(second()-tv);
 		#endif
-	        tc=second();
+	
 		if(     ((  (p->courant)/(p->maxcourant)  ))>1.0e-8  )
 		       p->dt=(p->courant)/(p->maxcourant);
 		//printf("new dt is %g %g\n",(p->courant)/(p->maxcourant),p->dt);
@@ -968,10 +927,9 @@ cuupdate(&p,&w,&wmod,&temp2,&state,&d_p,&d_w,&d_wmod,&d_wtemp2,  &d_state,n);
 			      mpiallreduce(&(p->cmax), MPI_MAX);
                               tcom+=(second()-tv);
 		      #endif
-			tc=second();
 		      cmax[dim]=p->cmax;
 		      cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,rho,dim);
- 		   tcal+=(second()-tc);
+
 		      #ifdef USE_MPI
                           tv=second();
 			  cucopytompivisc(&p,&temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,  &d_p,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2);
@@ -1123,12 +1081,12 @@ cuupdate(&p,&w,&wmod,&temp2,&state,&d_p,&d_w,&d_wmod,&d_wtemp2,  &d_state,n);
 	  //source terms
           tc=second();
           cusource(&p,&d_p,&d_state,&d_w,&d_wmod, &d_dwn1, &d_wd,order, ordero,p->dt);
-               
+                tcal+=(second()-tc);
 	for(int ii=0; ii<=(b1+(NDIM-1)); ii++)
 	for(int idir=0; idir<NDIM; idir++)
         //for(int ibound=0; ibound<2; ibound++)
 	  cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, ordero,idir,ii);
-         tcal+=(second()-tc);
+
 	} //end of if((p->rkon)==0)
        /*********************************************************************************************************/
        /* End single step  iteration*/
@@ -1376,6 +1334,7 @@ cuupdate(&p,&w,&wmod,&temp2,&state,&d_p,&d_w,&d_wmod,&d_wtemp2,  &d_state,n);
         {
                   gpusync();
 		 //  cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order,idir);
+              //if(idir==1)
 		   cucopywtompiwmod(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order,idir);
 
                  gpusync();
@@ -1387,6 +1346,7 @@ cuupdate(&p,&w,&wmod,&temp2,&state,&d_p,&d_w,&d_wmod,&d_wtemp2,  &d_state,n);
  gpusync();
 
 		//   cucopywfrommpiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order,idir);	
+		// if(idir==1)
 		   cucopywmodfrommpiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order,idir);	
  gpusync();
 

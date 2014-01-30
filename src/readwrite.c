@@ -382,6 +382,8 @@ int writevacgatherconfig(char *name,int n,params p, meta md, real *w, real *wd, 
   int ibuffer[5];
   char ext[3];
 
+
+#ifdef USE_MPI
  istart=2*((p.noghost)>0)*(p.pnpe[0]>1);
  jstart=2*((p.noghost)>0)*(p.pnpe[1]>1);
 
@@ -403,6 +405,7 @@ int writevacgatherconfig(char *name,int n,params p, meta md, real *w, real *wd, 
     #endif
 
 
+#endif
 
 
  
@@ -1047,7 +1050,8 @@ fscanf(fdt,"%d %lG %d %d %d\n",&(st->it),&(st->t),&ii1,&ii2,&ii3);
      freadl(fdt, &hlines[i]);
      printf("%s\n", hlines[i]);
    }
-printf("read ascii header %d %d %d %d %d\n" , p.ipe, is,iif, js,jf);
+//printf("read ascii header %d %d %d %d\n" , p.ipe, is,iif, js,jf);
+printf("read ascii header %d %d %d %d %d\n" , is,iif, js,jf);
   //fscanf(fdt,"%f",&val);
  //printf("%f",val);
 #ifdef USE_SAC_3D

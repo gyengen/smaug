@@ -549,6 +549,19 @@ char *method=NULL;
 
 		cuinitmgpubuffers(&p, &w, &wmod, &temp2, &gmpivisc0, &gmpivisc1, &gmpivisc2,   &gmpiw0, &gmpiwmod0,   &gmpiw1, &gmpiwmod1,   &gmpiw2, &gmpiwmod2, &d_p, &d_w, &d_wmod,&d_wtemp2,  &d_gmpivisc0,  &d_gmpivisc1,  &d_gmpivisc2, &d_gmpiw0, &d_gmpiwmod0, &d_gmpiw1, &d_gmpiwmod1, &d_gmpiw2, &d_gmpiwmod2);
 
+
+	cuinitmgpurbuffers(&p,    
+			&d_gmpiviscr0,    
+			&d_gmpiviscr1,    
+			&d_gmpiviscr2,   
+			d_gmpiwr0, 
+			&d_gmpiwmodr0,   
+			d_gmpiwr1, 
+			&d_gmpiwmodr1,   
+			d_gmpiwr2, 
+			&d_gmpiwmodr2);
+
+
 		gpusync();
 		int iii[3];
 		int ip,jp;
@@ -556,30 +569,61 @@ char *method=NULL;
 		p->it=-1;
 
 
+
 		cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order,0);
 		gpusync();
-		mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2 ,p,0);
+
+#ifdef USE_GPU_DIRECT
+		mpibound(NDERV, d_gmpiw0,d_gmpiw1,d_gmpiw2, d_gmpiwr0,d_gmpiwr1,d_gmpiwr2 ,p,0);
+		gpusync();
+		cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiwr0,    &d_gmpiwr1,    &d_gmpiwr2, order,0);
+		gpusync();
+#else
+		mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2, gmpiw0,gmpiw1,gmpiw2 ,p,0);
 		gpusync();
 		cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order,0);
 		gpusync();
-
+#endif
 
 		cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order,1);
 		gpusync();
+#ifdef USE_GPU_DIRECT
+		mpibound(NDERV, d_gmpiw0,d_gmpiw1,d_gmpiw2 , d_gmpiwr0,d_gmpiwr1,d_gmpiwr2 ,p,1);
+		gpusync();
+		cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiwr0,    &d_gmpiwr1,    &d_gmpiwr2, order,1);
+#else
+
                 printf("call mpibound %d\n",p->ipe);
-		mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2 ,p,1);
+		mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2, gmpiw0,gmpiw1,gmpiw2 ,p,1);
 	        printf("leave mpibound %d\n",p->ipe);
 		gpusync();
 		cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order,1);
+#endif
 
-		#ifdef USE_SAC3D
+
+
+
+#ifdef USE_SAC3D
 			gpusync();
 			cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order,2);
 			gpusync();
-			mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2 ,p,2);
+	#ifdef USE_GPU_DIRECT
+			mpibound(NDERV, d_gmpiw0,d_gmpiw1,d_gmpiw2  , d_gmpiwr0,d_gmpiwr1,d_gmpiwr2,p,2);
+			gpusync();
+			cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiwr0,    &d_gmpiwr1,    &d_gmpiwr2, order,2);
+
+	#else
+			mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2, gmpiw0,gmpiw1,gmpiw2 ,p,2);
 			gpusync();
 			cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order,2);
-		#endif
+	#endif
+#endif
+
+
+
+
+
+
 		p->it=n+1;
 		cuupdatehostwd(&p,&wd,&wmod,&temp2,&state,&d_p,&d_wd,&d_wmod,&d_wtemp2,  &d_state,n);
 		initgrid(&p,&state,&wd,&d_p, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
@@ -632,7 +676,7 @@ char *method=NULL;
 
         #ifdef USE_MPI
 
-        for(int ordert=0; ordert<=1; ordert++)
+        for(int ordert=0; ordert<=1; ordert++)//ozt case may only work with case ordert==1
         for(int idir=0; idir<NDIM;idir++)
         {
 		//for runge kutta will need to run this several times  for each order 
@@ -644,13 +688,27 @@ char *method=NULL;
 		gpusync();
 		if(p->ipe==0)          
 		printf("mpi trans mpiwmod\n");
-
-		mpiboundmod(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p,idir);
+		
+#ifdef USE_GPUDIRECT
+		mpiboundmod(NVAR, d_gmpiwmod0,d_gmpiwmod1,d_gmpiwmod2, d_gmpiwmodr0,d_gmpiwmodr1,d_gmpiwmodr2 ,p,idir);
+#else
+		mpiboundmod(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2, gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p,idir);
+#endif
 		gpusync();
 		//for runge kutta will need to run this several times  for each order  
-           //if(idir==1)       
+           //if(idir==1) 
+
+#ifdef USE_GPUDIRECT
+		cucopywmodfrommpiw(&p,&w, &wmod,      &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmodr0,   &d_gmpiw1, &d_gmpiwmodr1,   &d_gmpiw2, &d_gmpiwmodr2,ordert,idir);
+#else      
 		cucopywmodfrommpiw(&p,&w, &wmod,      &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,ordert,idir);
-		gpusync();
+#endif
+
+
+		gpusync();		
+
+
+
          }
 
 
@@ -780,7 +838,7 @@ char *method=NULL;
                     writeasciivacconfig(configfile,*p, meta , wmod,wd,hlines,*state,mode);
                   ;//  writevacconfig(configfile,n,*p, meta , wmod,wd,*state);
                  #endif
-		//writevacconfig(configfile,n,*p, meta , w,wd,*state);
+		//writevacconfig(configfile,n,*p, meta , wmod,wd,*state);
 
 
 	 
@@ -997,7 +1055,9 @@ char *method=NULL;
                           tc=second();
 			 cuhyperdifvisc1r(&p,&d_p,&d_wmod,&wd,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,mom1+f,dim);
 			 cuhyperdifvisc1l(&p,&d_p,&d_wmod,&wd,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,mom1+f,dim);
+tcal+=(second()-tc);
 
+tc=second();
 		         for(ii1=0;ii1<=1;ii1++)
 		         {
 		                  if (ii1 == 0)
@@ -1276,6 +1336,9 @@ char *method=NULL;
 		   }//closes if(p->hyperdifmom==1)
 
 		   cuadvance(&p,&d_p,&d_wmod,&d_w,order);
+		   
+		   
+		   
 		   #ifdef USE_MPI
                            for(int idir=0; idir<NDIM;idir++)
         {
@@ -1283,13 +1346,28 @@ char *method=NULL;
 
 
 		  // mpibound(NVAR, gmpiw0,gmpiw1,gmpiw2 ,p,idir);
-		   mpiboundmod(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p,idir);
+		#ifdef USE_GPUDIRECT
+		   mpiboundmod(NVAR, d_gmpiwmod0,d_gmpiwmod1,d_gmpiwmod2,d_gmpiwmodr0,d_gmpiwmodr1,d_gmpiwmodr2 ,p,idir);
+		#else
+		   mpiboundmod(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2,gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p,idir);
+		#endif
+
+
+		#ifdef USE_GPUDIRECT
+
+			cucopywmodfrommpiw(&p,&w, &wmod,   &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmodr0,   &d_gmpiw1, &d_gmpiwmodr1,   &d_gmpiw2, &d_gmpiwmodr2,order,idir);
+
+		#else
 
 
 			cucopywmodfrommpiw(&p,&w, &wmod,   &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order,idir);
+		#endif
       }
 
 		   #endif
+		   
+		   
+		   
 		   cuboundary(&p,&bp,&d_p,&d_bp,&d_state,&d_wmod, orderb,0,0);
 		   
 
@@ -1332,23 +1410,49 @@ char *method=NULL;
         tcom1=second();
         for(int idir=0; idir<NDIM;idir++)
         {
+
+
+
+
                   gpusync();
 		 //  cucopywtompiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order,idir);
               //if(idir==1)
+
+
 		   cucopywtompiwmod(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2, order,idir);
 
                  gpusync();
 	      //   mpibound(NVAR, gmpiw0,gmpiw1,gmpiw2 ,p,idir);
 		 //  gpusync();
-		   mpiboundmod(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p,idir);
+                #ifdef USE_GPUDIRECT
+		   mpiboundmod(NVAR, d_gmpiwmod0,d_gmpiwmod1,d_gmpiwmod2, d_gmpiwmodr0,d_gmpiwmodr1,d_gmpiwmodr2 ,p,idir);
+
+                #else
+
+		   mpiboundmod(NVAR, gmpiwmod0,gmpiwmod1,gmpiwmod2, gmpiwmod0,gmpiwmod1,gmpiwmod2 ,p,idir);
+                #endif
 
 		 
  gpusync();
 
 		//   cucopywfrommpiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order,idir);	
 		// if(idir==1)
+                #ifdef USE_GPUDIRECT
+		   cucopywmodfrommpiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmodr0,   &d_gmpiw1, &d_gmpiwmodr1,   &d_gmpiw2, &d_gmpiwmodr2,order,idir);	
+                #else
+
+
+
 		   cucopywmodfrommpiw(&p,&w, &wmod,    &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2,order,idir);	
+		#endif
+
+
  gpusync();
+
+
+
+
+
 
    }
      tcom2=second()-tcom1;

@@ -1,7 +1,8 @@
 #Makefile for StarSimulation IoSimTestSimple
 
 ##### User configurable options #####
-include make_inputs
+include make_inputs_mvapich
+#include make_inputs_mpi
 ### End User configurable options ###
 
 
@@ -28,7 +29,24 @@ ALLBIN	=	$(Bin)/smaug
 #@# Targets follow ---------------------------------
 
 ##all:	IoSimTestSimple
-
+spicule4:
+	cp ../solarmodels/iosmaugparams.h.spicule4_nob ../include/iosmaugparams.h
+	cp ../solarmodels/init_user.cu.spicule ../src/init_user.cu
+	cp ../solarmodels/boundary.cu.spicule ../src/boundary.cu
+	cp ../solarmodels/usersource.cu.spicule4_nob ../src/usersource.cu
+	cp ../solarmodels/initialisation_user.h.spicule4_b ../include/initialisation_user.h
+spicule4_mpi:
+	cp ../solarmodels/iosmaugparams.h.spicule4_nob_mpi ../include/iosmaugparams.h
+	cp ../solarmodels/init_user.cu.spicule ../src/init_user.cu
+	cp ../solarmodels/boundary.cu.spicule ../src/boundary.cu
+	cp ../solarmodels/usersource.cu.spicule4_nob ../src/usersource.cu
+	cp ../solarmodels/initialisation_user.h.spicule4_b ../include/initialisation_user.h
+spicule5_mpi:
+	cp ../solarmodels/iosmaugparams.h.spicule5_nob_mpi ../include/iosmaugparams.h
+	cp ../solarmodels/init_user.cu.spicule ../src/init_user.cu
+	cp ../solarmodels/boundary.cu.spicule ../src/boundary.cu
+	cp ../solarmodels/usersource.cu.spicule4_nob ../src/usersource.cu
+	cp ../solarmodels/initialisation_user.h.spicule5_b_mpi ../include/initialisation_user.h
 fluxtube1:
 	cp ../models/iosmaugparams.h.fluxtube1 ../include/iosmaugparams.h
 	cp ../models/init_user.cu.fluxtube1 ../src/init_user.cu

@@ -58,12 +58,110 @@ int is=1;
    else if((dir == 2) && (k==0)    && i>0   && i<((p->n[0])) && j>0   && j<((p->n[1]))   )
        wt[encode3p2_hdv1l(p,i+is,j+is,0,f)]=wt[encode3p2_hdv1l(p,i+is,j+is,6,f)];
 #endif
-
-
-
-
  
 }
+
+
+
+
+
+__device__ __host__
+void bc_hyperdifl0(real *wt, struct params *p,int *ii, int f,int dir) {
+
+   int i=ii[0];
+   int j=ii[1];
+   int k=0;
+ #ifdef USE_SAC_3D
+	k=ii[2];
+ #endif
+  //  IF (typeB(iwc,2*idim-1+k) .NE. 'mpi') THEN
+  //      IF (upperB(2*idim-1+k)) THEN
+
+int is=1;
+ #ifdef USE_SAC
+   if(  (i==(p->n[0])-1)   && j>=0   && j<(p->n[1])           )
+   {
+      //for(int is=0;is<3-2*(j<((p->n[1])-1));is++)   
+         wt[encode3p2_hdv1l(p,i+2,j+is,k,f)]=wt[encode3p2_hdv1l(p,(p->n[0])-5,j+is,k,f)];
+         
+   }
+
+  else if( (i==0)    && j>0   && j<((p->n[1]))   )
+    //for(int is=0;is<3-2*(j<((p->n[1])-1));is++)
+       wt[encode3p2_hdv1l(p,0,j+is,k,f)]=wt[encode3p2_hdv1l(p,6,j+is,k,f)];
+
+#endif
+ #ifdef USE_SAC_3D
+   if( (i==(p->n[0])-1)   && j>0   && j<(p->n[1])      && k>0   && k<(p->n[2])     )
+         wt[encode3p2_hdv1l(p,i+2,j+is,k+is,f)]=wt[encode3p2_hdv1l(p,(p->n[0])-5,j+is,k+is,f)];
+  else if( (i==0)    && j>0   && j<((p->n[1])) && k>0   && k<((p->n[2]))  )
+       wt[encode3p2_hdv1l(p,0,j+is,k+is,f)]=wt[encode3p2_hdv1l(p,6,j+is,k+is,f)];
+ 
+#endif
+ 
+}
+
+
+
+
+__device__ __host__
+void bc_hyperdifl1(real *wt, struct params *p,int *ii, int f,int dir) {
+
+   int i=ii[0];
+   int j=ii[1];
+   int k=0;
+ #ifdef USE_SAC_3D
+	k=ii[2];
+ #endif
+  //  IF (typeB(iwc,2*idim-1+k) .NE. 'mpi') THEN
+  //      IF (upperB(2*idim-1+k)) THEN
+
+int is=1;
+ #ifdef USE_SAC
+ if( (j==(p->n[1])-1)    && i>0   && i<((p->n[0]))  )
+    //for(int is=0;is<3-2*(j<((p->n[1])-1));is++)
+       wt[encode3p2_hdv1l(p,i+is,j+2,k,f)]=wt[encode3p2_hdv1l(p,i+is,(p->n[1])-5,k,f)];
+  
+   else if( (j==0)    && i>0   && i<((p->n[0]))   )
+    //for(int is=0;is<3-2*(j<((p->n[1])-1));is++)
+       wt[encode3p2_hdv1l(p,i+is,0,k,f)]=wt[encode3p2_hdv1l(p,i+is,6,k,f)];
+
+#endif
+ #ifdef USE_SAC_3D
+   if( (j==(p->n[1])-1)    && i>0   && i<((p->n[0])) && k>0   && k<((p->n[2]))  )
+       wt[encode3p2_hdv1l(p,i+is,j+2,k+is,f)]=wt[encode3p2_hdv1l(p,i+is,(p->n[1])-5,k+is,f)];  
+   else if( (j==0)    && i>0   && i<((p->n[0]))  && k>0   && k<((p->n[2]))  )
+       wt[encode3p2_hdv1l(p,i+is,0,k+is,f)]=wt[encode3p2_hdv1l(p,i+is,6,k+is,f)];
+ 
+#endif
+ 
+}
+
+
+
+__device__ __host__
+void bc_hyperdifl2(real *wt, struct params *p,int *ii, int f,int dir) {
+
+   int i=ii[0];
+   int j=ii[1];
+   int k=0;
+ #ifdef USE_SAC_3D
+	k=ii[2];
+ #endif
+  //  IF (typeB(iwc,2*idim-1+k) .NE. 'mpi') THEN
+  //      IF (upperB(2*idim-1+k)) THEN
+
+int is=1;
+
+ #ifdef USE_SAC_3D
+   if( (k==(p->n[2])-1)    && i>0   && i<((p->n[0])) && j>0   && j<((p->n[1]))  )
+       wt[encode3p2_hdv1l(p,i+is,j+is,k+2,f)]=wt[encode3p2_hdv1l(p,i+is,j+is,(p->n[2])-5,f)];
+   else if((k==0)    && i>0   && i<((p->n[0])) && j>0   && j<((p->n[1]))   )
+       wt[encode3p2_hdv1l(p,i+is,j+is,0,f)]=wt[encode3p2_hdv1l(p,i+is,j+is,6,f)];
+#endif
+ 
+}
+
 
 
 /*__device__ __host__
@@ -833,6 +931,64 @@ int shift=order*NVAR*dimp;
 
 
 
+
+
+
+
+ 
+}
+
+
+
+__global__ void hyperdifvisc1bcl_parallel(struct params *p,real *wmod, 
+     real *wd, int order, real *wtemp, real *wtemp1, real *wtemp2, int field, int dim)
+{
+
+  int iindex = blockIdx.x * blockDim.x + threadIdx.x;
+  const int blockdim=blockDim.x;
+  const int SZWT=blockdim;
+  const int SZWM=blockdim*NVAR;
+  int tid=threadIdx.x;
+  int i,j,iv;
+  int is,js;
+  int index,k;
+  int ni=p->n[0];
+  int nj=p->n[1];
+  real dt=p->dt;
+  real dy=p->dx[1];
+  real dx=p->dx[0];
+  real maxt=0,max3=0, max1=0;
+  
+   int ip,jp;
+  int ii[NDIM];
+  int dimp=((p->n[0]))*((p->n[1]));
+ #ifdef USE_SAC_3D
+   int kp;
+   real dz=p->dx[2];
+   dimp=((p->n[0]))*((p->n[1]))*((p->n[2]));
+#endif  
+   //int ip,jp,ipg,jpg;
+
+  #ifdef USE_SAC_3D
+   kp=iindex/(nj*ni);
+   jp=(iindex-(kp*(nj*ni)))/ni;
+   ip=iindex-(kp*nj*ni)-(jp*ni);
+#else
+    jp=iindex/ni;
+   ip=iindex-(jp*ni);
+#endif  
+
+int shift=order*NVAR*dimp;
+  //__shared__ real wts[512];
+  //__shared__ real wms[512];
+
+
+
+
+
+
+
+
      ii[0]=ip;
      ii[1]=jp;
      i=ii[0];
@@ -866,6 +1022,12 @@ int shift=order*NVAR*dimp;
 
  
 }
+
+
+
+
+
+
 
 
 __global__ void hyperdifvisc1l_parallel(struct params *p,real *wmod, 
@@ -1195,6 +1357,12 @@ double *h_cmax;
      cudaThreadSynchronize();
      hyperdifvisc1al_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,   *d_wd, order, *d_wtemp,*d_wtemp1,*d_wtemp2, field, dim);
      cudaThreadSynchronize();
+
+     hyperdifvisc1bcl_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,   *d_wd, order, *d_wtemp,*d_wtemp1,*d_wtemp2, field, dim);
+     cudaThreadSynchronize();
+
+
+
      hyperdifvisc2l_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,   *d_wd, order, *d_wtemp,*d_wtemp1,*d_wtemp2, field, dim);
      cudaThreadSynchronize();
      hyperdifvisc3l_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,   *d_wd, order, *d_wtemp,*d_wtemp1,*d_wtemp2, field, dim);

@@ -3077,6 +3077,80 @@ printf("dx=%g dy=%g\n",(*p)->dx[0], (*p)->dx[1] );
 
 #ifdef USE_MULTIGPU
 
+
+
+
+//prepare data buffers used to copy data between gpu and cpu
+//this will update only the ghost cells transferred between the CPU's
+
+int cuinitmgpurbuffers(struct params **p,    
+real **d_gmpiviscr0,    
+real **d_gmpiviscr1,    
+real **d_gmpiviscr2,   
+real **d_gmpiwr0, 
+real **d_gmpiwmodr0,   
+real **d_gmpiwr1, 
+real **d_gmpiwmodr1,   
+real **d_gmpiwr2, 
+real **d_gmpiwmodr2)
+{
+
+  int szw,  szvisc0,szvisc1,szvisc2,szw0,szw1,szw2;
+  #ifdef USE_SAC
+  //real *dt;
+  
+  szw=4*(  ((*p)->n[1])  +  ((*p)->n[0])   );
+  szw0=4*NDERV*(  ((*p)->n[1])     );
+  szw1=4*NDERV*(  ((*p)->n[0])     );
+
+  szvisc0=4*(  (((*p)->n[1])+2 )   );
+  szvisc1=4*(    (((*p)->n[0]) +2 )  );
+
+ //dt=(real *)calloc( NTEMP2*(((*p)->n[0])+2)* (((*p)->n[1])+2),sizeof(real));
+
+  #endif
+  #ifdef USE_SAC_3D
+  
+  szw=4*NDERV*(  ((*p)->n[1])*((*p)->n[2])  +  ((*p)->n[0])*((*p)->n[2])  +  ((*p)->n[0])*((*p)->n[1])  );
+  szw0=4*NDERV*(  ((*p)->n[1])*((*p)->n[2])    );
+  szw1=4*NDERV*(    ((*p)->n[0])*((*p)->n[2])   );
+  szw2=4*NDERV*(    ((*p)->n[0])*((*p)->n[1])  );
+
+
+
+  szvisc0=4*(  (((*p)->n[1])+2)*(((*p)->n[2])+2)  ); 
+  szvisc1=4*(   (((*p)->n[0])+2)*(((*p)->n[2])+2)    );    
+  szvisc2=4*(  (((*p)->n[1])+2)*(((*p)->n[2])+2)   );    
+
+   
+  //dt=(real *)calloc( NTEMP2*(((*p)->n[0])+2)* (((*p)->n[1])+2)* (((*p)->n[2])+2),sizeof(real));
+  #endif
+
+  	  cudaMalloc((void**)d_gmpiwmodr0, szw0*sizeof(real));
+	  cudaMalloc((void**)d_gmpiwr0, szw0*sizeof(real));
+	  cudaMalloc((void**)d_gmpiwmodr1, szw1*sizeof(real));
+	  cudaMalloc((void**)d_gmpiwr1, szw1*sizeof(real));
+
+  #ifdef USE_SAC_3D  
+	  cudaMalloc((void**)d_gmpiwmodr2, szw2*sizeof(real));
+	  cudaMalloc((void**)d_gmpiwr2, szw2*sizeof(real));
+          cudaMalloc((void**)d_gmpiviscr2, szvisc2*sizeof(real));
+  #else
+
+          cudaMalloc((void**)d_gmpiviscr2, sizeof(real));
+  #endif
+          cudaMalloc((void**)d_gmpiviscr0, szvisc0*sizeof(real));
+          cudaMalloc((void**)d_gmpiviscr1, szvisc1*sizeof(real));
+  return 0;
+
+
+
+}
+
+
+
+
+
 //prepare data buffers used to copy data between gpu and cpu
 //this will update only the ghost cells transferred between the CPU's
 

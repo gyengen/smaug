@@ -360,6 +360,11 @@ int ib;
 
     }
 
+
+
+  
+
+
 /*boundary setting terms should eventually look like this*/
 /*    
 //ensure boundary set correctly 
@@ -1170,7 +1175,7 @@ comm.Barrier();
 //logical :: periodic
 
 
-void mpibound(int nvar,  real *var1, real *var2, real *var3, params *p, int idir)
+void mpibound(int nvar,  real *var1, real *var2, real *var3,  real *rvar1, real *rvar2, real *rvar3, params *p, int idir)
 {
    int i;
 
@@ -1444,7 +1449,7 @@ if((p->pnpe[2])>1)
 
 
 
-void mpiboundmod(int nvar,  real *var1, real *var2, real *var3, params *p, int idir)
+void mpiboundmod(int nvar,  real *var1, real *var2, real *var3,  real *rvar1, real *rvar2, real *rvar3, params *p, int idir)
 {
    int i;
 
@@ -1811,6 +1816,15 @@ void mpivisc( int idim,params *p, real *var1, real *var2, real *var3)
    #else
    n=(p->n[0])*(p->n[1]);
 
+//int iolowerb=p->mpilowerb[idim];
+//int ioupperb=p->mpiupperb[idim];
+
+//p->mpilowerb[idim]=1;
+//p->mpiupperb[idim]=1;
+
+
+
+
    switch(idim)
    {
                case 0:
@@ -1826,6 +1840,10 @@ void mpivisc( int idim,params *p, real *var1, real *var2, real *var3)
    switch(idim)
    {
    case 0:
+
+if((p->pnpe[0])>1  )
+{
+
 
      mgpuneighbours(0, p);
 
@@ -1930,12 +1948,15 @@ comm.Rsend(gmpisrcbufferr[0], n, MPI_DOUBLE_PRECISION, p->jpe,100*(p->ipe)+10*(i
  
          
         #endif
-
+}
         
 
      break;
      
         case 1:
+
+if((p->pnpe[1])>1  )
+{
      mgpuneighbours(1, p);
 
      gnmpirequest=0;  
@@ -1943,7 +1964,7 @@ comm.Rsend(gmpisrcbufferr[0], n, MPI_DOUBLE_PRECISION, p->jpe,100*(p->ipe)+10*(i
      gmpirequest[i]=MPI_REQUEST_NULL;
      
 
-
+      // printf("visc %d %d %d %d %d\n",p->ipe,p->mpiupperb[idim],p->mpilowerb[idim],p->jpe,p->hpe);
 
 
         if((p->mpiupperb[idim])==1  ) gnmpirequest++;
@@ -2020,14 +2041,23 @@ comm.Rsend(gmpisrcbufferr[1], n, MPI_DOUBLE_PRECISION, p->jpe,100*(p->ipe)+10*(i
              var2[sacencodempivisc1(p,i1,i2,i3,bound,idim)]=gmpitgtbufferl[0][i1+bound*((p->n[0])+2)];
 
 
-
+          //if(i1>90 && i1 <110)
+          //         printf("r0 r1 l0 l1 %d %g %g %g %g\n",p->ipe,gmpitgtbufferr[0][i1+0*((p->n[0])+2)],gmpitgtbufferr[0][i1+1*((p->n[0])+2)],gmpitgtbufferl[0][i1+0*((p->n[0])+2)],gmpitgtbufferl[0][i1+1*((p->n[0])+2)]);
+          //printf("\n");
 
           }
 
       #endif
+
+}
+
+
      break;
      #ifdef USE_SAC3D
         case 2:
+
+if((p->pnpe[2])>1  )
+{
       mgpuneighbours(2, p);
 
      gnmpirequest=0;  
@@ -2080,13 +2110,17 @@ comm.Rsend(gmpisrcbufferr[2], n, MPI_DOUBLE_PRECISION, p->jpe,100*(p->ipe)+10*(i
 
 
           }
-
+}
      
      break;
      #endif
    
   }
    comm.Barrier();
+
+
+//p->mpilowerb[idim]=iolowerb;
+//p->mpiupperb[idim]=ioupperb;
 }
 
 

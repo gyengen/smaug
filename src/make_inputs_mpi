@@ -75,6 +75,7 @@ BASICEXOBJS	=\
 	computedervfields.o\
 	boundary.o\
 	init.o\
+	mpiutil.o\
 	update.o\
         advance.o\
 	readwrite.o\

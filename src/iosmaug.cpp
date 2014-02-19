@@ -109,6 +109,7 @@ if(argc>1)
 	mgpuneighbours(0,p);
 	mgpuneighbours(1,p);
 
+
 	//compute the max and min domain dimensions for each processor
 	p->xmax[0]=xmin+(1+(p->pipe[0]))*(xmax-xmin)/(p->pnpe[0]);
 	p->xmax[1]=ymin+(1+(p->pipe[1]))*(ymax-ymin)/(p->pnpe[1]);
@@ -196,44 +197,12 @@ if(argc>1)
 	     sprintf(configinfile,"%s",cfgfile);
 	#endif   //#ifdef USE_MULTIGPU
 
-       /*********************************************************************************************************/
-       /* End of section to set domain sizes and config filenames*/
-       /*********************************************************************************************************/
-
-
-
-
 char *method=NULL;
 
 
        /*********************************************************************************************************/
        /* Start of section initialising steering and auto metadata collection*/
        /*********************************************************************************************************/
-
-
-        //printf("cfgfile %s\n",configfile);
-        //   getintparam_( &elist.id,"i1",&it,  &elist.port, "localhost" );	
-        //	printf("Get integer %d\n",it);
-        //Set input filename as first arg
-	//if NULL use defaults
-	
-	//CIoSimulation *TestSimulation;
-	//this should be executed by the iome start up application
-	//exec('ioshallowwater.sce');
-	//this application is started using the io  start scilab application
-	//exec('paramssteeringtest1.sce');
-	//stacksize('max');
-	//stacksize(268435454)
-	//open the file generated
-	//sprintf(elist.portfile,"%s0_elist.port.txt",meta.name);
-	//FILE *fd=fopen(elist.portfile,"r");
-	//int elist.portelist.id;
-	//fscanf(fd,"%d",&elist.portelist.id);
-	//fclose(fd);
-	//elist.elist.port=elist.portelist.id;
-
-
-
     #ifdef USE_IOME
         if(argc>2)
         {
@@ -248,20 +217,9 @@ char *method=NULL;
 	sprintf(simfile,"%s.xml",meta.name);
         sprintf(newsimfile,"%s_update.xml",meta.name);
      #endif
-     //NewSimulation(metadata.name,'test1.xsl',elist);
-
-
        /*********************************************************************************************************/
        /* End of section initialising steering and auto metadata collection*/
        /*********************************************************************************************************/
-
-
-
-
-
-
-
-
 
 
        /*********************************************************************************************************/
@@ -376,8 +334,7 @@ char *method=NULL;
        }
 
 
-
-       /*********************************************************************************************************/
+        /*********************************************************************************************************/
        /* Start of section to scatter data
         /*********************************************************************************************************/
         #ifdef USE_MULTIGPU
@@ -499,7 +456,6 @@ char *method=NULL;
 	/*********************************************************************************************************/
 
 
-
 	/*********************************************************************************************************/
 	/* Start of section to run special user initialisation
 	/*********************************************************************************************************/
@@ -531,9 +487,10 @@ char *method=NULL;
 
 
 
+
 	//p->it=0;
 	int order=0;
-
+        
         if(mode==run)
         {
         //intialise arrays on GPU
@@ -634,6 +591,7 @@ char *method=NULL;
 	cusync(&p);
          #ifdef USE_MPI
 		p->it=n+1;
+		gpusync();
 		cusync(&p);
         #endif //use_MPI
 
@@ -645,6 +603,7 @@ char *method=NULL;
        /*********************************************************************************************************/
        /* End of grid initialisation */
        /*********************************************************************************************************/
+
 
 
        /*********************************************************************************************************/
@@ -717,10 +676,13 @@ char *method=NULL;
 	#endif
 
 
+
+
+
+
        /*********************************************************************************************************/
        /* End of section initialising the configuration */
        /*********************************************************************************************************/
-
 
 
 
@@ -799,29 +761,23 @@ char *method=NULL;
 	}
 
 
-
        /*********************************************************************************************************/
        /* Start looping over iterations*/
        /*********************************************************************************************************/
-
-
+        printf("its %d\n",nt);
+        //for(n=nt-2;n<=nt;n++)
 	for( n=its;n<=nt;n++)
 	{
-	    p->it=n;
-
-
-	if((p->rkon)==0)
-	{
-	  cucomputedervfields(&p,&d_p,&d_wmod, &d_wd,0);
-        }
-
-         //tc=second();
-         //cuupdate(&p,&w,&wmod,&temp2,&state,&d_p,&d_w,&d_wmod,&d_wtemp2,  &d_state,n);
-         //tcal+=(second()-tc);
-
-
-
-
+	    	p->it=n;	
+		gpusync();
+		printf("%d,step %d\n",p->ipe,n);
+		gpusync();
+	
+		if((p->rkon)==0)
+		{
+	  		cucomputedervfields(&p,&d_p,&d_wmod, &d_wd,0);
+        	}	
+	
 
 	    if(((n-1)%(p->cfgsavefrequency))==0)
 	    {
@@ -845,8 +801,18 @@ char *method=NULL;
                 printf("finished write routine\n");
 	    }
 
+
+
+
+	
+
 	    order=0;
-	    t1=second();
+	    t1=second();	
+	
+
+
+
+
 
        /*********************************************************************************************************/
        /* Start single step  iteration*/
@@ -898,6 +864,8 @@ char *method=NULL;
        /*********************************************************************************************************/
        /* End of single step  iteration*/
        /*********************************************************************************************************/
+
+
 
 
 
@@ -1014,7 +982,7 @@ char *method=NULL;
                 tc=second();
 		p->cmax=cmax[dim];
 		#ifdef USE_MPI
-		     ;// mpiallreduce(&(p->cmax), MPI_MAX);
+		      ;//mpiallreduce(&(p->cmax), MPI_MAX);
 		#endif
 	        cuhyperdifvisc1ir(&p,&d_p,&d_wmod,  &d_wd,order,&d_wtemp,&d_wtemp1,&d_wtemp2,energy,dim);
                 tcal+=(second()-tc);
@@ -1151,6 +1119,8 @@ tc=second();
        /*********************************************************************************************************/
        /* End single step  iteration*/
        /*********************************************************************************************************/
+
+
 
 
 
@@ -1377,16 +1347,6 @@ tc=second();
        /*********************************************************************************************************/
 
 
-	 //cuupdate(&p,&w,&wmod,&temp2,&state,&d_p,&d_w,&d_wmod,&d_wtemp2,  &d_state,n);
-
-
-       // for(int ivar=1;ivar<NVAR;ivar++)
-       // for(j1=0; j1<2*(p->n[1]); j1++)
-      //  for(i1=0; i1<2*(p->n[0]); i1++)
-          ;//  w[(2*j1*(p->n[0])+i1)+4*ivar*(p->n[0])*(p->n[1])]=0.0;
-
-
-
 	  #ifdef USE_MPI
 
 
@@ -1521,7 +1481,15 @@ tc=second();
 	    }*/
 
            // gpusync();
-	    }//end of testep
+
+
+
+
+
+	
+	
+	
+	}
        /*********************************************************************************************************/
        /* End of looping over iterations*/
        /*********************************************************************************************************/
@@ -1538,33 +1506,23 @@ tc=second();
 
 
 	
-        } //mode=0 clean up routine
+        } //mode=0 clean up routine//if(mode==run)
 
 
 
-//free(d_gwnew);
-//free(d_gw);
-/*free(d_gwtemp);
-free(d_gwtemp1);
-free(d_gwtemp2);
-free(d_gwmod);
-free(d_gdwn1);
-free(d_gwd);
-
-free(d_gp);
-free(d_gstate);
-free(d_gbp);*/
 
 
-	#ifdef USE_IOME
-		writesimulation_(elist.id,newsimfile,elist.port,elist.server);
-	#endif
-	#ifdef USE_MPI
-          ;// mgpufinalize(p);
-        #endif
 
-cufinish(&p,&w,&wnew,&state,&d_p,&d_bp,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
+
+
+
+//}//if(mode==run)
+
+cusync(&p);
+
+//cufinish(&p,&w,&wnew,&state,&d_p,&d_bp,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
 #ifdef USE_MPI
+			gpusync();
 	     printf("at cumpifinish end here %d\n",p->ipe);
 #endif
 	free(hlines);
@@ -1576,14 +1534,16 @@ cufinish(&p,&w,&wnew,&state,&d_p,&d_bp,&d_w,&d_wnew,&d_wmod, &d_dwn1,  &d_wd, &d
 	free(formfile);
 
 	#ifdef USE_MPI
+				gpusync();
 	    // printf("at cumpifinish end here %d\n",p->ipe);
+             mgpufinalize(p);
 
 	   ;// cufinishmgpu(&p,&w, &wmod, &temp2,&gmpivisc0,&gmpivisc1,&gmpivisc2,   &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,   &d_w, &d_wmod,&d_wtemp2,    &d_gmpivisc0,    &d_gmpivisc1,    &d_gmpivisc2,   &d_gmpiw0, &d_gmpiwmod0,   &d_gmpiw1, &d_gmpiwmod1,   &d_gmpiw2, &d_gmpiwmod2);
-            ;// mgpufinalize();
-            ;//MPI::Finalize();
+           ;// MPI::Finalize();
 
 	#endif
-
+            printf("return\n");
 		return 0;
-	}
+	
 
+}

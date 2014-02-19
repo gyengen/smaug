@@ -232,6 +232,10 @@ init.o: init.cu
 	sed 's/MODID/i/g' < gradops.cu > ../include/gradops_i.cuh
 	sed 's/MODID/i/g' < init_user.cu > ../include/init_user_i.cuh
 	$(NVCC) -o $@     $(CUDACCFLAGS) -c $<
+mpiutil.o: mpiutil.cu
+	sed 's/MODID/mpiu/g' < gradops.cu > ../include/gradops_mpiu.cuh
+	sed 's/MODID/mpiu/g' < init_user.cu > ../include/init_user_mpiu.cuh
+	$(NVCC) -o $@     $(CUDACCFLAGS) -c $<
 update.o: update.cu
 	sed 's/MODID/u/g' < gradops.cu > ../include/gradops_u.cuh
 	$(NVCC) -o $@     $(CUDACCFLAGS) -c $<

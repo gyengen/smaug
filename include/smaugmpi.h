@@ -130,7 +130,7 @@ void mgpuinit(params *p)
      p->npe=comm.Get_size();
      p->ipe=comm.Get_rank();
 
-#ifdef USE_SAC3D
+#ifdef USE_SAC_3D
 
 gnmpibuffer0=NDERV*(p->n[2])*(p->n[1])*(p->ng[0]);
 gnmpibuffer1=NDERV*(p->n[0])*(p->n[2])*(p->ng[1]);
@@ -200,7 +200,7 @@ for(i=0;i<NDIM;i++)
               switch(i)
               {
                  case 0:
-#ifdef USE_SAC3D
+#ifdef USE_SAC_3D
      gmpisrcbufferl[i]=(real *)calloc( ((p->n[1])+2)*((p->n[2])+2)*(p->ng[0]),sizeof(real));
      gmpisrcbufferr[i]=(real *)calloc( ((p->n[1])+2)*((p->n[2])+2)*(p->ng[0]),sizeof(real ));
      gmpitgtbufferl[i]=(real *)calloc(((p->n[1])+2)*((p->n[2])+2)*(p->ng[0]),sizeof(real ));
@@ -214,7 +214,7 @@ for(i=0;i<NDIM;i++)
                       
                       break;   
                  case 1:
-#ifdef USE_SAC3D
+#ifdef USE_SAC_3D
      gmpisrcbufferl[i]=(real *)calloc(((p->n[0])+2)*((p->n[2])+2)*(p->ng[1]),sizeof(real ));
      gmpisrcbufferr[i]=(real *)calloc(((p->n[0])+2)*((p->n[2])+2)*(p->ng[1]),sizeof(real ));
      gmpitgtbufferl[i]=(real *)calloc(((p->n[0])+2)*((p->n[2])+2)*(p->ng[1]),sizeof(real ));
@@ -227,7 +227,7 @@ for(i=0;i<NDIM;i++)
 #endif
                       
                       break;
-#ifdef USE_SAC3D         
+#ifdef USE_SAC_3D         
                  case 2:
      gmpisrcbufferl[i]=(real *)calloc(((p->n[0])+2)*((p->n[1])+2)*(p->ng[2]),sizeof(real ));
      gmpisrcbufferr[i]=(real *)calloc(((p->n[0])+2)*((p->n[1])+2)*(p->ng[2]),sizeof(real ));
@@ -507,7 +507,7 @@ void mpisend(int nvar,real *var, int *ixmin, int *ixmax  ,int qipe,int iside, in
 		case 0:
 		   for(ivar=0; ivar<nvar;ivar++)
 		     for(i1=0;i1<=1;i1++)
-		#ifdef USE_SAC3D
+		#ifdef USE_SAC_3D
 			for(i3=0;i3<p->n[2];i3++)
 		#endif
 
@@ -547,7 +547,7 @@ void mpisend(int nvar,real *var, int *ixmin, int *ixmax  ,int qipe,int iside, in
 
 		   for(ivar=0; ivar<nvar;ivar++)
                      for(i2=0;i2<=1;i2++)
-		#ifdef USE_SAC3D
+		#ifdef USE_SAC_3D
 			for(i3=0;i3<p->n[2];i3++)
 		#endif
 
@@ -587,7 +587,7 @@ void mpisend(int nvar,real *var, int *ixmin, int *ixmax  ,int qipe,int iside, in
 		break;
 		case 2:
 
-		#ifdef USE_SAC3D
+		#ifdef USE_SAC_3D
 		   for(ivar=0; ivar<nvar;ivar++)
                      for(i3=0;i3<=1;i3++)
                      for(i2=0;i2<p->n[1];i2++)
@@ -637,7 +637,7 @@ void mpisendmod(int nvar,real *var, int *ixmin, int *ixmax  ,int qipe,int iside,
 		case 0:
 		   for(ivar=0; ivar<nvar;ivar++)
 		     for(i1=0;i1<=1;i1++)
-		#ifdef USE_SAC3D
+		#ifdef USE_SAC_3D
 			for(i3=0;i3<p->n[2];i3++)
 		#endif
 
@@ -678,7 +678,7 @@ void mpisendmod(int nvar,real *var, int *ixmin, int *ixmax  ,int qipe,int iside,
 		case 1:
 		   for(ivar=0; ivar<nvar;ivar++)
                      for(i2=0;i2<=1;i2++)
-		#ifdef USE_SAC3D
+		#ifdef USE_SAC_3D
 			for(i3=0;i3<p->n[2];i3++)
 		#endif
 
@@ -718,7 +718,7 @@ void mpisendmod(int nvar,real *var, int *ixmin, int *ixmax  ,int qipe,int iside,
 		break;
 		case 2:
 
-		#ifdef USE_SAC3D
+		#ifdef USE_SAC_3D
 		   for(ivar=0; ivar<nvar;ivar++)
                      for(i3=0;i3<=1;i3++)
                      for(i2=0;p->n[1];i2++)
@@ -775,7 +775,7 @@ void mpisendmod(int nvar,real *var, int *ixmin, int *ixmax  ,int qipe,int iside,
 void mpirecvbuffer(int nvar,int *ixmin, int *ixmax  ,int qipe,int iside,int dim, params *p)
 {
 int nrecv;
-/*#ifdef USE_SAC3D
+/*#ifdef USE_SAC_3D
    nrecv = nvar* (ixmax[0]-ixmin[0]+1)*(ixmax[1]-ixmin[1]+1)*(ixmax[2]-ixmin[2]+1);
 #else
    nrecv = nvar* (ixmax[0]-ixmin[0]+1)*(ixmax[1]-ixmin[1]+1);
@@ -784,7 +784,7 @@ int nrecv;
 	switch(dim)
 	{
 		case 0:
-			#ifdef USE_SAC3D
+			#ifdef USE_SAC_3D
 			   nrecv = 2*nvar* (p->n[1])*(p->n[2]);
 			#else
 			   nrecv = 2*nvar* (p->n[1]);
@@ -793,7 +793,7 @@ int nrecv;
 
 		break;
 		case 1:
-			#ifdef USE_SAC3D
+			#ifdef USE_SAC_3D
 			   nrecv = 2*nvar* (p->n[0])*(p->n[2]);
 			#else
 			   nrecv = 2*nvar* (p->n[0]);
@@ -803,7 +803,7 @@ int nrecv;
 
 		break;
 		case 2:
-			#ifdef USE_SAC3D
+			#ifdef USE_SAC_3D
 			   nrecv = 2*nvar* (p->n[1])*(p->n[0]);
 			#endif
 
@@ -834,7 +834,7 @@ gnmpirequest++;
 void mpirecvbuffermod(int nvar,int *ixmin, int *ixmax  ,int qipe,int iside,int dim, params *p)
 {
 int nrecv;
-/*#ifdef USE_SAC3D
+/*#ifdef USE_SAC_3D
    nrecv = nvar* (ixmax[0]-ixmin[0]+1)*(ixmax[1]-ixmin[1]+1)*(ixmax[2]-ixmin[2]+1);
 #else
    nrecv = nvar* (ixmax[0]-ixmin[0]+1)*(ixmax[1]-ixmin[1]+1);
@@ -843,7 +843,7 @@ int nrecv;
 	switch(dim)
 	{
 		case 0:
-			#ifdef USE_SAC3D
+			#ifdef USE_SAC_3D
 			   nrecv = 2*nvar* (p->n[1])*(p->n[2]);
 			#else
 			   nrecv = 2*nvar* (p->n[1]);
@@ -851,7 +851,7 @@ int nrecv;
 			gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(2*iside*gnmpibuffermod0),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
 		break;
 		case 1:
-			#ifdef USE_SAC3D
+			#ifdef USE_SAC_3D
 			   nrecv = 2*nvar* (p->n[0])*(p->n[2]);
 			#else
 			   nrecv = 2*nvar* (p->n[0]);
@@ -859,7 +859,7 @@ int nrecv;
 			gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(2*iside*gnmpibuffermod1),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
 		break;
 		case 2:
-			#ifdef USE_SAC3D
+			#ifdef USE_SAC_3D
 			   nrecv = 2*nvar* (p->n[1])*(p->n[0]);
 			#endif
 			gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(2*iside*gnmpibuffermod2),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
@@ -907,7 +907,7 @@ void mpibuffer2var(int iside,int nvar,real *var, int *ixmin, int *ixmax, int dim
 		case 0:
 		   for(ivar=0; ivar<nvar;ivar++)
 		     for(i1=0;i1<=1;i1++)
-		#ifdef USE_SAC3D
+		#ifdef USE_SAC_3D
 			for(i3=0;i3<p->n[2];i3++)
 		#endif
 		      for(i2=0;i2<p->n[1];i2++)
@@ -945,7 +945,7 @@ void mpibuffer2var(int iside,int nvar,real *var, int *ixmin, int *ixmax, int dim
 		case 1:
 		   for(ivar=0; ivar<nvar;ivar++)
                     for(i2=0;i2<=1;i2++)
-		#ifdef USE_SAC3D
+		#ifdef USE_SAC_3D
 			for(i3=0;i3<p->n[2];i3++)
 		#endif
 		     for(i1=0;i1<p->n[0];i1++)
@@ -974,7 +974,7 @@ void mpibuffer2var(int iside,int nvar,real *var, int *ixmin, int *ixmax, int dim
 		break;
 		case 2:
 
-		#ifdef USE_SAC3D
+		#ifdef USE_SAC_3D
 		   for(ivar=0; ivar<nvar;ivar++)
 			for(i3=0;i3<=1;i3++)			
 		      for(i2=0;p->n[1];i2++)		
@@ -1022,7 +1022,7 @@ void mpibuffer2varmod(int iside,int nvar,real *var, int *ixmin, int *ixmax, int 
 		case 0:
 		   for(ivar=0; ivar<nvar;ivar++)
 		     for(i1=0;i1<=1;i1++)
-		#ifdef USE_SAC3D
+		#ifdef USE_SAC_3D
 			for(i3=0;i3<p->n[2];i3++)
 		#endif
 		      for(i2=0;i2<p->n[1];i2++)
@@ -1070,7 +1070,7 @@ void mpibuffer2varmod(int iside,int nvar,real *var, int *ixmin, int *ixmax, int 
 		case 1:
 		   for(ivar=0; ivar<nvar;ivar++)
                     for(i2=0;i2<=1;i2++)
-		#ifdef USE_SAC3D
+		#ifdef USE_SAC_3D
 			for(i3=0;i3<p->n[2];i3++)
 		#endif
 		     for(i1=0;i1<p->n[0];i1++)
@@ -1113,7 +1113,7 @@ void mpibuffer2varmod(int iside,int nvar,real *var, int *ixmin, int *ixmax, int 
 		break;
 		case 2:
 
-		#ifdef USE_SAC3D
+		#ifdef USE_SAC_3D
 		   for(ivar=0; ivar<nvar;ivar++)
 			for(i3=0;i3<=1;i3++)			
 		      for(i2=0;p->n[1];i2++)		
@@ -1363,7 +1363,7 @@ if((p->pnpe[1])>1   && idir==1)
 
 
 
-#ifdef USE_SAC3D
+#ifdef USE_SAC_3D
  comm.Barrier();
 if((p->pnpe[2])>1)
 {
@@ -1660,7 +1660,7 @@ if((p->pnpe[1])>1   && idir==1)
 
 
 
-#ifdef USE_SAC3D
+#ifdef USE_SAC_3D
  comm.Barrier();
 if((p->pnpe[2])>1)
 {
@@ -1799,7 +1799,7 @@ void mpivisc( int idim,params *p, real *var1, real *var2, real *var3)
    int i1,i2,i3;
    int bound;
    i3=0;
-   #ifdef USE_SAC3D
+   #ifdef USE_SAC_3D
    n=(p->n[0])*(p->n[1])*(p->n[2]);
    switch(idim)
    {
@@ -1902,7 +1902,7 @@ comm.Rsend(gmpisrcbufferr[0], n, MPI_DOUBLE_PRECISION, p->jpe,100*(p->ipe)+10*(i
         //copy data from buffer to the viscosity data in temp2
         //organise buffers so that pointers are swapped instead
 
-        #ifdef USE_SAC3D
+        #ifdef USE_SAC_3D
    //tmp_nuI(ixFhi1+1,ixFlo2:ixFhi2,ixFlo3:ixFhi3)=tgtbufferR1(1,ixFlo2:ixFhi2,&
    //   ixFlo3:ixFhi3) !right, upper R
    //tmp_nuI(ixFlo1-1,ixFlo2:ixFhi2,ixFlo3:ixFhi3)=tgtbufferL1(1,ixFlo2:ixFhi2,&
@@ -1998,7 +1998,7 @@ comm.Rsend(gmpisrcbufferr[1], n, MPI_DOUBLE_PRECISION, p->jpe,100*(p->ipe)+10*(i
 
 
 
-      #ifdef USE_SAC3D
+      #ifdef USE_SAC_3D
   //tmp_nuI(ixFlo1:ixFhi1,ixFhi2+1,ixFlo3:ixFhi3)=tgtbufferR2(ixFlo1:ixFhi1,1,&
   //    ixFlo3:ixFhi3) !right, upper R
   // tmp_nuI(ixFlo1:ixFhi1,ixFlo2-1,ixFlo3:ixFhi3)=tgtbufferL2(ixFlo1:ixFhi1,1,&
@@ -2053,7 +2053,7 @@ comm.Rsend(gmpisrcbufferr[1], n, MPI_DOUBLE_PRECISION, p->jpe,100*(p->ipe)+10*(i
 
 
      break;
-     #ifdef USE_SAC3D
+     #ifdef USE_SAC_3D
         case 2:
 
 if((p->pnpe[2])>1  )

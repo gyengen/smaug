@@ -3251,7 +3251,7 @@ int cucopywtompiwmod(struct params **p,real **w, real **wmod,    real **gmpiw0, 
      int numBlocks = (dimp+numThreadsPerBlock-1) / numThreadsPerBlock;
 
      szbuf=2*2*( ((*p)->n[0])+((*p)->n[1]));
-     #ifdef USE_SAC3D
+     #ifdef USE_SAC_3D
      szbuf=2*2*( ((*p)->n[0])*((*p)->n[1])+ ((*p)->n[0])*((*p)->n[2]) + ((*p)->n[1])*((*p)->n[2])        );
      #endif
 
@@ -3310,7 +3310,7 @@ if(idir==1)
 
     
 
-   #ifdef USE_SAC3D
+   #ifdef USE_SAC_3D
 if(idir==2)
 {
      cudaMemcpy(*gmpiwmod2, *d_gmpiwmod2, szw2*sizeof(real), cudaMemcpyDeviceToHost);
@@ -3342,7 +3342,7 @@ int cucopywtompiw(struct params **p,real **w, real **wmod,    real **gmpiw0, rea
      int numBlocks = (dimp+numThreadsPerBlock-1) / numThreadsPerBlock;
 
      szbuf=2*2*( ((*p)->n[0])+((*p)->n[1]));
-     #ifdef USE_SAC3D
+     #ifdef USE_SAC_3D
      szbuf=2*2*( ((*p)->n[0])*((*p)->n[1])+ ((*p)->n[0])*((*p)->n[2]) + ((*p)->n[1])*((*p)->n[2])        );
      #endif
 
@@ -3387,7 +3387,7 @@ if(idir==1)
       
     
 
-   #ifdef USE_SAC3D
+   #ifdef USE_SAC_3D
 if(idir==2)
 {
     // cudaMemcpy(*gmpiwmod2, *d_gmpiwmod2, szw2*sizeof(real), cudaMemcpyDeviceToHost);
@@ -3446,7 +3446,7 @@ cudaThreadSynchronize();
             switch(dim)
             {
                        case 0:
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
          i1=bound*(bound<2)+(((*p)->n[0])-(bound-1))*(bound>1);
          for(i2=0;i2<(((*p)->n[1]));i2++ )
                   for(i3=0;i3<(((*p)->n[2]));i3++ )
@@ -3492,7 +3492,7 @@ cudaThreadSynchronize();
                        
                        break;   
                        case 1:
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
          i2=bound*(bound<2)+(((*p)->n[1])-(bound-1))*(bound>1);
          for(i1=0;i1<(((*p)->n[0]));i1++ )
                   for(i3=0;i3<(((*p)->n[2]));i3++ )
@@ -3523,7 +3523,7 @@ cudaThreadSynchronize();
             #endif
                        
                        break; 
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
                        case 2:
          i3=bound*(bound<2)+( ((*p)->n[2])-(bound-1) )*(bound>1);
          for(i1=0;i1<(((*p)->n[0]));i1++ )
@@ -3564,7 +3564,7 @@ int cucopywdtompiwd(struct params **p,real **wd,    real **gmpiw0,    real **gmp
      int numBlocks = (dimp+numThreadsPerBlock-1) / numThreadsPerBlock;
 
      szbuf=2*2*( ((*p)->n[0])+((*p)->n[1]));
-     #ifdef USE_SAC3D
+     #ifdef USE_SAC_3D
      szbuf=2*2*( ((*p)->n[0])*((*p)->n[1])+ ((*p)->n[0])*((*p)->n[2]) + ((*p)->n[1])*((*p)->n[2])        );
      #endif
 
@@ -3601,7 +3601,7 @@ if(idir==1)
       
     
 
-   #ifdef USE_SAC3D
+   #ifdef USE_SAC_3D
 if(idir==2)
       cudaMemcpy(*gmpiw2, *d_gmpiw2, szw2*sizeof(real), cudaMemcpyDeviceToHost);
    #endif 
@@ -3656,7 +3656,7 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw0, r
   dimp=(((*p)->n[0]))*(((*p)->n[1]))*(((*p)->n[2]));
 #endif      
      szbuf=2*2*( ((*p)->n[0])+((*p)->n[1]));
-     #ifdef USE_SAC3D
+     #ifdef USE_SAC_3D
      szbuf=2*2*( ((*p)->n[0])*((*p)->n[1])+ ((*p)->n[0])*((*p)->n[2]) + ((*p)->n[1])*((*p)->n[2])        );
      #endif
         int numBlocks = (dimp+numThreadsPerBlock-1) / numThreadsPerBlock;
@@ -3690,7 +3690,7 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw0, r
             switch(dim)
             {
                        case 0:
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
          i1=bound*(bound<2)+(((*p)->n[0])-(bound-1))*(bound>1);
          for(i2=0;i2<(((*p)->n[1]));i2++ )
                   for(i3=0;i3<(((*p)->n[2]));i3++ )
@@ -3728,7 +3728,7 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw0, r
                        
                        break;   
                        case 1:
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
          i2=bound*(bound<2)+(((*p)->n[1])-(bound-1))*(bound>1);
          for(i1=0;i1<(((*p)->n[0]));i1++ )
                   for(i3=0;i3<(((*p)->n[2]));i3++ )
@@ -3758,7 +3758,7 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw0, r
             #endif
                        
                        break; 
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
                        case 2:
          i3=bound*(bound<2)+(((*p)->n[2])-(bound-1))*(bound>1);
          for(i1=0;i1<(((*p)->n[0]));i1++ )
@@ -3786,7 +3786,7 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw0, r
             switch(dim)
             {
                        case 0:
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
          i1=bound*(bound<2)+(((*p)->n[0])-(bound-1))*(bound>1);
          for(i2=0;i2<(((*p)->n[1]));i2++ )
                   for(i3=0;i3<(((*p)->n[2]));i3++ )
@@ -3815,7 +3815,7 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw0, r
                        
                        break;   
                        case 1:
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
          i2=bound*(bound<2)+(((*p)->n[1])-(bound-1))*(bound>1);
          for(i1=0;i1<(((*p)->n[0]));i1++ )
                   for(i3=0;i3<(((*p)->n[2]));i3++ )
@@ -3845,7 +3845,7 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw0, r
             #endif
                        
                        break; 
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
                        case 2:
          i3=bound*(bound<2)+(((*p)->n[2])-(bound-1))*(bound>1);
          for(i1=0;i1<(((*p)->n[0]));i1++ )
@@ -3879,7 +3879,7 @@ if(idir==1)
    	 //cudaMemcpy(*d_gmpiwmod1, *gmpiwmod1, szw1*sizeof(real), cudaMemcpyHostToDevice);     
 }
     
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
 if(idir==2)
 {
    	      cudaMemcpy(*d_gmpiw2, *gmpiw2, szw2*sizeof(real), cudaMemcpyHostToDevice);     
@@ -3914,7 +3914,7 @@ real *tgmpiwmod1=*gmpiwmod1;
   dimp=(((*p)->n[0]))*(((*p)->n[1]))*(((*p)->n[2]));
 #endif      
      szbuf=2*2*( ((*p)->n[0])+((*p)->n[1]));
-     #ifdef USE_SAC3D
+     #ifdef USE_SAC_3D
      szbuf=2*2*( ((*p)->n[0])*((*p)->n[1])+ ((*p)->n[0])*((*p)->n[2]) + ((*p)->n[1])*((*p)->n[2])        );
      #endif
         int numBlocks = (dimp+numThreadsPerBlock-1) / numThreadsPerBlock;
@@ -3977,7 +3977,7 @@ if(idir==1)
    	 cudaMemcpy(*d_gmpiwmod1, *gmpiwmod1, szw1*sizeof(real), cudaMemcpyHostToDevice);     
 }
     
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
 if(idir==2)
 {
    	      cudaMemcpy(*d_gmpiwmod2, *gmpiwmod0, szw2*sizeof(real), cudaMemcpyHostToDevice); 
@@ -4029,7 +4029,7 @@ int cucopywdfrommpiwd(struct params **p,real **wd,     real **gmpiw0,     real *
   dimp=(((*p)->n[0]))*(((*p)->n[1]))*(((*p)->n[2]));
 #endif      
      szbuf=2*2*( ((*p)->n[0])+((*p)->n[1]));
-     #ifdef USE_SAC3D
+     #ifdef USE_SAC_3D
      szbuf=2*2*( ((*p)->n[0])*((*p)->n[1])+ ((*p)->n[0])*((*p)->n[2]) + ((*p)->n[1])*((*p)->n[2])        );
      #endif
         int numBlocks = (dimp+numThreadsPerBlock-1) / numThreadsPerBlock;
@@ -4059,7 +4059,7 @@ int cucopywdfrommpiwd(struct params **p,real **wd,     real **gmpiw0,     real *
    	 cudaMemcpy(*d_gmpiw1, *gmpiw1, szw1*sizeof(real), cudaMemcpyHostToDevice);     
 
     
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
      if(idir==2)
    	      cudaMemcpy(*d_gmpiw2, *gmpiw2, szw2*sizeof(real), cudaMemcpyHostToDevice);     
          #endif
@@ -4097,7 +4097,7 @@ int cucopytompivisc(struct params **p,real **temp2, real **gmpivisc0, real **gmp
 	  szbuf1=4*(    (((*p)->n[0]) +2 )  );
 
 
-     #ifdef USE_SAC3D
+     #ifdef USE_SAC_3D
      szbuf=2*2*( ((*p)->n[0])*((*p)->n[1])+ ((*p)->n[0])*((*p)->n[2]) + ((*p)->n[1])*((*p)->n[2])        );
   szbuf0=4*(  (((*p)->n[1])+2)*(((*p)->n[2])+2)  ); 
   szbuf1=4*(   (((*p)->n[0])+2)*(((*p)->n[2])+2)    );    
@@ -4109,7 +4109,7 @@ int cucopytompivisc(struct params **p,real **temp2, real **gmpivisc0, real **gmp
      cudaThreadSynchronize();
      cudaMemcpy(*gmpivisc0, *d_gmpivisc0, szbuf0*sizeof(real), cudaMemcpyDeviceToHost);
      cudaMemcpy(*gmpivisc1, *d_gmpivisc1, szbuf1*sizeof(real), cudaMemcpyDeviceToHost);
-     #ifdef USE_SAC3D
+     #ifdef USE_SAC_3D
      	cudaMemcpy(*gmpivisc2, *d_gmpivisc2, szbuf2*sizeof(real), cudaMemcpyDeviceToHost);
      #endif
      //copy data to correct area in temp2
@@ -4121,7 +4121,7 @@ int cucopytompivisc(struct params **p,real **temp2, real **gmpivisc0, real **gmp
             switch(dim)
             {
                        case 0:
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
          i1=bound*(((*p)->n[0])+1);
          for(i2=1;i2<(((*p)->n[1])+2);i2++ )
                   for(i3=1;i3<(((*p)->n[2])+2);i3++ )
@@ -4146,7 +4146,7 @@ int cucopytompivisc(struct params **p,real **temp2, real **gmpivisc0, real **gmp
                        
                        break;   
                        case 1:
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
          i2=bound*(((*p)->n[1])+1);
          for(i1=1;i1<(((*p)->n[0])+2);i1++ )
                   for(i3=1;i3<(((*p)->n[2])+2);i3++ )
@@ -4166,7 +4166,7 @@ int cucopytompivisc(struct params **p,real **temp2, real **gmpivisc0, real **gmp
             #endif
                        
                        break; 
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
                        case 2:
                   i3=bound*(((*p)->n[2])+1);
         for(i1=1;i1<(((*p)->n[0])+2);i1++ )
@@ -4205,7 +4205,7 @@ int cucopyfrommpivisc(struct params **p,real **temp2,real **gmpivisc0,real **gmp
  	  szbuf0=4*(  (((*p)->n[1])+2 )   );
 	  szbuf1=4*(    (((*p)->n[0]) +2 )  );
 
-     #ifdef USE_SAC3D
+     #ifdef USE_SAC_3D
      szbuf=2*2*( ((*p)->n[0])*((*p)->n[1])+ ((*p)->n[0])*((*p)->n[2]) + ((*p)->n[1])*((*p)->n[2])        );
 
      
@@ -4222,7 +4222,7 @@ int cucopyfrommpivisc(struct params **p,real **temp2,real **gmpivisc0,real **gmp
             switch(dim)
             {
                        case 0:
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
          i1=bound*(((*p)->n[0])+1);
          for(i2=1;i2<(((*p)->n[1])+2);i2++ )
                   for(i3=1;i3<(((*p)->n[2])+2);i3++ )
@@ -4247,7 +4247,7 @@ int cucopyfrommpivisc(struct params **p,real **temp2,real **gmpivisc0,real **gmp
                        
                        break;   
                        case 1:
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
          i2=bound*(((*p)->n[1])+1);
          for(i1=1;i1<(((*p)->n[0])+2);i1++ )
                   for(i3=1;i3<(((*p)->n[2])+2);i3++ )
@@ -4268,7 +4268,7 @@ int cucopyfrommpivisc(struct params **p,real **temp2,real **gmpivisc0,real **gmp
             #endif
                        
                        break; 
-            #ifdef USE_SAC3D
+            #ifdef USE_SAC_3D
                        case 2:
                   i3=bound*(((*p)->n[2])+1);
         for(i1=1;i1<(((*p)->n[0])+2);i1++ )
@@ -4286,7 +4286,7 @@ int cucopyfrommpivisc(struct params **p,real **temp2,real **gmpivisc0,real **gmp
 
    	 cudaMemcpy(*d_gmpivisc0, *gmpivisc0, szbuf0*sizeof(real), cudaMemcpyHostToDevice);     
    	 cudaMemcpy(*d_gmpivisc1, *gmpivisc1, szbuf1*sizeof(real), cudaMemcpyHostToDevice);
-       #ifdef USE_SAC3D    
+       #ifdef USE_SAC_3D    
    	 cudaMemcpy(*d_gmpivisc2, *gmpivisc2, szbuf2*sizeof(real), cudaMemcpyHostToDevice); 
        #endif    
 

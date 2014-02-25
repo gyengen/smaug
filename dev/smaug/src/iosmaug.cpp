@@ -511,11 +511,11 @@ char *method=NULL;
 			&d_gmpiviscr0,    
 			&d_gmpiviscr1,    
 			&d_gmpiviscr2,   
-			d_gmpiwr0, 
+			&d_gmpiwr0, 
 			&d_gmpiwmodr0,   
-			d_gmpiwr1, 
+			&d_gmpiwr1, 
 			&d_gmpiwmodr1,   
-			d_gmpiwr2, 
+			&d_gmpiwr2, 
 			&d_gmpiwmodr2);
 
 
@@ -524,16 +524,19 @@ char *method=NULL;
 		int ip,jp;
 		iii[2]=0;
 		p->it=-1;
-
+		
+		printf("buffer initialisation complete %d\n",p->ipe);
+gpusync();
 
 
 		cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order,0);
 		gpusync();
-
-#ifdef USE_GPU_DIRECT
+				printf("%d here 1\n",p->ipe);
+#ifdef USE_GPUDIRECT
 		mpibound(NDERV, d_gmpiw0,d_gmpiw1,d_gmpiw2, d_gmpiwr0,d_gmpiwr1,d_gmpiwr2 ,p,0);
 		gpusync();
 		cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiwr0,    &d_gmpiwr1,    &d_gmpiwr2, order,0);
+						printf("%d here 2\n",p->ipe);
 		gpusync();
 #else
 		mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2, gmpiw0,gmpiw1,gmpiw2 ,p,0);
@@ -541,13 +544,15 @@ char *method=NULL;
 		cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order,0);
 		gpusync();
 #endif
-
+				printf("%d here 3\n",p->ipe);
 		cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order,1);
 		gpusync();
-#ifdef USE_GPU_DIRECT
+#ifdef USE_GPUDIRECT
+				printf("%d here 4\n",p->ipe);
 		mpibound(NDERV, d_gmpiw0,d_gmpiw1,d_gmpiw2 , d_gmpiwr0,d_gmpiwr1,d_gmpiwr2 ,p,1);
 		gpusync();
 		cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiwr0,    &d_gmpiwr1,    &d_gmpiwr2, order,1);
+						printf("%d here 5\n",p->ipe);
 #else
 
                 printf("call mpibound %d\n",p->ipe);
@@ -557,17 +562,17 @@ char *method=NULL;
 		cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order,1);
 #endif
 
-
+				printf("%d here 6\n",p->ipe);
 
 
 #ifdef USE_SAC3D
 			gpusync();
 			cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order,2);
 			gpusync();
-	#ifdef USE_GPU_DIRECT
+	#ifdef USE_GPUDIRECT
 			mpibound(NDERV, d_gmpiw0,d_gmpiw1,d_gmpiw2  , d_gmpiwr0,d_gmpiwr1,d_gmpiwr2,p,2);
 			gpusync();
-			cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiwr0,    &d_gmpiwr1,    &d_gmpiwr2, order,2);
+			cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   d_gmpiwr0,    d_gmpiwr1,    d_gmpiwr2, order,2);
 
 	#else
 			mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2, gmpiw0,gmpiw1,gmpiw2 ,p,2);
@@ -582,7 +587,9 @@ char *method=NULL;
 
 
 		p->it=n+1;
+		printf("1 after buffer copy %d\n",p->ipe);
 		cuupdatehostwd(&p,&wd,&wmod,&temp2,&state,&d_p,&d_wd,&d_wmod,&d_wtemp2,  &d_state,n);
+		printf("2 after buffer copy %d\n",p->ipe);
 		initgrid(&p,&state,&wd,&d_p, &d_dwn1,  &d_wd, &d_state,&d_wtemp,&d_wtemp1,&d_wtemp2);
 		printf("grid initialised\n");
 	        cusync(&p);	   
@@ -656,7 +663,8 @@ char *method=NULL;
 		gpusync();
 		//for runge kutta will need to run this several times  for each order  
            //if(idir==1) 
-
+		if(p->ipe==0)          
+		printf("after mpi trans mpiwmod\n");
 #ifdef USE_GPUDIRECT
 		cucopywmodfrommpiw(&p,&w, &wmod,      &gmpiw0, &gmpiwmod0,    &gmpiw1, &gmpiwmod1,    &gmpiw2, &gmpiwmod2, &d_p,  &d_w, &d_wmod,    &d_gmpiw0, &d_gmpiwmodr0,   &d_gmpiw1, &d_gmpiwmodr1,   &d_gmpiw2, &d_gmpiwmodr2,ordert,idir);
 #else      
@@ -765,7 +773,7 @@ char *method=NULL;
        /* Start looping over iterations*/
        /*********************************************************************************************************/
         printf("its %d\n",nt);
-        //for(n=nt-2;n<=nt;n++)
+        //for(n=nt+1;n<=nt;n++)
 	for( n=its;n<=nt;n++)
 	{
 	    	p->it=n;	

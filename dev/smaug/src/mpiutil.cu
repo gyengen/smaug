@@ -1673,6 +1673,13 @@ int cucopywtompiwmod(struct params **p,real **w, real **wmod,    real **gmpiw0, 
     //   for(dim=0;dim<NDIM;dim++)
      gputompiwmod_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,*d_w,*d_wmod,*d_gmpiw0,*d_gmpiwmod0,*d_gmpiw1,*d_gmpiwmod1,*d_gmpiw2,*d_gmpiwmod2,order,idir);
 
+ 
+ #ifdef USE_GPUDIRECT
+     
+     cudaThreadSynchronize();
+
+#else
+ 
      
      cudaThreadSynchronize();
 
@@ -1713,6 +1720,9 @@ if(idir==2)
      //cudaMemcpy(*gmpiw2, *d_gmpiw2, szw2*sizeof(real), cudaMemcpyDeviceToHost);
 }
    #endif 
+   
+   
+   #endif
 
 cudaThreadSynchronize();
 }
@@ -1764,6 +1774,15 @@ int cucopywtompiw(struct params **p,real **w, real **wmod,    real **gmpiw0, rea
     //   for(dim=0;dim<NDIM;dim++)
      gputompiw_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,*d_w,*d_wmod,*d_gmpiw0,*d_gmpiwmod0,*d_gmpiw1,*d_gmpiwmod1,*d_gmpiw2,*d_gmpiwmod2,order,idir);
 
+
+#ifdef USE_GPUDIRECT
+     
+     cudaThreadSynchronize();
+
+#else
+
+
+
      
      cudaThreadSynchronize();
 
@@ -1790,6 +1809,8 @@ if(idir==2)
      cudaMemcpy(*gmpiw2, *d_gmpiw2, szw2*sizeof(real), cudaMemcpyDeviceToHost);
 }
    #endif 
+   
+   #endif
 
 cudaThreadSynchronize();
 
@@ -1986,6 +2007,13 @@ int cucopywdtompiwd(struct params **p,real **wd,    real **gmpiw0,    real **gmp
     //   for(dim=0;dim<NDIM;dim++)
      gputompiwd_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,*d_wd,*d_gmpiw0,*d_gmpiw1,*d_gmpiw2,order, idir);
 
+#ifdef USE_GPUDIRECT
+     
+     cudaThreadSynchronize();
+
+#else
+
+
      
      cudaThreadSynchronize();
 if(idir==0)
@@ -2003,7 +2031,7 @@ if(idir==2)
    #endif 
 
 cudaThreadSynchronize();
-
+#endif
 
  /*if(((*p)->ipe)==3  && ((*p)->it)==2)
 {
@@ -2261,7 +2289,11 @@ int cucopywfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw0, r
                                      
          }  */ 
 
+#ifdef USE_GPUDIRECT
+      mpiwtogpu_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,*d_w,*d_wmod,*d_gmpiw0,*d_gmpiwmod0,*d_gmpiw1,*d_gmpiwmod1,*d_gmpiw2,*d_gmpiwmod2,idir);    
+     cudaThreadSynchronize();
 
+#else
 
 if(idir==0)
 {
@@ -2287,6 +2319,10 @@ if(idir==2)
 
      mpiwtogpu_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,*d_w,*d_wmod,*d_gmpiw0,*d_gmpiwmod0,*d_gmpiw1,*d_gmpiwmod1,*d_gmpiw2,*d_gmpiwmod2,idir);
      cudaThreadSynchronize();
+     
+     
+ #endif    
+     
 }
 
 int cucopywmodfrommpiw(struct params **p,real **w, real **wmod,    real **gmpiw0, real **gmpiwmod0,    real **gmpiw1, real **gmpiwmod1,    real **gmpiw2, real **gmpiwmod2, struct params **d_p  ,real **d_w, real **d_wmod,   real **d_gmpiw0, real **d_gmpiwmod0,   real **d_gmpiw1, real **d_gmpiwmod1,   real **d_gmpiw2, real **d_gmpiwmod2, int order, int idir)
@@ -2331,6 +2367,8 @@ real *tgmpiwmod1=*gmpiwmod1;
   #endif
 
 
+#ifndef USE_GPUDIRECT
+ 
 
 
       //copy data from w and wmod to correct gmpiw and gmpiwmod
@@ -2391,6 +2429,8 @@ if(idir==2)
          ;//    printf("%d %d %lg %lg\n",i,j, (tgmpiwmod0[4*rhob*((*p)->n[0]) +i+j*((*p)->n[0])]), (tgmpiwmod1[4*rhob*((*p)->n[0]) +i+j*((*p)->n[0])]));
          ;//printf("\n");
      }
+     
+ #endif
 
 
 
@@ -2446,6 +2486,7 @@ int cucopywdfrommpiwd(struct params **p,real **wd,     real **gmpiw0,     real *
   #endif
 
 
+#ifndef USE_GPUDIRECT
 
 
        if(idir==0)
@@ -2459,7 +2500,7 @@ int cucopywdfrommpiwd(struct params **p,real **wd,     real **gmpiw0,     real *
      if(idir==2)
    	      cudaMemcpy(*d_gmpiw2, *gmpiw2, szw2*sizeof(real), cudaMemcpyHostToDevice);     
          #endif
-
+#endif
     //printf("call mpiwtogpu\n");
 
      mpiwdtogpu_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,0,0,*d_wd,*d_gmpiw0,*d_gmpiw1,*d_gmpiw2,idir);

@@ -1108,6 +1108,10 @@ int writeasciivacconfig(char *cfgfile, params p, meta md, real *w,real *wd, char
 
   int iif,jf,kf;
   int is,js,ks;
+  
+  
+  printf("here 1\n");
+  
   is=0;
   js=0;
   ks=0;
@@ -1125,11 +1129,14 @@ int writeasciivacconfig(char *cfgfile, params p, meta md, real *w,real *wd, char
    
    //char **hlines;
    char *line;
-
+ char nconfigfile[301];
  char configfile[300];
-  char tcfg[300];
+  char tcfg[300]="\0";
 
-sprintf(configfile,"%s",cfgfile);
+sprintf(configfile,"%s\0",cfgfile);
+
+
+//printf("here 2\n");
 
 if(mode==0)
 {
@@ -1146,21 +1153,28 @@ if(mode==0)
 	
         #endif
 }
-
-
+//comm.Barrier();
+//printf("here 3 %s\n",configfile);
  #ifdef USE_MPI
-   char ext[3];
+   char ext[]="out\0";
    char *pch1,*pch2;
+   
+   strncat(nconfigfile,configfile,strlen(configfile));
+   /*following block modified because strtok resulted in buffer overflow */
+   /*known solution is to ensure strings correctly terminated with NULL character*/
    pch1 = strtok (configfile,".");
    sprintf(tcfg,"%s",pch1);
    pch2 = strtok (NULL,".");
+   ;//pch2="out";
    sprintf(ext,"%s",pch2);
-
-
- 
-
-   //printf("here1 %s \n",tcfg);
    //sprintf(ext,"%s",pch2);
+   
+   //strncat(tcfg,configfile,strlen(configfile)-4);
+
+ //printf("here4a %s %s %s\n",pch1,pch2,nconfigfile);
+
+   //printf("here4 %s %s %d\n",tcfg,ext,strlen(nconfigfile));
+   
 
       //set the input filename corresponding to proc id
       //if scattering configuration and ini file will not have the name appended with the iteration number

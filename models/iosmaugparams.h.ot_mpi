@@ -22,10 +22,10 @@ int ngk=2;
 //vac ozt
 int ni;
 ni = 122;
-//ni=250;    //OZT tests
+
 //ni=506;
 //ni=1018;    //OZT tests
-//ni=1446;    //OZT tests
+
 ni=ni+2*ngi;
 //ni=512;
 //real xmax = 6.2831853;  
@@ -42,7 +42,7 @@ real dx = xmax/(ni);
 int nj = 122;  //OZT tests
 //int nj = 506;  //OZT tests
 //int nj = 1018;  //OZT tests
-;//int nj = 1446;  //OZT tests
+
 //int nj=2;  //BW test
 nj=nj+2*ngj;
 //nj=512;

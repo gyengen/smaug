@@ -619,6 +619,37 @@ void mpisend(int nvar,real *var, int *ixmin, int *ixmax  ,int qipe,int iside, in
    
    comm.Rsend(gmpisendbuffer, n, MPI_DOUBLE_PRECISION, qipe, 100*((p->ipe)+1)+10*(dim+1)+(iside==0?1:0));
 #else
+
+
+	switch(dim)
+	{
+		case 0:
+			#ifdef USE_SAC_3D
+			   n = 2*nvar* (p->n[1])*(p->n[2]);
+			#else
+			   n = 2*nvar* (p->n[1]);
+			#endif
+
+		break;
+		case 1:
+			#ifdef USE_SAC_3D
+			   n = 2*nvar* (p->n[0])*(p->n[2]);
+			#else
+			   n = 2*nvar* (p->n[0]);
+			#endif
+
+		break;
+		case 2:
+			#ifdef USE_SAC_3D
+			   n = 2*nvar* (p->n[1])*(p->n[0]);
+			#endif
+
+		break;
+	}
+
+
+
+
    comm.Rsend(var, n, MPI_DOUBLE_PRECISION, qipe, 100*((p->ipe)+1)+10*(dim+1)+(iside==0?1:0));
 
 #endif
@@ -759,6 +790,48 @@ void mpisendmod(int nvar,real *var, int *ixmin, int *ixmax  ,int qipe,int iside,
 //			printf("%d %d %d\n",p->ipe,iside,n);
 #else
 
+
+//if(p->ipe==3  && dim==0 && iside==0)
+//{
+//  for(i1=0; i1<120;i1++)
+//      printf("ipe %d send tag %d nb %d  to %d %d %d %lg
+//      \n",p->ipe,100*((p->ipe)+1)+10*(dim+1)+(iside==0?1:0),n,qipe,iside,i1,vari1[0]);
+//  printf("end\n\n");
+//}
+
+
+
+	switch(dim)
+	{
+		case 0:
+			#ifdef USE_SAC_3D
+			   n = 2*nvar* (p->n[1])*(p->n[2]);
+			#else
+			   n = 2*nvar* (p->n[1]);
+			#endif
+
+		break;
+		case 1:
+			#ifdef USE_SAC_3D
+			   n = 2*nvar* (p->n[0])*(p->n[2]);
+			#else
+			   n = 2*nvar* (p->n[0]);
+			#endif
+
+		break;
+		case 2:
+			#ifdef USE_SAC_3D
+			   n = 2*nvar* (p->n[1])*(p->n[0]);
+			#endif
+
+		break;
+	}
+
+
+
+
+
+  //n=200*nvar;
   comm.Rsend(var, n, MPI_DOUBLE_PRECISION, qipe, 100*((p->ipe)+1)+10*(dim+1)+(iside==0?1:0));
 #endif
 
@@ -903,11 +976,12 @@ gnmpirequest++;
 //gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(iside*gnmpibuffermod),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
 
 #ifdef USE_GPUDIRECT
-	gmpirequest[gnmpirequest]=comm.Irecv(var+(2*iside*gnmpibuffermod),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
+	gmpirequest[gnmpirequest]=comm.Irecv(var+(2*iside*gnmpibuffermod0),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
+	//gmpirequest[gnmpirequest]=comm.Irecv(var,nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
 
 #else
 
-			gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(2*iside*gnmpibuffermod2),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
+	gmpirequest[gnmpirequest]=comm.Irecv(gmpirecvbuffer+(2*iside*gnmpibuffermod0),nrecv,MPI_DOUBLE_PRECISION,qipe,100*(qipe+1)+10*(dim+1)+iside/**(iside==0?1:0)*/);
 
 #endif
 

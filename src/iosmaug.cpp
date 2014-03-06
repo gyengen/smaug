@@ -532,35 +532,37 @@ gpusync();
 		cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order,0);
 		gpusync();
 				printf("%d here 1\n",p->ipe);
-#ifdef USE_GPUDIRECT
-		mpibound(NDERV, d_gmpiw0,d_gmpiw1,d_gmpiw2, d_gmpiwr0,d_gmpiwr1,d_gmpiwr2 ,p,0);
-		gpusync();
-		cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiwr0,    &d_gmpiwr1,    &d_gmpiwr2, order,0);
+
+//still using hostcopy method temporarily
+//#ifdef USE_GPUDIRECT
+//		mpibound(NDERV, d_gmpiw0,d_gmpiw1,d_gmpiw2, d_gmpiwr0,d_gmpiwr1,d_gmpiwr2 ,p,0);
+//		gpusync();
+//		cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiwr0,    &d_gmpiwr1,    &d_gmpiwr2, order,0);
 						printf("%d here 2\n",p->ipe);
-		gpusync();
-#else
+//		gpusync();
+//#else
 		mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2, gmpiw0,gmpiw1,gmpiw2 ,p,0);
 		gpusync();
 		cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order,0);
 		gpusync();
-#endif
+//#endif
 				printf("%d here 3\n",p->ipe);
 		cucopywdtompiwd(&p,&wd,    &gmpiw0,     &gmpiw1,    &gmpiw2, &d_p,  &d_wd,    &d_gmpiw0,   &d_gmpiw1,   &d_gmpiw2,  order,1);
 		gpusync();
-#ifdef USE_GPUDIRECT
-				printf("%d here 4\n",p->ipe);
-		mpibound(NDERV, d_gmpiw0,d_gmpiw1,d_gmpiw2 , d_gmpiwr0,d_gmpiwr1,d_gmpiwr2 ,p,1);
-		gpusync();
-		cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiwr0,    &d_gmpiwr1,    &d_gmpiwr2, order,1);
+//#ifdef USE_GPUDIRECT
+//				printf("%d here 4\n",p->ipe);
+//		mpibound(NDERV, d_gmpiw0,d_gmpiw1,d_gmpiw2 , d_gmpiwr0,d_gmpiwr1,d_gmpiwr2 ,p,1);
+//		gpusync();
+//		cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiwr0,    &d_gmpiwr1,    &d_gmpiwr2, order,1);
 						printf("%d here 5\n",p->ipe);
-#else
+//#else
 
                 printf("call mpibound %d\n",p->ipe);
 		mpibound(NDERV, gmpiw0,gmpiw1,gmpiw2, gmpiw0,gmpiw1,gmpiw2 ,p,1);
 	        printf("leave mpibound %d\n",p->ipe);
 		gpusync();
 		cucopywdfrommpiwd(&p,&wd,     &gmpiw0,     &gmpiw1,     &gmpiw2,  &d_p,  &d_wd,   &d_gmpiw0,    &d_gmpiw1,    &d_gmpiw2, order,1);
-#endif
+//#endif
 
 				printf("%d here 6\n",p->ipe);
 

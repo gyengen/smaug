@@ -202,8 +202,8 @@ k=0;
                 {              
                     bound=i;
                     d_wmod[order*ntot+encode3_mpiu(p,i,j,k,var)]=d_mpiwmod0[encodempiw0(p,i,j,k,var,bound)];
-                    // if(var==0 && ((p)->ipe)==0)                        
-                    //    printf(" %d %d %d %d actual mpi data %d %g\n",i,j,bound,dim,encodempiw0(p,i,j,k,var,bound),d_mpiwmod0[encodempiw0(p,i,j,k,var,bound)]); 
+                     //if(var==0 && ((p)->ipe)==0)                        
+                     //   printf(" %d %d %d %d actual mpi data %d %g\n",i,j,bound,dim,encodempiw0(p,i,j,k,var,bound),d_mpiwmod0[encodempiw0(p,i,j,k,var,bound)]); 
 
        
       
@@ -922,14 +922,19 @@ int iindex = blockIdx.x * blockDim.x + threadIdx.x;
                     d_mpiwmod0[encodempiw0(p,i,j,k,var,bound)]=d_wmod[encode3_mpiu(p,i+2,j,k,var)];*/
 
 
-
+                 if( f==rho && (p->ipe)==3 && (iia[0]==0  || iia[0]==1) )
+                       if(idir==0)
+		       {
+		       //d_mpiwmod0[encodempiw0(p,iia[0],iia[1],iia[2],f,iia[0])]=j+(p->ipe)*(1000);
+    		 		printf("nani0 %d %d %d  %lg  \n",p->ipe, iia[0],iia[1], d_mpiwmod0[encodempiw0(p,iia[0],iia[1],iia[2],f,iia[0])]); 
+				}
 
 
  mpiwmodtogpu(p,d_w,d_wmod,d_mpiw0,d_mpiwmod0,d_mpiw1,d_mpiwmod1,d_mpiw2,d_mpiwmod2,iia,f,idir,order);
 
                 
 		/*int bound;
-                 if( f==rhob /*&& (p->ipe)==0  && (  d_wmod[fencode3_mpiu(p,iia,f)]==0 )*/ /*  && (j==0 || j==513)   && i>=0 && i<20)
+                 if( f==rhob /*&& (p->ipe)==1  && (  d_wmod[fencode3_mpiu(p,iia,f)]==0 )*/ /*  && (j==0 || j==513)   && i>=0 && i<20)
                        if(idir==1)
                        {
 
@@ -945,9 +950,9 @@ int iindex = blockIdx.x * blockDim.x + threadIdx.x;
                        }*/
 
 
-                // if( f==rho && (p->ipe)==0  && (  d_wmod[fencode3_mpiu(p,iia,f)]==0 ))
-                //       if(idir==0)
-    		//		printf("nani0 %d %d  %lg %lg \n",iia[0],iia[1], d_wmod[fencode3_mpiu(p,iia,rho)],d_wmod[fencode3_mpiu(p,iia,f)+dimp*NVAR] );
+                 if( f==rho && (p->ipe)==3 && (iia[0]==0  || iia[0]==1) )
+                       if(idir==0)
+    		 		printf("nani0 %d %d  %lg %lg \n",iia[0],iia[1], d_wmod[fencode3_mpiu(p,iia,rho)],d_wmod[fencode3_mpiu(p,iia,f)+dimp*NVAR] );
 
 }
 
@@ -1106,9 +1111,22 @@ int dim;
 
                   gputompiwmod(p,d_w,d_wmod,d_mpiw0,d_mpiwmod0,d_mpiw1,d_mpiwmod1,d_mpiw2,d_mpiwmod2,iia,f,idir,order);
 
-                            // if(p->ipe==0    && f==rho && idir==0 )
-                            //  for(int bound=0;bound<=1;bound++)
-                            //    printf("mpiw0 %d %d %d %d %lg %lg\n",idir,bound,iia[0],iia[1],d_mpiwmod0[encodempiw0(p,i,j,k,f,bound)],d_mpiwmod1[encodempiw1(p,i,j,k,f,bound)]);
+                             /*if( f==rho && idir==0 )
+                                          if((i==0 || i==1) )
+						{
+                                 		
+							d_mpiwmod0[encodempiw0(p,i,j,k,f,i)]=1000*(p->ipe)+j;
+							//printf("mpiw0 %d %d %d %d %d %lg %lg\n",p->ipe,idir,i,iia[0],iia[1],d_mpiwmod0[encodempiw0(p,i,j,k,f,i)],d_mpiwmod1[encodempiw1(p,i,j,k,f,i)]);
+                                                  }*/
+
+
+                             if(p->ipe==3    && f==rho && idir==0 )
+                                          if((i==0 || i==1) )
+						{
+                                 		
+							//d_mpiwmod0[encodempiw0(p,i,j,k,f,i)]=1000*(p->ipe)+j;
+							printf("mpiw0 %d %d %d %d %d %lg %lg\n",p->ipe,idir,i,iia[0],iia[1],d_mpiwmod0[encodempiw0(p,i,j,k,f,i)],d_mpiwmod1[encodempiw1(p,i,j,k,f,i)]);
+                                                  }
 
 	}
 
@@ -1675,7 +1693,7 @@ int cucopywtompiwmod(struct params **p,real **w, real **wmod,    real **gmpiw0, 
 
  
  #ifdef USE_GPUDIRECT
-     
+    // printf("using gpudirect in1\n");
      cudaThreadSynchronize();
 
 #else
@@ -2007,11 +2025,11 @@ int cucopywdtompiwd(struct params **p,real **wd,    real **gmpiw0,    real **gmp
     //   for(dim=0;dim<NDIM;dim++)
      gputompiwd_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,*d_wd,*d_gmpiw0,*d_gmpiw1,*d_gmpiw2,order, idir);
 
-#ifdef USE_GPUDIRECT
+;//#ifdef USE_GPUDIRECT
      
-     cudaThreadSynchronize();
+;//     cudaThreadSynchronize();
 
-#else
+;//#else
 
 
      
@@ -2031,7 +2049,7 @@ if(idir==2)
    #endif 
 
 cudaThreadSynchronize();
-#endif
+;//#endif
 
  /*if(((*p)->ipe)==3  && ((*p)->it)==2)
 {
@@ -2369,7 +2387,7 @@ real *tgmpiwmod1=*gmpiwmod1;
 
 #ifndef USE_GPUDIRECT
  
-
+//printf("gpudirect not define!\n");
 
       //copy data from w and wmod to correct gmpiw and gmpiwmod
 
@@ -2486,7 +2504,7 @@ int cucopywdfrommpiwd(struct params **p,real **wd,     real **gmpiw0,     real *
   #endif
 
 
-#ifndef USE_GPUDIRECT
+//#ifndef USE_GPUDIRECT
 
 
        if(idir==0)
@@ -2500,7 +2518,7 @@ int cucopywdfrommpiwd(struct params **p,real **wd,     real **gmpiw0,     real *
      if(idir==2)
    	      cudaMemcpy(*d_gmpiw2, *gmpiw2, szw2*sizeof(real), cudaMemcpyHostToDevice);     
          #endif
-#endif
+//#endif
     //printf("call mpiwtogpu\n");
 
      mpiwdtogpu_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p,0,0,*d_wd,*d_gmpiw0,*d_gmpiw1,*d_gmpiw2,idir);

@@ -194,16 +194,16 @@ int writevacconfig(char *name,int n,params p, meta md, real *w, real *wd, state 
  
      #ifdef USE_SAC3D
 	      if(p.ipe>99)
-		sprintf(configfile,"%s%d_np%d%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);
+		sprintf(configfile,"%s%d_np0%d0%d0%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);
 	      else if(p.ipe>9)
 		sprintf(configfile,"%s%d_np0%d0%d0%d_0%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);
 	      else
-		sprintf(configfile,"%s%d_np00%d00%d00%d_00%d.out",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);  	     
+		sprintf(configfile,"%s%d_np0%d0%d0%d_00%d.out",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe);  	     
      #else
 	      if(p.ipe>99)
-		sprintf(configfile,"%s%d_np%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);
+		sprintf(configfile,"%s%d_np0%d0%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);
 	      else if(p.ipe>9)
-		sprintf(configfile,"%s%d_np%d%d_%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);
+		sprintf(configfile,"%s%d_np0%d0%d_0%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);
 	      else
 		sprintf(configfile,"%s%d_np0%d0%d_00%d.out",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe);  	     	     
      #endif
@@ -1051,7 +1051,7 @@ fscanf(fdt,"%d %lG %d %d %d\n",&(st->it),&(st->t),&ii1,&ii2,&ii3);
      printf("%s\n", hlines[i]);
    }
 //printf("read ascii header %d %d %d %d\n" , p.ipe, is,iif, js,jf);
-printf("read ascii header %d %d %d %d %d\n" , is,iif, js,jf);
+printf("read ascii header %d %d %d %d \n" , is,iif, js,jf);
   //fscanf(fdt,"%f",&val);
  //printf("%f",val);
 #ifdef USE_SAC_3D
@@ -1110,7 +1110,7 @@ int writeasciivacconfig(char *cfgfile, params p, meta md, real *w,real *wd, char
   int is,js,ks;
   
   
-  printf("here 1\n");
+  //printf("here 1\n");
   
   is=0;
   js=0;
@@ -1129,10 +1129,11 @@ int writeasciivacconfig(char *cfgfile, params p, meta md, real *w,real *wd, char
    
    //char **hlines;
    char *line;
- char nconfigfile[301];
- char configfile[300];
-  char tcfg[300]="\0";
+ char nconfigfile[351];
+ char configfile[351];
 
+  char tcfg[350]="\0";
+//printf("here 1a\n");
 sprintf(configfile,"%s\0",cfgfile);
 
 
@@ -1159,21 +1160,23 @@ if(mode==0)
    char ext[]="out\0";
    char *pch1,*pch2;
    
-   strncat(nconfigfile,configfile,strlen(configfile));
+//printf("here 3 %s\n",configfile);
+   //strncat(nconfigfile,configfile,strlen(configfile));
    /*following block modified because strtok resulted in buffer overflow */
    /*known solution is to ensure strings correctly terminated with NULL character*/
    pch1 = strtok (configfile,".");
+//printf("here 3 %s\n",configfile);
    sprintf(tcfg,"%s",pch1);
-   pch2 = strtok (NULL,".");
+  pch2 = strtok (NULL,".");
    ;//pch2="out";
    sprintf(ext,"%s",pch2);
    //sprintf(ext,"%s",pch2);
    
    //strncat(tcfg,configfile,strlen(configfile)-4);
 
- //printf("here4a %s %s %s\n",pch1,pch2,nconfigfile);
+ //printf("here4a %s %s %s %s\n",pch1,pch2,nconfigfile,tcfg);
 
-   //printf("here4 %s %s %d\n",tcfg,ext,strlen(nconfigfile));
+  
    
 
       //set the input filename corresponding to proc id
@@ -1182,16 +1185,16 @@ if(mode==0)
      {
 	     #ifdef USE_SAC3D
 		      if(p.ipe>99)
-			sprintf(configfile,"%s_np%d%d%d_%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe,ext);
+			sprintf(configfile,"%s_np0%d0%d0%d_%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe,ext);
 		      else if(p.ipe>9)
 			sprintf(configfile,"%s_np0%d0%d0%d_0%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe,ext);
 		      else
-			sprintf(configfile,"%s_np00%d00%d00%d_00%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe,ext);  	     
+			sprintf(configfile,"%s_np0%d0%d0%d_00%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe,ext);  	     
 	     #else
 		      if(p.ipe>99)
-			sprintf(configfile,"%s_np%d%d_%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.ipe,ext);
+			sprintf(configfile,"%s_np0%d0%d_%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.ipe,ext);
 		      else if(p.ipe>9)
-			sprintf(configfile,"%s_np%d%d_%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.ipe,ext);
+			sprintf(configfile,"%s_np0%d0%d_0%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.ipe,ext);
 		      else
 			sprintf(configfile,"%s_np0%d0%d_00%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.ipe,ext);  	     	     
 	     #endif
@@ -1201,21 +1204,21 @@ if(mode==0)
      {
 	     #ifdef USE_SAC3D
 		      if(p.ipe>99)
-			sprintf(configfile,"%s%d_np%d%d%d_%d.%s",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe,ext);
+			sprintf(configfile,"%s%d_np0%d0%d0%d_%d.%s",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe,ext);
 		      else if(p.ipe>9)
 			sprintf(configfile,"%s%d_np0%d0%d0%d_0%d.%s",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe,ext);
 		      else
-			sprintf(configfile,"%s%d_np00%d00%d00%d_00%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe,ext);  	     
+			sprintf(configfile,"%s%d_np0%d0%d0%d_00%d.%s",tcfg,p.pnpe[0],p.pnpe[1],p.pnpe[2],p.ipe,ext);  	     
 	     #else
 		      if(p.ipe>99)
-			sprintf(configfile,"%s%d_np%d%d_%d.%s",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe,ext);
+			sprintf(configfile,"%s%d_np0%d0%d_%d.%s",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe,ext);
 		      else if(p.ipe>9)
-			sprintf(configfile,"%s%d_np%d%d_%d.%s",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe,ext);
+			sprintf(configfile,"%s%d_np0%d0%d_0%d.%s",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe,ext);
 		      else
 			sprintf(configfile,"%s%d_np0%d0%d_00%d.%s",tcfg,st.it,p.pnpe[0],p.pnpe[1],p.ipe,ext);  	     	     
 	     #endif
      }
-
+ //printf("here4 %s %s %d\n",tcfg,ext,strlen(nconfigfile));
     // if(p.mode==3)
     //    sprintf(configfile,"%s",cfgfile);
    #else

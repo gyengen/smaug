@@ -27,13 +27,13 @@ help()
 
 #! sbatch directives begin here ###############################
 #! Name of the job:
-#SBATCH -J sgather_ngdr
+#SBATCH -J sscatt_ngdr
 #! Which project should be charged (NB Wilkes projects end in '-GPU'):
 #SBATCH -A SHEFFIELD-GPU
 #! How many whole nodes should be allocated?
-#SBATCH --nodes=2
+#SBATCH --nodes=1
 #! How many (MPI) tasks in total should be launched?
-#SBATCH --ntasks=4
+#SBATCH --ntasks=1
 #! How much wallclock time will be required?
 #SBATCH --time=02:00:00
 #! What types of email messages do you wish to receive?
@@ -89,7 +89,7 @@ workdir="$SLURM_SUBMIT_DIR"  # The value of SLURM_SUBMIT_DIR sets workdir to the
 #! (e.g. because the memory required per process will otherwise overload the node).
 #! Note: since each tesla node has 2 GPUs, your code may require you to set ppn=2 here.
 #! Do this by uncommenting and editing the following line (ensure ppn<=12):
-ppn=2
+ppn=1
 
 #! Are you using OpenMP (NB this is unrelated to OpenMPI)? If so increase this
 #! safe value to no more than 12:

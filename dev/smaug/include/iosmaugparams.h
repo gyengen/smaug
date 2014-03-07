@@ -20,15 +20,13 @@ int ngk=2;
 // Define the x domain
 #ifdef USE_SAC
 //vac ozt
-int ni;
-ni = 122;
-//ni=250;    //OZT tests
-//ni=506;
-//ni=1018;    //OZT tests
-//ni=1446;    //OZT tests
+int ni = 122;  //   configs/zero1_ot_asc_252.ini  with 2x2 processors
+//int ni = 506;  //   configs/zero1_ot_asc_1020.ini  with 2x2 processors 
+//int ni = 1018; //   configs/zero1_ot_asc_2044.ini  with 2x2 processors
+//int ni=996;  //bigconfigs/zero1_ot_asc_4000.ini with 4x4 processors or bigconfigs/zero1_ot_asc_8000.ini with 8x8 processors
+
 ni=ni+2*ngi;
-//ni=512;
-//real xmax = 6.2831853;  
+  
 real xmax=1.0;
 real xmin=0.0;
 real dx = xmax/(ni);
@@ -38,15 +36,14 @@ real dx = xmax/(ni);
 
 // Define the y domain
 #ifdef USE_SAC
-//vac ozt
-int nj = 122;  //OZT tests
-//int nj = 506;  //OZT tests
-//int nj = 1018;  //OZT tests
-;//int nj = 1446;  //OZT tests
-//int nj=2;  //BW test
+
+int nj = 122;  //   configs/zero1_ot_asc_252.ini  with 2x2 processors
+//int nj = 506;  //   configs/zero1_ot_asc_1020.ini  with 2x2 processors 
+//int nj = 1018; //   configs/zero1_ot_asc_2044.ini  with 2x2 processors
+//int nj=996;  //bigconfigs/zero1_ot_asc_4000.ini with 4x4 processors or bigconfigs/zero1_ot_asc_8000.ini with 8x8 processors
+
 nj=nj+2*ngj;
-//nj=512;
-//real ymax = 6.2831853; 
+
 real ymax = 1.0;
 real ymin=0.0;   
 real dy = ymax/(nj);    
@@ -76,18 +73,14 @@ real tmax = 0.2;
 int steeringenabled=1;
 int finishsteering=0;
 
-//char *cfgfile="zero1.ini";
 
-//char *cfgfile="zero1_np020203.ini";
-//char *cfgfile="zero1_ot_asc_np0201.ini";
-//char *cfgfile="configs/zero1_ot_asc_252.ini";
-//char *cfgfile="ot_508b252_asc.ini";
 char *cfgfile="configs/zero1_ot_asc_252.ini";
-;//char *cfgfile="zero1_ot_2044_asc.ini";
-;//char *cfgfile="zero1_ot_2892_asc.ini";
-//char *cfgfile="zero1_BW_bin.ini";
-//char *cfgout="zero1_np010203."
-//char *cfgout="out/zeroOT";
+//char *cfgfile="configs/zero1_ot_asc_1020.ini";
+//char *cfgfile="configs/zero1_ot_asc_2044.ini";
+//char *cfgfile="bigconfigs/zero1_ot_asc_8000.ini";
+//char *cfgfile="bigconfigs/zero1_ot_asc_4000.ini";
+
+
 char *cfgout="tmpout/zero1_.out";
 char *cfggathout="out/zero1_.out";
 //char *cfgout="zero1_np0202.out";
@@ -100,7 +93,7 @@ char *cfggathout="out/zero1_.out";
 dt=0.0002;  //OZT test
 #endif
 
-nt=3;
+nt=4;
 //nt=3000;
 //nt=5000;
 //nt=200000;
@@ -196,11 +189,25 @@ p->chyp[rho]=0.02;
 
 #ifdef USE_MULTIGPU
 //number of procs in each dim mpi only
+
+//2x2 processors for  "configs/zero1_ot_asc_252.ini";"configs/zero1_ot_asc_1020.ini"; "configs/zero1_ot_asc_2044.ini";
 p->pnpe[0]=2;
 p->pnpe[1]=2;
+
+
+//4x4 processors for "bigconfigs/zero1_ot_asc_4000.ini"
+//p->pnpe[0]=4;
+//p->pnpe[1]=4;
+
+//8x8 processors for "bigconfigs/zero1_ot_asc_8000.ini"
+//p->pnpe[0]=8;
+//p->pnpe[1]=8;
+
+
+
 p->pnpe[2]=1;
 
-p->npe=4;
+p->npe=(p->pnpe[0])*(p->pnpe[1])*(p->pnpe[2]);  
 #endif
 
 

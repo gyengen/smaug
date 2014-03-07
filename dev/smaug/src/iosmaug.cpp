@@ -105,9 +105,16 @@ if(argc>1)
 	     MPI::Init(argc, argv);
 	#endif
 	mgpuinit(p);
-	ipe2iped(p);     
-	mgpuneighbours(0,p);
-	mgpuneighbours(1,p);
+
+
+	if(mode==run)
+	{
+		ipe2iped(p); 
+
+    
+		mgpuneighbours(0,p);
+		mgpuneighbours(1,p);
+	}
 
 
 	//compute the max and min domain dimensions for each processor
@@ -144,16 +151,16 @@ if(argc>1)
 	#ifdef USE_MPI
 	     #ifdef USE_SAC3D
 		      if(p->ipe>99)
-			sprintf(configinfile,"%s_np%d%d%d_%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->pnpe[2],p->ipe,ext);
+			sprintf(configinfile,"%s_np0%d0%d0%d_%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->pnpe[2],p->ipe,ext);
 		      else if(p->ipe>9)
 			sprintf(configinfile,"%s_np0%d0%d0%d_0%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->pnpe[2],p->ipe,ext);
 		      else
-			sprintf(configinfile,"%s_np00%d00%d00%d_00%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->pnpe[2],p->ipe,ext);  	     
+			sprintf(configinfile,"%s_np0%d0%d0%d_00%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->pnpe[2],p->ipe,ext);  	     
 	     #else
 		      if(p->ipe>99)
-			sprintf(configinfile,"%s_np%d%d_%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->ipe,ext);
+			sprintf(configinfile,"%s_np0%d0%d_%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->ipe,ext);
 		      else if(p->ipe>9)
-			sprintf(configinfile,"%s_np%d%d_%d.0%s",tcfg,p->pnpe[0],p->pnpe[1],p->ipe,ext);
+			sprintf(configinfile,"%s_np0%d0%d_%d.0%s",tcfg,p->pnpe[0],p->pnpe[1],p->ipe,ext);
 		      else
 			sprintf(configinfile,"%s_np0%d0%d_00%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->ipe,ext);  	     	     
 	     #endif
@@ -163,7 +170,7 @@ if(argc>1)
 	//take a distribution and distribute domain to processors
 	if(mode==scatter )
 	{
-	  printf("Scatter %s \n",cfgfile);
+	  printf("Scatter %s %d %d %d\n",cfgfile,p->pnpe[0],p->pnpe[1],p->pnpe[2]);
 	  sprintf(configinfile,"%s",cfgfile);
 	  p->n[0]=ni*(p->pnpe[0]);
 	  p->n[1]=nj*(p->pnpe[1]);
@@ -344,14 +351,14 @@ char *method=NULL;
 	       gpusync();
                if(p->ipe==0) //currently only processor zero
 	       {
-
+                  p->npe=(p->pnpe[0])*(p->pnpe[1])*(p->pnpe[2]);
 		  for(i=0; i<p->npe; i++)
 		  {
 		    p->ipe=i;
                     ipe2iped(p);
 		    
 		    //copy segment
-		    printf("copy segment %d\n",i);                    
+		    printf("copy segment %d %d %d\n",i,p->npe,p->ipe);                    
 		    createconfigsegment(*p, wnew,wdnew,wmod,wd);  //in readwrite.c
 
 		    //writeas

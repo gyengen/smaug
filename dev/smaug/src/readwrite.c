@@ -1016,12 +1016,12 @@ int readasciivacconfig(char *cfgfile, params p, meta md,state *st, real *w, real
 		if((p.pipe[1])==0 && (p.pnpe[1]>1)  ) 
               {
 		jf=nj-2;
-              printf("aread ifinish %d %d %d\n",p.ipe,p.pipe[1],jf);
+              //printf("aread ifinish %d %d %d\n",p.ipe,p.pipe[1],jf);
 		}
 		if((p.pipe[1])==((p.pnpe[1])-1) && (p.pnpe[1]>1))
 		{
               js=2;
-              printf("aread istart %d %d %d\n",p.ipe,p.pipe[1],js);		
+              //printf("aread istart %d %d %d\n",p.ipe,p.pipe[1],js);		
 		 
 		}
 

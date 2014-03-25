@@ -157,7 +157,7 @@ echo -e "\nExecuting command:\n==================\n$CMD\n"
 
 
 start=0
-end=100 
+end=50 
 step=1
 current=$start
 

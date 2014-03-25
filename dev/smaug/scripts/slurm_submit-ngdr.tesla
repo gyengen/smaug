@@ -13,6 +13,7 @@
 #SBATCH -J smaug_ngdr
 #! Which project should be charged (NB Wilkes projects end in '-GPU'):
 #SBATCH -A SHEFFIELD-GPU
+##SBATCH --qos=gpu0
 #! How many whole nodes should be allocated?
 #SBATCH --nodes=2
 #! How many (MPI) tasks in total should be launched?
@@ -88,7 +89,12 @@ application="bin/smaug"
 
 options=" -genvall "
 
+
 appopts="a"
+#appopts="-o init"
+
+
+
 #! Work directory (i.e. where the job will run):
 workdir="$SLURM_SUBMIT_DIR"  # The value of SLURM_SUBMIT_DIR sets workdir to the directory
                              # in which sbatch is run.

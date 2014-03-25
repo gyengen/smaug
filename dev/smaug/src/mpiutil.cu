@@ -922,12 +922,12 @@ int iindex = blockIdx.x * blockDim.x + threadIdx.x;
                     d_mpiwmod0[encodempiw0(p,i,j,k,var,bound)]=d_wmod[encode3_mpiu(p,i+2,j,k,var)];*/
 
 
-                 if( f==rho && (p->ipe)==3 && (iia[0]==0  || iia[0]==1) )
-                       if(idir==0)
-		       {
+                 //if( f==rho && (p->ipe)==3 && (iia[0]==0  || iia[0]==1) )
+                      // if(idir==0)
+		      // {
 		       //d_mpiwmod0[encodempiw0(p,iia[0],iia[1],iia[2],f,iia[0])]=j+(p->ipe)*(1000);
-    		 		printf("nani0 %d %d %d  %lg  \n",p->ipe, iia[0],iia[1], d_mpiwmod0[encodempiw0(p,iia[0],iia[1],iia[2],f,iia[0])]); 
-				}
+    		 		//printf("nani0 %d %d %d  %lg  \n",p->ipe, iia[0],iia[1], d_mpiwmod0[encodempiw0(p,iia[0],iia[1],iia[2],f,iia[0])]); 
+				//}
 
 
  mpiwmodtogpu(p,d_w,d_wmod,d_mpiw0,d_mpiwmod0,d_mpiw1,d_mpiwmod1,d_mpiw2,d_mpiwmod2,iia,f,idir,order);
@@ -950,9 +950,9 @@ int iindex = blockIdx.x * blockDim.x + threadIdx.x;
                        }*/
 
 
-                 if( f==rho && (p->ipe)==3 && (iia[0]==0  || iia[0]==1) )
-                       if(idir==0)
-    		 		printf("nani0 %d %d  %lg %lg \n",iia[0],iia[1], d_wmod[fencode3_mpiu(p,iia,rho)],d_wmod[fencode3_mpiu(p,iia,f)+dimp*NVAR] );
+                 //if( f==rho && (p->ipe)==3 && (iia[0]==0  || iia[0]==1) )
+                       //if(idir==0)
+    		 		//printf("nani0 %d %d  %lg %lg \n",iia[0],iia[1], d_wmod[fencode3_mpiu(p,iia,rho)],d_wmod[fencode3_mpiu(p,iia,f)+dimp*NVAR] );
 
 }
 
@@ -1120,13 +1120,13 @@ int dim;
                                                   }*/
 
 
-                             if(p->ipe==3    && f==rho && idir==0 )
-                                          if((i==0 || i==1) )
-						{
+                            // if(p->ipe==3    && f==rho && idir==0 )
+                                       //   if((i==0 || i==1) )
+						//{
                                  		
 							//d_mpiwmod0[encodempiw0(p,i,j,k,f,i)]=1000*(p->ipe)+j;
-							printf("mpiw0 %d %d %d %d %d %lg %lg\n",p->ipe,idir,i,iia[0],iia[1],d_mpiwmod0[encodempiw0(p,i,j,k,f,i)],d_mpiwmod1[encodempiw1(p,i,j,k,f,i)]);
-                                                  }
+							//printf("mpiw0 %d %d %d %d %d %lg %lg\n",p->ipe,idir,i,iia[0],iia[1],d_mpiwmod0[encodempiw0(p,i,j,k,f,i)],d_mpiwmod1[encodempiw1(p,i,j,k,f,i)]);
+                                                 // }
 
 	}
 

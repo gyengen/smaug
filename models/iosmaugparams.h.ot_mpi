@@ -23,7 +23,8 @@ int ngk=2;
 int ni = 122;  //   configs/zero1_ot_asc_252.ini  with 2x2 processors
 //int ni = 506;  //   configs/zero1_ot_asc_1020.ini  with 2x2 processors 
 //int ni = 1018; //   configs/zero1_ot_asc_2044.ini  with 2x2 processors
-//int ni=996;  //bigconfigs/zero1_ot_asc_4000.ini with 4x4 processors or bigconfigs/zero1_ot_asc_8000.ini with 8x8 processors
+//int ni=796;  //bigconfigs/zero1_ot_asc_4000.ini with 4x4 processors or bigconfigs/zero1_ot_asc_8000.ini with 8x8 processors
+//int ni=507;
 
 ni=ni+2*ngi;
   
@@ -40,7 +41,8 @@ real dx = xmax/(ni);
 int nj = 122;  //   configs/zero1_ot_asc_252.ini  with 2x2 processors
 //int nj = 506;  //   configs/zero1_ot_asc_1020.ini  with 2x2 processors 
 //int nj = 1018; //   configs/zero1_ot_asc_2044.ini  with 2x2 processors
-//int nj=996;  //bigconfigs/zero1_ot_asc_4000.ini with 4x4 processors or bigconfigs/zero1_ot_asc_8000.ini with 8x8 processors
+//int nj=796;  //bigconfigs/zero1_ot_asc_4000.ini with 4x4 processors or bigconfigs/zero1_ot_asc_8000.ini with 8x8 processors
+//int nj=507;
 
 nj=nj+2*ngj;
 
@@ -76,10 +78,11 @@ int finishsteering=0;
 
 char *cfgfile="configs/zero1_ot_asc_252.ini";
 //char *cfgfile="configs/zero1_ot_asc_1020.ini";
-//char *cfgfile="configs/zero1_ot_asc_2044.ini";
+//char *cfgfile="bigconfigs/zero1_ot_asc_8000.ini";
 //char *cfgfile="bigconfigs/zero1_ot_asc_8000.ini";
 //char *cfgfile="bigconfigs/zero1_ot_asc_4000.ini";
 
+//char *cfgfile="configs/zero1_ot_asc_1000.ini";
 
 char *cfgout="tmpout/zero1_.out";
 char *cfggathout="out/zero1_.out";
@@ -93,7 +96,7 @@ char *cfggathout="out/zero1_.out";
 dt=0.0002;  //OZT test
 #endif
 
-nt=4;
+nt=501;
 //nt=3000;
 //nt=5000;
 //nt=200000;
@@ -155,9 +158,9 @@ p->sodifon=1.0;
 p->moddton=1.0;
 p->divbon=0.0;
 p->divbfix=0.0;
-p->hyperdifmom=0.0;
+p->hyperdifmom=1.0;
 p->readini=1.0;
-p->cfgsavefrequency=1;
+p->cfgsavefrequency=10;
 p->noghost=0;
 p->fullgridini=1;
 p->xmax[0]=xmax;
@@ -200,8 +203,8 @@ p->pnpe[1]=2;
 //p->pnpe[1]=4;
 
 //8x8 processors for "bigconfigs/zero1_ot_asc_8000.ini"
-//p->pnpe[0]=8;
-//p->pnpe[1]=8;
+//p->pnpe[0]=10;
+//p->pnpe[1]=10;
 
 
 

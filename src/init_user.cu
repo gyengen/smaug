@@ -19,7 +19,7 @@ __device__ __host__ void init_user_MODID (real *w, struct params *p,int *ii) {
                     //swapping dimensions must use the following commented line to
                     //obtain the correct configuration see bug id 540
 		    //if((nj-j)<nj*0.315)
-                    if(i<(ni*0.315))
+                    /*if(i<(ni*0.315))
                     {
 		            w[fencode3_MODID(p,ii,rhob)]=0.0;
 		            w[fencode3_MODID(p,ii,rho)]=rho1;
@@ -46,7 +46,7 @@ __device__ __host__ void init_user_MODID (real *w, struct params *p,int *ii) {
 		            w[fencode3_MODID(p,ii,energyb)]=(e1+e2);
 		            w[fencode3_MODID(p,ii,energy)]=w[fencode3_MODID(p,ii,energyb)];
 		            w[fencode3_MODID(p,ii,energyb)]=0.0;
-                    }
+                    }*/
 }
 
 

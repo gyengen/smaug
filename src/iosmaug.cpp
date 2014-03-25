@@ -160,7 +160,7 @@ if(argc>1)
 		      if(p->ipe>99)
 			sprintf(configinfile,"%s_np0%d0%d_%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->ipe,ext);
 		      else if(p->ipe>9)
-			sprintf(configinfile,"%s_np0%d0%d_%d.0%s",tcfg,p->pnpe[0],p->pnpe[1],p->ipe,ext);
+			sprintf(configinfile,"%s_np0%d0%d_0%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->ipe,ext);
 		      else
 			sprintf(configinfile,"%s_np0%d0%d_00%d.%s",tcfg,p->pnpe[0],p->pnpe[1],p->ipe,ext);  	     	     
 	     #endif

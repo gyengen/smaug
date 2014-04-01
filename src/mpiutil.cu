@@ -198,7 +198,8 @@ k=0;
                 //or an mpi period 
 
 
-                if((i==0 || i==1) && dim==0 /* && ( ((p->mpilowerb[dim])==1) || ((p->boundtype[0][dim][0])==2))  */  )
+                if((i==0 || i==1) && dim==0  && ( ((p->mpilowerb[dim])==1) ||
+		((p->boundtype[0][dim][0])==2))    )
                 {              
                     bound=i;
                     d_wmod[order*ntot+encode3_mpiu(p,i,j,k,var)]=d_mpiwmod0[encodempiw0(p,i,j,k,var,bound)];
@@ -208,7 +209,8 @@ k=0;
        
       
                 }
-                else if((( i>=((p->n[0])-2)   ))  && dim==0 /* && ( ((p->mpiupperb[dim])==1) || ((p->boundtype[0][dim][0])==2)) */)               
+                else if((( i>=((p->n[0])-2)   ))  && dim==0  && ( ((p->mpiupperb[dim])==1) ||
+		((p->boundtype[0][dim][1])==2)) )               
                 {
                     bound=2*(i==((p->n[0])-1))+(p->n[0])-i;
                     d_wmod[order*ntot+encode3_mpiu(p,i,j,k,var)]=d_mpiwmod0[encodempiw0(p,i,j,k,var,bound)];  
@@ -224,7 +226,8 @@ k=0;
 
               
 
-                if((j==0 || j==1) && dim==1  /*&& ( ((p->mpilowerb[dim])==1) || ((p->boundtype[0][0][0])==2))*/   )              
+                if((j==0 || j==1) && dim==1  && ( ((p->mpilowerb[dim])==1) ||
+		((p->boundtype[0][0][0])==2))   )              
                 {              
                     bound=j;
                     d_wmod[order*ntot+encode3_mpiu(p,i,j,k,var)]=d_mpiwmod1[encodempiw1(p,i,j,k,var,bound)]; 
@@ -233,7 +236,8 @@ k=0;
 
              
                 }            
-                 else if((( j>=((p->n[1])-2)   ))  && dim==1  /* && ( ((p->mpiupperb[dim])==1) || ((p->boundtype[0][0][0])==2)) */   )               
+                 else if((( j>=((p->n[1])-2)   ))  && dim==1   && ( ((p->mpiupperb[dim])==1) ||
+		 ((p->boundtype[0][dim][1])==2))    )               
                 {
                    bound=2*(j==((p->n[1])-1))+(p->n[1])-j;
                     d_wmod[order*ntot+encode3_mpiu(p,i,j,k,var)]=d_mpiwmod1[encodempiw1(p,i,j,k,var,bound)]; 
@@ -247,12 +251,14 @@ k=0;
 
        #ifdef USE_SAC_3D
                k=ii[2];
-                if((k==0 || k==1) && dim==2  /* && ( ((p->mpilowerb[dim])==1) || ((p->boundtype[0][dim][0])==2))  */ )              
+                if((k==0 || k==1) && dim==2   && ( ((p->mpilowerb[dim])==1) ||
+		((p->boundtype[0][dim][0])==2))   )              
                 {              
                     bound=k;
                     d_wmod[order*ntot+encode3_mpiu(p,i,j,k,var)]=d_mpiwmod2[encodempiw2(p,i,j,k,var,bound)];              
                 }        
-                 else if((( k>=((p->n[2])-2)   ))  && dim==2  /* && ( ((p->mpiupperb[dim])==1) || ((p->boundtype[0][dim][0])==2))  */ )               
+                 else if((( k>=((p->n[2])-2)   ))  && dim==2   && ( ((p->mpiupperb[dim])==1) ||
+		 ((p->boundtype[0][dim][1])==2))   )               
                 {
                     bound=2*(k==((p->n[2])-1))+(p->n[2])-k;
                     d_wmod[order*ntot+encode3_mpiu(p,i,j,k,var)]=d_mpiwmod2[encodempiw2(p,i,j,k,var,bound)];              

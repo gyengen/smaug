@@ -407,16 +407,16 @@ char *method=NULL;
 
 				#ifdef USE_SAC3D
 					if(p->ipe>99)
-						sprintf(configinfile,"%s%d_np%d%d%d_%d.out",tcfg,n,p->pnpe[0],p->pnpe[1],p->pnpe[2],p->ipe);
+						sprintf(configinfile,"%s%d_np0%d0%d0%d_%d.out",tcfg,n,p->pnpe[0],p->pnpe[1],p->pnpe[2],p->ipe);
 					else if(p->ipe>9)
 						sprintf(configinfile,"%s%d_np0%d0%d0%d_0%d.out",tcfg,n,p->pnpe[0],p->pnpe[1],p->pnpe[2],p->ipe);
 					else
 						sprintf(configinfile,"%s%d_np00%d00%d00%d_00%d.out",tcfg,n,p->pnpe[0],p->pnpe[1],p->pnpe[2],p->ipe);  	     
 				#else
 					if(p->ipe>99)
-						sprintf(configinfile,"%s%d_np%d%d_%d.out",tcfg,n,p->pnpe[0],p->pnpe[1],p->ipe);
+						sprintf(configinfile,"%s%d_np0%d0%d_%d.out",tcfg,n,p->pnpe[0],p->pnpe[1],p->ipe);
 					else if(p->ipe>9)
-						sprintf(configinfile,"%s%d_np%d%d_%d.out",tcfg,n,p->pnpe[0],p->pnpe[1],p->ipe);
+						sprintf(configinfile,"%s%d_np0%d0%d_0%d.out",tcfg,n,p->pnpe[0],p->pnpe[1],p->ipe);
 					else
 						sprintf(configinfile,"%s%d_np0%d0%d_00%d.out",tcfg,n,p->pnpe[0],p->pnpe[1],p->ipe);  	     	     
 				#endif

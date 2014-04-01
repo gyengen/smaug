@@ -353,8 +353,26 @@ int ib;
     for(int idir=0; idir<NDIM; idir++)
     for(int ibound=0; ibound<2; ibound++)
     {
-       if( ((p->boundtype[ii][idir][ibound])==0) && ((p->pnpe[idir])>0) )
+       //if( ((p->boundtype[ii][idir][ibound])==0) && ((p->pnpe[idir])>0) )
+       //                              p->boundtype[ii][idir][ibound]=2;
+
+       if(  ((p->pipe[idir])==((p->pnpe[idir])-1)) && (ibound==1))
+                                     p->boundtype[ii][idir][ibound]=-1;
+				     
+				     
+       if(  ((p->pipe[idir])==0) && (ibound==0))
+                                     p->boundtype[ii][idir][ibound]=-1;
+
+
+				     
+       if( ((p->boundtype[ii][idir][ibound])==0) && ((p->pipe[idir])==((p->pnpe[idir])-1)) && (ibound==1))
                                      p->boundtype[ii][idir][ibound]=2;
+				     
+				     
+       if( ((p->boundtype[ii][idir][ibound])==0) && ((p->pipe[idir])==0) && (ibound==0))
+                                     p->boundtype[ii][idir][ibound]=2;
+				     
+				     
        ;//else if( (((p->mpiupperb[idir])==1) && (p->pipe[idir])<((p->pnpe[idir])-1) )  ||  ((p->mpiupperb[idir])!=1)  && ((p->pipe[idir])>0) )
        ;//                              p->boundtype[ii][idir][ibound]=1;
 

@@ -121,7 +121,7 @@ int is=1;
 
 #endif
  #ifdef USE_SAC_3D
-if (j==(p->n[1])-1)    && i>0   && i<((p->n[0])) && k>0   && k<((p->n[2]))  )
+if (j==((p->n[1])-1)    && i>0   && i<((p->n[0])) && k>0   && k<((p->n[2]))  )
        wt[encode3p2_hdv1r(p,i+is,j+2,k+is,f)]=wt[encode3p2_hdv1r(p,i+is,(p->n[1])-5,k+is,f)];
    else if( (j==0)    && i>0   && i<((p->n[0]))  && k>0   && k<((p->n[2]))  )
        wt[encode3p2_hdv1r(p,i+is,0,k+is,f)]=wt[encode3p2_hdv1r(p,i+is,6,k+is,f)];

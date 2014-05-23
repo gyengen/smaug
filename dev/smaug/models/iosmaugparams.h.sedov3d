@@ -81,9 +81,9 @@ int steeringenabled=1;
 int finishsteering=0;
 char configfile[300];
 //char *cfgfile="zero1.ini";
-char *cfgfile="zero1_BW.ini";
+char *cfgfile="zero1_sedov3d.ini";
 //char *cfgfile="zero1_BW_bin.ini";
-char *cfgout="out/zeroOT";
+char *cfgout="out/sedov";
 
 
 struct params *d_p;
@@ -118,9 +118,9 @@ dt=0.000000493;  //BW tests
 int nt=(int)((tmax)/dt);
 //nt=3000;
 //nt=5000;
-//nt=200000;
-nt=2;
-//nt=100;
+nt=200000;
+//nt=2;
+nt=100;
 real *t=(real *)calloc(nt,sizeof(real));
 printf("runsim 1%d \n",nt);
 //t = [0:dt:tdomain];
@@ -166,8 +166,8 @@ p->adiab=1.0;
 
 //ozt test
 //p->gamma=5.0/3.0;  //OZ test
-p->gamma=2.0;  //BW test
-//p->gamma=5.0/3.0;  //BACH3D
+//p->gamma=2.0;  //BW test
+p->gamma=5.0/3.0;  //BACH3D
 //alfven test
 //p->gamma=1.4;
 
@@ -193,7 +193,7 @@ p->moddton=0.0;
 p->divbon=0.0;
 p->divbfix=0.0;
 p->hyperdifmom=1.0;
-p->readini=0.0;
+p->readini=1.0;
 p->cfgsavefrequency=1;
 
 
@@ -252,22 +252,11 @@ p->chyp[b3]=0.02;
 iome elist;
 meta meta;
 
-
-
-
-//set boundary types
-for(int ii=0;ii<NVAR; ii++)
+for(int ii=0; ii<NVAR; ii++)
 for(int idir=0; idir<NDIM; idir++)
-for(int ibound=0; ibound<2; ibound++)
+for(int bound=0; bound<2; bound++)
 {
-   (p->boundtype[ii][idir][ibound])=4;  //period=0 mpi=1 mpiperiod=2  cont=3 contcd4=4 fixed=5 symm=6 asymm=7
-}
-
-//set boundary types
-for(int ii=0;ii<NVAR; ii++)
-for(int ibound=0; ibound<2; ibound++)
-{
-   (p->boundtype[ii][0][ibound])=4;  //period=0 mpi=1 mpiperiod=2  cont=3 contcd4=4 fixed=5 symm=6 asymm=7
+   (p->boundtype[ii][idir][bound])=4;  //period=0 mpi=1 mpiperiod=2  cont=3 contcd4=4 fixed=5 symm=6 asymm=7
 }
 
 

@@ -59,6 +59,8 @@ if(argc>2  && strcmp(argv[2],"init")==0)
   mode=init;
   printf("init mode=3\n");
 }
+p->mode=mode;
+
 
 #ifdef USE_IOME
 if(argc>1)
@@ -786,9 +788,9 @@ gpusync();
 	for( n=its;n<=nt;n++)
 	{
 	    	p->it=n;	
-		gpusync();
-		printf("%d,step %d\n",p->ipe,n);
-		gpusync();
+		//gpusync();
+		//printf("%d,step %d\n",p->ipe,n);
+		//gpusync();
 	
 		if((p->rkon)==0)
 		{

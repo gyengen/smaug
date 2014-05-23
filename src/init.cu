@@ -170,7 +170,8 @@ int ni=p->n[0];
 
                    //commented out because spicule problem
                    //constructed on host
-                   ;//init_user_i(wmod,wd,p,ii);
+               if(p->mode!=3)
+                   init_user_i(wmod,wd,p,ii);
            #endif
 
 	

@@ -1,8 +1,7 @@
 #Makefile for StarSimulation IoSimTestSimple
 
 ##### User configurable options #####
-include make_inputs
-#include make_inputs_mpi
+include make_inputs_3d
 ### End User configurable options ###
 
 
@@ -29,24 +28,7 @@ ALLBIN	=	$(Bin)/smaug
 #@# Targets follow ---------------------------------
 
 ##all:	IoSimTestSimple
-spicule4:
-	cp ../solarmodels/iosmaugparams.h.spicule4_nob ../include/iosmaugparams.h
-	cp ../solarmodels/init_user.cu.spicule ../src/init_user.cu
-	cp ../solarmodels/boundary.cu.spicule ../src/boundary.cu
-	cp ../solarmodels/usersource.cu.spicule4_nob ../src/usersource.cu
-	cp ../solarmodels/initialisation_user.h.spicule4_b ../include/initialisation_user.h
-spicule4_mpi:
-	cp ../solarmodels/iosmaugparams.h.spicule4_nob_mpi ../include/iosmaugparams.h
-	cp ../solarmodels/init_user.cu.spicule ../src/init_user.cu
-	cp ../solarmodels/boundary.cu.spicule ../src/boundary.cu
-	cp ../solarmodels/usersource.cu.spicule4_nob ../src/usersource.cu
-	cp ../solarmodels/initialisation_user.h.spicule4_b ../include/initialisation_user.h
-spicule5_mpi:
-	cp ../solarmodels/iosmaugparams.h.spicule5_nob_mpi ../include/iosmaugparams.h
-	cp ../solarmodels/init_user.cu.spicule ../src/init_user.cu
-	cp ../solarmodels/boundary.cu.spicule ../src/boundary.cu
-	cp ../solarmodels/usersource.cu.spicule4_nob ../src/usersource.cu
-	cp ../solarmodels/initialisation_user.h.spicule5_b_mpi ../include/initialisation_user.h
+
 fluxtube1:
 	cp ../models/iosmaugparams.h.fluxtube1 ../include/iosmaugparams.h
 	cp ../models/init_user.cu.fluxtube1 ../src/init_user.cu
@@ -79,18 +61,21 @@ sedov:
 	cp ../models/boundary.cu.sedov ../src/boundary.cu
 	cp ../models/usersource.cu.default ../src/usersource.cu
 	cp ../models/initialisation_user.h.default ../include/initialisation_user.h
-sedov3d:
-	cp ../models/iosmaugparams.h.sedov3d ../include/iosmaugparams.h
-	cp ../models/init_user.cu.sedov3d ../src/init_user.cu
-	cp ../models/boundary.cu.sedov3d ../src/boundary.cu
-	cp ../models/usersource.cu.default ../src/usersource.cu
-	cp ../models/initialisation_user.h.sedov3d ../include/initialisation_user.h
+
 bach:
 	cp ../models/iosmaugparams.h.bach ../include/iosmaugparams.h
 	cp ../models/init_user.cu.bach ../src/init_user.cu
 	cp ../models/boundary.cu.bach ../src/boundary.cu
 	cp ../models/usersource.cu.default ../src/usersource.cu
 	cp ../models/initialisation_user.h.default ../include/initialisation_user.h
+
+sedov3d:
+	cp ../models/iosmaugparams.h.sedov3d ../include/iosmaugparams.h
+	cp ../models/init_user.cu.sedov3d ../src/init_user.cu
+	cp ../models/boundary.cu.sedov3d ../src/boundary.cu
+	cp ../models/usersource.cu.default ../src/usersource.cu
+	cp ../models/initialisation_user.h.sedov3d ../include/initialisation_user.h
+
 
 ah:
 	cp ../models/iosmaugparams.h.ah ../include/iosmaugparams.h
@@ -236,10 +221,6 @@ boundary.o: boundary.cu
 init.o: init.cu
 	sed 's/MODID/i/g' < gradops.cu > ../include/gradops_i.cuh
 	sed 's/MODID/i/g' < init_user.cu > ../include/init_user_i.cuh
-	$(NVCC) -o $@     $(CUDACCFLAGS) -c $<
-mpiutil.o: mpiutil.cu
-	sed 's/MODID/mpiu/g' < gradops.cu > ../include/gradops_mpiu.cuh
-	sed 's/MODID/mpiu/g' < init_user.cu > ../include/init_user_mpiu.cuh
 	$(NVCC) -o $@     $(CUDACCFLAGS) -c $<
 update.o: update.cu
 	sed 's/MODID/u/g' < gradops.cu > ../include/gradops_u.cuh

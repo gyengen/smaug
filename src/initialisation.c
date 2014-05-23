@@ -151,10 +151,16 @@ void initconfig(params *k, meta *md, real *w, real *wd)
 	int i1,j1,k1;
         int ni=k->n[0];
         int nj=k->n[1];
+	#ifdef USE_SAC3D
+		int nk=k->n[2];
+	#endif
         unsigned long int ilv;
         printf("%d %d\n",ni,nj);
         for(i1=0; i1<(k->n[0]) ;i1++)
 	  for(j1=0; j1<(k->n[1]) ;j1++)
+		#ifdef USE_SAC3D
+			for(k1=0; k1<(k->n[2]) ;k1++)
+		#endif
           {
                     
                     wd[encode3_in(k,i1,j1,k1,pos1)]=(k->xmin[0])+((real)i1)*((k->xmax[0])- (k->xmin[0])  )/ni;
@@ -171,7 +177,13 @@ void initconfig(params *k, meta *md, real *w, real *wd)
                     //for(int f=rho; f<=b2; f++)
                     {
                     ;//ilv=j1*ni+i1+(ni*nj*f);
-                     ilv=j1*ni+i1+(ni*nj*f);
+
+		    #ifdef USE_SAC3D
+                        ilv=k1*ni*nj+j1*ni+i1+(ni*nj*nk*f);
+		    #else
+                        ilv=j1*ni+i1+(ni*nj*f);
+                    #endif
+
                     w[ilv]=0.0;
                     switch(f)
 		            {
@@ -184,6 +196,14 @@ void initconfig(params *k, meta *md, real *w, real *wd)
 		              case mom2:
 		            	w[ilv]=0.01;
 			      break;
+		    #ifdef USE_SAC3D
+		              case mom3:
+		            	w[ilv]=0.01;
+			      break;
+                    #endif
+
+
+
 		              //case mom3:
 		            	//w[j1*ni+i1+(ni*nj*f)]=0.0;
 			      //break;
@@ -196,9 +216,12 @@ void initconfig(params *k, meta *md, real *w, real *wd)
 		              case b2:
 		            	w[ilv]=0.0;
 			      break;
-		              //case b3:
-		            //	w[j1*ni+i1+(ni*nj*f)]=0.0;
-			     // break;
+		    #ifdef USE_SAC3D
+		              case b3:
+		            	w[ilv]=0.0;
+			      break;
+                    #endif
+
 		            }; //end of switch to check for field
 
 			}//end of loop over f

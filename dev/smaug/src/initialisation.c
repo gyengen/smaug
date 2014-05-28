@@ -151,14 +151,14 @@ void initconfig(params *k, meta *md, real *w, real *wd)
 	int i1,j1,k1;
         int ni=k->n[0];
         int nj=k->n[1];
-	#ifdef USE_SAC3D
+	#ifdef USE_SAC_3D
 		int nk=k->n[2];
 	#endif
         unsigned long int ilv;
         printf("%d %d\n",ni,nj);
         for(i1=0; i1<(k->n[0]) ;i1++)
 	  for(j1=0; j1<(k->n[1]) ;j1++)
-		#ifdef USE_SAC3D
+		#ifdef USE_SAC_3D
 			for(k1=0; k1<(k->n[2]) ;k1++)
 		#endif
           {
@@ -168,7 +168,7 @@ void initconfig(params *k, meta *md, real *w, real *wd)
                     wd[encode3_in(k,i1,j1,k1,pos2)]=(k->xmin[1])+((real)j1)*((k->xmax[1])- (k->xmin[1])  )/nj;
                     wd[encode3_in(k,i1,j1,k1,delx2)]=((k->xmax[1])- (k->xmin[1])  )/nj;
 
-		    #ifdef USE_SAC3D
+		    #ifdef USE_SAC_3D
 		            wd[encode3_in(k,i1,j1,k1,pos3)]=(k->xmin[2])+((real)k1)*((k->xmax[2])-(k->xmin[2]))/nk;
 		            wd[encode3_in(k,i1,j1,k1,delx3)]=((k->xmax[2])- (k->xmin[2])  )/nk;
                     #endif
@@ -178,7 +178,7 @@ void initconfig(params *k, meta *md, real *w, real *wd)
                     {
                     ;//ilv=j1*ni+i1+(ni*nj*f);
 
-		    #ifdef USE_SAC3D
+		    #ifdef USE_SAC_3D
                         ilv=k1*ni*nj+j1*ni+i1+(ni*nj*nk*f);
 		    #else
                         ilv=j1*ni+i1+(ni*nj*f);
@@ -196,7 +196,7 @@ void initconfig(params *k, meta *md, real *w, real *wd)
 		              case mom2:
 		            	w[ilv]=0.01;
 			      break;
-		    #ifdef USE_SAC3D
+		    #ifdef USE_SAC_3D
 		              case mom3:
 		            	w[ilv]=0.01;
 			      break;
@@ -216,7 +216,7 @@ void initconfig(params *k, meta *md, real *w, real *wd)
 		              case b2:
 		            	w[ilv]=0.0;
 			      break;
-		    #ifdef USE_SAC3D
+		    #ifdef USE_SAC_3D
 		              case b3:
 		            	w[ilv]=0.0;
 			      break;

@@ -1223,7 +1223,65 @@ __global__ void myreduction0computemaxcourant_parallel(struct params *p,   real 
  
 }
 
+__global__ void copytotemp_parallel(struct params *p, real *wd, real *wtemp)
+{
+  int iindex = blockIdx.x * blockDim.x + threadIdx.x;
+  unsigned int tid = threadIdx.x;
+  int i,j;
+  int index,k;
+  int ni=p->n[0];
+  int nj=p->n[1];
 
+  int ii[NDIM];
+  int dimp=((p->n[0]))*((p->n[1]));
+ #ifdef USE_SAC_3D
+   int kp;
+   real dz=p->dx[2];
+   dimp=((p->n[0]))*((p->n[1]))*((p->n[2]));
+#endif  
+   int ip,jp;
+
+ 
+  #ifdef USE_SAC_3D
+   kp=iindex/(nj*ni);
+   jp=(iindex-(kp*(nj*ni)))/ni;
+   ip=iindex-(kp*nj*ni)-(jp*ni);
+#else
+    jp=iindex/ni;
+   ip=iindex-(jp*ni);
+#endif
+
+
+     ii[0]=ip;
+     ii[1]=jp;
+     #ifdef USE_SAC_3D
+	   ii[2]=kp;
+     #endif
+
+
+     #ifdef USE_SAC_3D
+       if(ii[0]<p->n[0] && ii[1]<p->n[1] && ii[2]<p->n[2])
+     #else
+       if(ii[0]<p->n[0] && ii[1]<p->n[1])
+     #endif
+  //if(i>1 && j >1 && i<((p->n[0])-2) && j<((p->n[1])-2))
+	{
+ 
+               
+               
+                    wtemp[fencode3_cdf(p,ii,0)]=wd[fencode3_cdf(p,ii,cfast)];
+        }
+
+
+              __syncthreads();
+
+
+
+
+
+
+
+}
 
 
 __global__ void zeropadmaxc_parallel(struct params *p,   real *wmod, real *wd, int order, int dir, real *temp, int ndimp)
@@ -1911,8 +1969,12 @@ int cucomputemaxc(struct params **p,  struct params **d_p, real **d_wmod,  real 
   //determine maximum value of magneto-acoustic fast mode
   zeropadmaxc_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,  *d_wd, order, dir, *d_wtemp,ndimp);
 
-  cudaMemcpy(*wd, *d_wd, NDERV*dimp*sizeof(real), cudaMemcpyDeviceToHost);
-  cudaMemcpy(*d_wtemp, ((*wd)+(cfast*dimp)), dimp*sizeof(real), cudaMemcpyHostToDevice);
+  //the following cudamemcpy routines are bottlenecks!
+  //the copytotemp routine does this on the GPU
+  ;//cudaMemcpy(*wd, *d_wd, NDERV*dimp*sizeof(real), cudaMemcpyDeviceToHost);
+  ;//cudaMemcpy(*d_wtemp, ((*wd)+(cfast*dimp)), dimp*sizeof(real), cudaMemcpyHostToDevice);
+  //need GPU memory routine here to transfer data from derived memory (fast wave speeds to temporrary area)
+  copytotemp_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wd, *d_wtemp);
   int i=0;
 
 
@@ -1945,7 +2007,7 @@ int cucomputemaxc(struct params **p,  struct params **d_p, real **d_wmod,  real 
   for( i=0;i<numBlocks;i++)          		
                 if(h_cmax[i]>((*p)->cmax)) ((*p)->cmax)=h_cmax[i];
 
- 
+ //((*p)->cmax)=2.0;
   int oldnumBlocks,newnumBlocks;
   newnumBlocks=numBlocks;
 

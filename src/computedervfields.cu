@@ -1223,7 +1223,7 @@ __global__ void myreduction0computemaxcourant_parallel(struct params *p,   real 
  
 }
 
-__global__ void copytotemp_parallel(struct params *p, real *wd, real *wtemp)
+__global__ void copytotemp_parallel(struct params *p, real *wd, real *wtemp,int ifield)
 {
   int iindex = blockIdx.x * blockDim.x + threadIdx.x;
   unsigned int tid = threadIdx.x;
@@ -1269,7 +1269,7 @@ __global__ void copytotemp_parallel(struct params *p, real *wd, real *wtemp)
  
                
                
-                    wtemp[fencode3_cdf(p,ii,0)]=wd[fencode3_cdf(p,ii,cfast)];
+                    wtemp[fencode3_cdf(p,ii,0)]=wd[fencode3_cdf(p,ii,ifield)];
         }
 
 
@@ -1971,10 +1971,10 @@ int cucomputemaxc(struct params **p,  struct params **d_p, real **d_wmod,  real 
 
   //the following cudamemcpy routines are bottlenecks!
   //the copytotemp routine does this on the GPU
-  ;//cudaMemcpy(*wd, *d_wd, NDERV*dimp*sizeof(real), cudaMemcpyDeviceToHost);
-  ;//cudaMemcpy(*d_wtemp, ((*wd)+(cfast*dimp)), dimp*sizeof(real), cudaMemcpyHostToDevice);
+  //cudaMemcpy(*wd, *d_wd, NDERV*dimp*sizeof(real), cudaMemcpyDeviceToHost);
+  //cudaMemcpy(*d_wtemp, ((*wd)+(cfast*dimp)), dimp*sizeof(real), cudaMemcpyHostToDevice);
   //need GPU memory routine here to transfer data from derived memory (fast wave speeds to temporrary area)
-  copytotemp_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wd, *d_wtemp);
+  copytotemp_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wd, *d_wtemp,cfast);
   int i=0;
 
 
@@ -1993,7 +1993,9 @@ int cucomputemaxc(struct params **p,  struct params **d_p, real **d_wmod,  real 
 
 
  //determine maximum value of sound speed
- cudaMemcpy(*d_wtemp, ((*wd)+(soundspeed*dimp)), dimp*sizeof(real), cudaMemcpyHostToDevice);
+ //cudaMemcpy(*d_wtemp, ((*wd)+(soundspeed*dimp)), dimp*sizeof(real), cudaMemcpyHostToDevice);
+ copytotemp_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wd, *d_wtemp,soundspeed);
+
  zeropadmaxc_parallel<<<numBlocks, numThreadsPerBlock>>>(*d_p, *d_wmod,  *d_wd, order, dir, *d_wtemp,ndimp);
  for(i=0;i<numBlocks;i++)
                 h_cmax[i]=0;

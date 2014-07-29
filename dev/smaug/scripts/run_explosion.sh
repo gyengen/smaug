@@ -3,12 +3,14 @@
 #$ -V 
 #$ -l arch=intel*
 #$ -l gpu=1
-##$ -P cs-test
-#$ -P gpu
+#$ -P cs-test
+##$ -P gpu
 #$ -N jexp3d
 #$ -l mem=12G
 #$ -l rmem=12G
-#$ -l h_rt=168:00:00
+##$ -l h_rt=168:00:00
+#$ -l h_rt=672:00:00
+
 module add libs/cuda/4.0.17
 
 
@@ -27,6 +29,6 @@ cd ..
 
 export TIMECOUNTER=0
 source timeused
-./smaug init
+bin/smaug a
 source timeused
 

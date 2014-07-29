@@ -28,8 +28,13 @@ ni=ni+2*ngi;
 //ni=512;
 //real xmax = 6.2831853;  
 
-real xmax=14.19e18;
-real xmin=-14.19e18;
+//real xmax=14.19e18;
+//real xmin=-14.19e18;
+real xmax=0.5;
+real xmin=-0.5;
+
+
+
 real dx = (xmax-xmin)/(ni);
 //#endif
 
@@ -44,8 +49,10 @@ int nj=124;  //BW test
 nj=nj+2*ngj;
 //nj=512;
 //real ymax = 6.2831853; 
-real ymax=14.19e18;
-real ymin=-14.19e18;
+//real ymax=14.19e18;
+//real ymin=-14.19e18;
+real ymax=0.5;
+real ymin=-0.5;
 //real dx = xmax/(ni-4);
 real dy = (ymax-ymin)/(nj);  
 //nj=41;
@@ -59,8 +66,12 @@ int nk;
 nk=124;    //BW tests
 
 nk=nk+2*ngk;
-real zmax=14.19e18;
-real zmin=-14.19e18;
+//real zmax=14.19e18;
+//real zmin=-14.19e18;
+
+real zmax=0.5;
+real zmin=-0.5;
+
 //real dx = xmax/(ni-4);
 real dz = (zmax-zmin)/(nk);
 #endif     
@@ -81,7 +92,8 @@ int steeringenabled=1;
 int finishsteering=0;
 char configfile[300];
 //char *cfgfile="zero1.ini";
-char *cfgfile="zero1_sedov3d.ini";
+char *cfgfile="out/sedov_asc_0.ini";
+//char *cfgfile="out/sedov_asc_199000.ini";
 //char *cfgfile="zero1_BW_bin.ini";
 char *cfgout="out/sedov";
 
@@ -98,29 +110,36 @@ dt=1000000.0;  //bach test
 #endif
 
 #ifdef USE_SAC_3D
-dt=5.0e6;  //BACH3D
+//dt=5.0e6;  //BACH3D
+//dt=5.0e7;  //BACH3D
+//dt=5.0e8;  //BACH3D
+//dt=5.0e9;  //BACH3D
+//dt=5.0e10;  //BACH3D
+//dt=5.0e11;  //BACH3D
+dt=0.00001;
+
 #endif
 
 
-/*//dt=0.15;
+///*//dt=0.15;
 
 //#ifdef USE_SAC
 //dt=0.00065;  //OZT test
 //dt=6.5/10000000.0; //BW test
 //dt=0.00000065;  //BW tests
-dt=0.000000493;  //BW tests
+//dt=0.000000493;  //BW tests
 //dt=0.005;
 //dt=0.000139;
 //dt=3.0/10000000.0; //BW test
-//#endif*/
+////#endif*/
 
 
 int nt=(int)((tmax)/dt);
 //nt=3000;
 //nt=5000;
-nt=200000;
+nt=6000000;
 //nt=2;
-nt=100;
+//nt=100;
 real *t=(real *)calloc(nt,sizeof(real));
 printf("runsim 1%d \n",nt);
 //t = [0:dt:tdomain];
@@ -152,6 +171,12 @@ p->dx[2]=dz;
 #endif
 //p->g=g;
 
+p->qt=0.0;
+p->it=0;
+
+
+//p->qt=9.95e11;
+//p->it=199001;
 
 
 /*constants used for adiabatic hydrodynamics*/
@@ -194,7 +219,7 @@ p->divbon=0.0;
 p->divbfix=0.0;
 p->hyperdifmom=1.0;
 p->readini=1.0;
-p->cfgsavefrequency=1;
+p->cfgsavefrequency=1000;
 
 
 p->xmax[0]=xmax;
@@ -228,9 +253,13 @@ p->chyp[b2]=0.02;
 p->chyp[mom1]=0.4;
 p->chyp[mom2]=0.4;
 
+p->chyp[mom1]=0.05;
+p->chyp[mom2]=0.05;
+
+
 p->chyp[rho]=0.02;
-p->chyp[mom1]=0;
-p->chyp[mom2]=0;
+//p->chyp[mom1]=0;
+//p->chyp[mom2]=0;
 
 
 
@@ -244,6 +273,7 @@ p->chyp[mom1]=0.4;
 p->chyp[mom2]=0.4;
 #ifdef USE_SAC_3D
 p->chyp[mom3]=0.4;
+//p->chyp[mom3]=0.05;
 p->chyp[b3]=0.02;
 #endif
 
@@ -256,7 +286,7 @@ for(int ii=0; ii<NVAR; ii++)
 for(int idir=0; idir<NDIM; idir++)
 for(int bound=0; bound<2; bound++)
 {
-   (p->boundtype[ii][idir][bound])=4;  //period=0 mpi=1 mpiperiod=2  cont=3 contcd4=4 fixed=5 symm=6 asymm=7
+   (p->boundtype[ii][idir][bound])=0;  //period=0 mpi=1 mpiperiod=2  cont=3 contcd4=4 fixed=5 symm=6 asymm=7
 }
 
 

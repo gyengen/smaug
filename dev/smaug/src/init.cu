@@ -1584,12 +1584,15 @@ kp=0;
 		     case 0:
 	               // (wda[(encode3_i(*p,ip-1,jp-1,kpo,delx1))])=/*(*p)->dx[0];//*/0.5*(ttemp2[encode3p2_i(*p,ip+1,jp,kp,tmpnui)]-ttemp2[encode3p2_i(*p,ip-1,jp,kp,tmpnui)]);
                   (wda[(encode3_i(*p,ip-1,jp-1,kpo,delx1))])=/*(*p)->dx[0];//*/0.5*(ttemp2[encode3p2_i(*p,ip+1,jp,kp,tmpnui)]-ttemp2[encode3p2_i(*p,ip-1,jp,kp,tmpnui)]);
+
+		if(wda[(encode3_i(*p,ip-1,jp-1,kpo,delx1))]==0) wda[(encode3_i(*p,ip-1,jp-1,kpo,delx1))]=(*p)->dx[0];
 	              //  if(ip==128  && jp==128 && kp==128)
                       //  printf("delx 0 %d %d %d %16.20f  %16.20f   %16.20f \n",ii[0]-1,ii[1]-1,ii[2]-1,wda[(encode3_i(*p,ip-1,jp-1,kp-1,delx1))],wda[(encode3_i(*p,ip-1,jp-1,kp-1,delx2))],wda[(encode3_i(*p,ip-1,jp-1,kp-1,delx3))]);
 		     break;
 	
 		     case 1:
 			(wda[(encode3_i(*p,ip-1,jp-1,kpo,delx2))])=/*(*p)->dx[1];//*/0.5*(ttemp2[encode3p2_i(*p,ip,jp+1,kp,tmpnui1)]-ttemp2[encode3p2_i(*p,ip,jp-1,kp,tmpnui1)]);
+		if(wda[(encode3_i(*p,ip-1,jp-1,kpo,delx2))]==0) wda[(encode3_i(*p,ip-1,jp-1,kpo,delx2))]=(*p)->dx[1];
 	               // if(ip==128  && jp==128 && kp==128)
                        //   printf("delx 1 %d %d %d %16.20f  %16.20f   %16.20f \n",ii[0]-1,ii[1]-1,ii[2]-1,wda[(encode3_i(*p,ip-1,jp-1,kp-1,delx1))],wda[(encode3_i(*p,ip-1,jp-1,kp-1,delx2))],wda[(encode3_i(*p,ip-1,jp-1,kp-1,delx3))]);
 
@@ -1599,6 +1602,7 @@ kp=0;
 		     #ifdef USE_SAC_3D
 		     case 2:
 			(wda[(encode3_i(*p,ip-1,jp-1,kpo,delx3))])=0.5*(ttemp2[encode3p2_i(*p,ip,jp,kp+1,tmpnui2)]-ttemp2[encode3p2_i(*p,ip,jp,kp-1,tmpnui2)]);
+		if(wda[(encode3_i(*p,ip-1,jp-1,kpo,delx3))]==0) wda[(encode3_i(*p,ip-1,jp-1,kpo,delx3))]=(*p)->dx[2];
 	              //  if(ip==128  && jp==128 && kp==128)
                       //  printf("delx 2 %d %d %d %16.20f  %16.20f   %16.20f \n",ii[0]-1,ii[1]-1,ii[2]-1,wda[(encode3_i(*p,ip-1,jp-1,kp-1,delx1))],wda[(encode3_i(*p,ip-1,jp-1,kp-1,delx2))],wda[(encode3_i(*p,ip-1,jp-1,kp-1,delx3))]);
 

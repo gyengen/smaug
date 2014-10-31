@@ -61,8 +61,10 @@ ppn=$(echo "$SLURM_TASKS_PER_NODE" | sed -e  's/^\([0-9][0-9]*\).*$/\1/')
 module load default-wilkes                 # REQUIRED - loads the basic environment
 
 #! Insert additional module load commands after this line if needed:
-module load cuda/5.5
-module load mvapich2/gcc/2.0b/gdr
+#module load cuda/5.5
+#module load mvapich2/gcc/2.0b/gdr
+module load cuda/6.5
+module load mvapich2-GDR/gnu/2.0-8_cuda-6.5
 
 export MV2_USE_CUDA=1
 export MV2_USE_GPUDIRECT=1
@@ -74,13 +76,7 @@ export MV2_CPU_BINDING_POLICY=SCATTER
 export CUDA_VISIBLE_DEVICE=0
 
 
-#! Full path to application executable: 
-#application="osu_latency"
-application="bin/smaug"
-#! Run options for the application:
-#options="-d cuda D D"
-#options="a"
-options=" -genvall "
+
 #! Work directory (i.e. where the job will run):
 workdir="$SLURM_SUBMIT_DIR"  # The value of SLURM_SUBMIT_DIR sets workdir to the directory
                              # in which sbatch is run.
@@ -157,8 +153,8 @@ echo -e "\nExecuting command:\n==================\n$CMD\n"
 
 
 start=0
-end=500 
-step=10
+end=50 
+step=1
 current=$start
 
 
@@ -167,6 +163,10 @@ numproc=4
 
 
 
+#! Run options for the application:
+#options="-d cuda D D"
+#options="a"
+options=" -genvall "
 
 
 while [ "$current" -le $end ]
@@ -175,7 +175,12 @@ do
         #eval $CMD
         #mpirun -np $numproc bin/smaug -o gather $current
         #mpirun -npernode $mpi_tasks_per_node -np $np $application -o gather $current
-	mpirun -ppn $mpi_tasks_per_node -np $np $options $application -o gather $current
+
+	#! Full path to application executable: 
+	#application="osu_latency"
+	application="bin/smaug -o gather $current"
+
+	mpirun -ppn $mpi_tasks_per_node -np $np $options $application
         current=`expr $current + $step`
 
 done

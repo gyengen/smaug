@@ -59,7 +59,7 @@ void freadl(FILE *stream, char **string)
 
 int createlog(char *logfile)
 {
-	int status=0;
+      int status=0;
 
       FILE *fdt=0;
 
@@ -67,7 +67,7 @@ int createlog(char *logfile)
       fprintf(fdt,"it   t   dt    rho m1 m2 m3 e bx by bz\n");
       fclose(fdt);	
 
-	return status;
+      return status;
 }
 
 int appendlog(char *logfile, params p, state s)
@@ -1011,14 +1011,14 @@ int readasciivacconfig(char *cfgfile, params p, meta md,state *st, real *w, real
     if(mode==0)
     {
        #ifdef USE_MULTIGPU
-		if((p.pipe[0])==0  && (p.pnpe[0]>1)) iif=ni -2;
-		if((p.pipe[0])==((p.pnpe[0])-1)  && (p.pnpe[0]>1)  ) is=2;
-		if((p.pipe[1])==0 && (p.pnpe[1]>1)  ) 
+		if((p.pnpe[0]>1)) iif=ni -2;
+		if( (p.pnpe[0]>1)  ) is=2;
+		if( (p.pnpe[1]>1)  ) 
               {
 		jf=nj-2;
               //printf("aread ifinish %d %d %d\n",p.ipe,p.pipe[1],jf);
 		}
-		if((p.pipe[1])==((p.pnpe[1])-1) && (p.pnpe[1]>1))
+		if( (p.pnpe[1]>1))
 		{
               js=2;
               //printf("aread istart %d %d %d\n",p.ipe,p.pipe[1],js);		
@@ -1026,8 +1026,8 @@ int readasciivacconfig(char *cfgfile, params p, meta md,state *st, real *w, real
 		}
 
 	  #ifdef USE_SAC_3D
-		if((p.pipe[2])==0  && (p.pnpe[2]>1)) kf=nk-2;
-		if((p.pipe[2])==((p.pnpe[2])-1)  && (p.pnpe[2]>1)) ks=2;
+		if( (p.pnpe[2]>1)) kf=nk-2;
+		if( (p.pnpe[2]>1)) ks=2;
           #endif
 	
         #endif
@@ -1142,14 +1142,16 @@ sprintf(configfile,"%s\0",cfgfile);
 if(mode==0)
 {
       #ifdef USE_MULTIGPU
-		if((p.pipe[0])==0 &&  (p.pnpe[0]>1)) iif=ni -2;
-		if((p.pipe[0])==((p.pnpe[0])-1) &&  (p.pnpe[0]>1)  ) is=2;
-		if((p.pipe[1])==0  &&  (p.pnpe[1]>1)  ) jf=nj-2;
-		if((p.pipe[1])==((p.pnpe[1])-1)   &&  (p.pnpe[1]>1)  ) js=2;
+		if(  (p.pnpe[0]>1)) iif=ni -2;
+		if(  (p.pnpe[0]>1)  ) is=2;
+		if(  (p.pnpe[1]>1)  ) jf=nj-2;
+		if(  (p.pnpe[1]>1)  ) js=2;
+
+                printf("%d %d %d %d\n",is,js,iif,jf);
 
 	  #ifdef USE_SAC_3D
-		if((p.pipe[2])==0  &&  (p.pnpe[2]>1)  ) kf=nk-2;
-		if((p.pipe[2])==((p.pnpe[2])-1)    &&  (p.pnpe[2]>1)) ks=2;
+		if( (p.pnpe[2]>1)  ) kf=nk-2;
+		if( (p.pnpe[2]>1)) ks=2;
           #endif
 	
         #endif

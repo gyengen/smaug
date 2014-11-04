@@ -1010,15 +1010,18 @@ int readasciivacconfig(char *cfgfile, params p, meta md,state *st, real *w, real
 
     if(mode==0)
     {
+
+       /*Comment out checks for the number of processors*/
+       /*caused errors out boundaries for models needs to be checked and tested again */
        #ifdef USE_MULTIGPU
-		if((p.pnpe[0]>1)) iif=ni -2;
-		if( (p.pnpe[0]>1)  ) is=2;
-		if( (p.pnpe[1]>1)  ) 
+		if((p.pipe[0])==0 /* && (p.pnpe[0]>1)*/) iif=ni -2;
+		if((p.pipe[0])==((p.pnpe[0])-1) /* && (p.pnpe[0]>1) */ ) is=2;
+		if((p.pipe[1])==0 /* && (p.pnpe[1]>1) */ ) 
               {
 		jf=nj-2;
               //printf("aread ifinish %d %d %d\n",p.ipe,p.pipe[1],jf);
 		}
-		if( (p.pnpe[1]>1))
+		if((p.pipe[1])==((p.pnpe[1])-1)/* && (p.pnpe[1]>1)*/)
 		{
               js=2;
               //printf("aread istart %d %d %d\n",p.ipe,p.pipe[1],js);		
@@ -1026,10 +1029,11 @@ int readasciivacconfig(char *cfgfile, params p, meta md,state *st, real *w, real
 		}
 
 	  #ifdef USE_SAC_3D
-		if( (p.pnpe[2]>1)) kf=nk-2;
-		if( (p.pnpe[2]>1)) ks=2;
+		if((p.pipe[2])==0 /* && (p.pnpe[2]>1)*/) kf=nk-2;
+		if((p.pipe[2])==((p.pnpe[2])-1) /* && (p.pnpe[2]>1)*/) ks=2;
           #endif
-	
+
+
         #endif
     }
   
@@ -1141,20 +1145,21 @@ sprintf(configfile,"%s\0",cfgfile);
 
 if(mode==0)
 {
-      #ifdef USE_MULTIGPU
-		if(  (p.pnpe[0]>1)) iif=ni -2;
-		if(  (p.pnpe[0]>1)  ) is=2;
-		if(  (p.pnpe[1]>1)  ) jf=nj-2;
-		if(  (p.pnpe[1]>1)  ) js=2;
 
-                printf("%d %d %d %d\n",is,js,iif,jf);
+
+       /*Comment out checks for the number of processors*/
+       /*caused errors out boundaries for models needs to be checked and tested again */
+      #ifdef USE_MULTIGPU
+		if((p.pipe[0])==0 /*&&  (p.pnpe[0]>1)*/) iif=ni -2;
+		if((p.pipe[0])==((p.pnpe[0])-1)/* &&  (p.pnpe[0]>1) */ ) is=2;
+		if((p.pipe[1])==0  /*&&  (p.pnpe[1]>1)*/  ) jf=nj-2;
+		if((p.pipe[1])==((p.pnpe[1])-1)   /*&&  (p.pnpe[1]>1)*/  ) js=2;
 
 	  #ifdef USE_SAC_3D
-		if( (p.pnpe[2]>1)  ) kf=nk-2;
-		if( (p.pnpe[2]>1)) ks=2;
+		if((p.pipe[2])==0  /*&&  (p.pnpe[2]>1)*/  ) kf=nk-2;
+		if((p.pipe[2])==((p.pnpe[2])-1)    /*&&  (p.pnpe[2]>1)*/) ks=2;
           #endif
-	
-        #endif
+      #endif
 }
 //comm.Barrier();
 //printf("here 3 %s\n",configfile);

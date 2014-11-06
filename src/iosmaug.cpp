@@ -289,6 +289,9 @@ char *method=NULL;
 		  szvisc2=4*NVAR*(  (((p)->n[1])+2)*(((p)->n[2])+2)   );   
 	  #endif
 
+
+
+
 	  #ifdef USE_SAC
 	  temp2=(real *)calloc(NTEMP2*(((p)->n[0])+2)* (((p)->n[1])+2),sizeof(real));
 	  #endif

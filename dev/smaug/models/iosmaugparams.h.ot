@@ -10,7 +10,7 @@ int ngk=2;
 #ifdef USE_SAC
 //vac ozt
 int ni;
-ni=252;    //OZT tests
+ni=248;    //OZT tests
 ni=ni+2*ngi;
 //ni=512;
 //real xmax = 6.2831853;  
@@ -23,7 +23,7 @@ real dx = xmax/(ni);
 // Define the y domain
 #ifdef USE_SAC
 //vac ozt
-int nj = 252;  //OZT tests
+int nj = 248;  //OZT tests
 //int nj=2;  //BW test
 nj=nj+2*ngj;
 //nj=512;
@@ -70,7 +70,7 @@ int finishsteering=0;
 //char *cfgfile="zero1_np020203.ini";
 //char *cfgfile="zero1_np0201.ini";
 //char *cfgfile="configs/zero1_ot_asc.ini";
-char *cfgfile="zero1_ot_asc_256.ini";
+char *cfgfile="configs/zero1_ot_asc_252.ini";
 //char *cfgfile="zero1_BW_bin.ini";
 //char *cfgout="zero1_np010203."
 char *cfgout="out/zeroOT";

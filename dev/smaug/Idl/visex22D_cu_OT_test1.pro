@@ -79,8 +79,8 @@ close,2
 ;directory='/home/mikeg/proj/sac2.5d-cuda/out_OT_withhyper/'
 ;directory='/home/mike/swat/out_kep_h/'
 ;directory='../../swat/out_kep_noh/'
-directory='../../iceberg/out_smaug_noh/'
-
+;directory='../../iceberg/out_smaug_noh/'
+directory='../out/'
 
 ;directory='/fastdata/cs1mkg/smaug/ot_512/'
 ;pic=999

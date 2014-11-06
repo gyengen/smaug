@@ -14,7 +14,8 @@ MYLIBS  =
 
 #CUDA = /usr/local/cuda
 #CUDA = /usr/local/cuda-5.0
-CUDA = /usr/local/lib/nvidia-cuda/toolkit/4.0.17
+#CUDA = /usr/local/lib/nvidia-cuda/toolkit/4.0.17
+CUDA = /usr/local/lib/nvidia-cuda/toolkit/6.5.14
 
 BASE = /usr/local/dx
 incDirs = -I$(BASE)/include  -I$(IOME_HOME)/include  -I/usr/local/include -I$(CUDA)/include -I$../include

@@ -90,7 +90,7 @@ char *cfgfile="3D_tubeact_128_128_128_asc_50.ini";
 //char *cfgfile="zero1_BW_bin.ini";
 //char *cfgout="3D_tube_128_128_128";
 //char *cfgout="/fastdata/cs1mkg/sac_cuda/out_ndriver_nohyp_npgft/3D_tube_128_128_128";
-char *cfgout="/fastdata/cs1mkg/sac_cuda/out_driver_hyp_tube/3D_atubet1slow_128_128_128_final";
+char *cfgout="out/3D_atubet1slow_128_128_128_final";
 struct params *d_p;
 struct params *p=(struct params *)malloc(sizeof(struct params));
 
@@ -255,8 +255,9 @@ meta meta;
 //set boundary types
 for(int ii=0; ii<NVAR; ii++)
 for(int idir=0; idir<NDIM; idir++)
+for(int ibound=0; ibound<2; ibound++)
 {
-   (p->boundtype[ii][idir])=5;  //period=0 mpi=1 mpiperiod=2  cont=3 contcd4=4 fixed=5 symm=6 asymm=7
+   (p->boundtype[ii][idir][ibound])=5;  //period=0 mpi=1 mpiperiod=2  cont=3 contcd4=4 fixed=5 symm=6 asymm=7
 }
 
 

@@ -3,7 +3,7 @@
 
 //bach3d
 __device__ __host__
-void init_user_MODID (real *w, struct params *p,int *ii) {
+void init_user_MODID (real *w, real *wd, struct params *p,int *ii) {
                     
 	real p1,p2,rho0,rho2,v1,v2,v3,T1,T2, xc,yc,zc,r0;
 	real Ly, e0,c0;

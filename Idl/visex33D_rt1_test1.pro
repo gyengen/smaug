@@ -111,7 +111,8 @@ close,2
 ;directory='/home/mikeg/proj/sac2.5d-cuda/out_OT_withhyper/'
 directory='../out/'
 ;pic=999
-name='zeroOT_'
+;name='zeroOT_'
+name='3D_atubet1slow_128_128_128_final_'
 ;ndim=2
 ;n1=800
 ;n2=6
@@ -194,19 +195,19 @@ mu_gas=0.6
 gamma=1.66667
 
 xstart=0
-xend=29
+xend=127
 ystart=0
-yend=29
+yend=127
 
-pp=25 ;x
-kk=5  ;y
+pp=63 ;x
+kk=63  ;y
 
 wset,0
 !p.multi = [0,4,4,0,1]
 
 
 zstart=0
-zend=29
+zend=127
 
 wt=dblarr(zend-zstart+1,xend-xstart+1,iw)
 wt=reform(w(zstart:zend,xstart:xend,pp,*))
@@ -276,10 +277,10 @@ zze=zz[zend]
 ;writeu,10,ww
 ;close, 10
 
-tvframe,rotate(wt(*,*,2)/(wt(*,*,0)+wt(*,*,9)),1),/sample, /bar,title='Vx', $
-        xtitle='x', ytitle='z',charsize=2.0, CT='dPdT', $
-	xrange=[xx[xstart]/scale, xx[xend]/scale], $
-	yrange=[zz[zstart]/scale, zz[zend]/scale]
+;tvframe,rotate(wt(*,*,2)/(wt(*,*,0)+wt(*,*,9)),1),/sample, /bar,title='Vx', $
+;        xtitle='x', ytitle='z',charsize=2.0, CT='dPdT', $
+;	xrange=[xx[xstart]/scale, xx[xend]/scale], $
+;	yrange=[zz[zstart]/scale, zz[zend]/scale]
 
 ;close,10
 ;openw,10,'/data/ap1vf/data_line_prof/vx/vx_y50.'+st,/f77_unf
@@ -288,8 +289,8 @@ tvframe,rotate(wt(*,*,2)/(wt(*,*,0)+wt(*,*,9)),1),/sample, /bar,title='Vx', $
 ;writeu,10,ww
 ;close, 10	
 
-tvframe,rotate(wt(*,*,3)/(wt(*,*,0)+wt(*,*,9)),1),/sample, /bar,title='Vy', $
-        xtitle='x', ytitle='z',charsize=2.0, CT='dPdT'
+;tvframe,rotate(wt(*,*,3)/(wt(*,*,0)+wt(*,*,9)),1),/sample, /bar,title='Vy', $
+;        xtitle='x', ytitle='z',charsize=2.0, CT='dPdT'
 	
 ;close,10
 ;openw,10,'/data/ap1vf/data_line_prof/vy/vy_y50.'+st,/f77_unf
@@ -300,7 +301,7 @@ tvframe,rotate(wt(*,*,3)/(wt(*,*,0)+wt(*,*,9)),1),/sample, /bar,title='Vy', $
 	
 
 tvframe,rotate(wy(*,*,2)/(wy(*,*,0)+wy(*,*,9)),1),/sample, /bar,title='Vx', $
-        xtitle='y', ytitle='z',charsize=2.0, CT='dPdT'
+        xtitle='y', ytitle='z',charsize=2.0;, CT='dPdT'
 	
 
 tvframe,rotate(wt(*,*,4),1),/bar, /sample, title='e', xtitle='x', ytitle='z', $

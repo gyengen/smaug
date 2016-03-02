@@ -39,7 +39,7 @@ dumd=long(1)
 
 close,1
 ;openr,1,'/fastdata/cs1mkg/smaug/spicule4_nob/zerospic1_290000.out'
-openr,1,'/fastdata/cs1mkg/smaug/spicule5_nob/zerospic1_167500.out'
+openr,1,'/data/cs1ngg/smaug/configs/zero1_ot_bin_256.ini',/f77_unf
 
 
 ;openr,1,'/fastdata/cs1mkg/smaug/spicule4_nob/zerospic1_100000.out'
@@ -95,7 +95,7 @@ nn=200 ; the number of elements in new arrays
 ;***********************************save new ini file
 close,1
 ;openw,1,'/fastdata/cs1mkg/smaug/spicule4_nob/zerospic1_asc_290001.ini'
-openw,1,'/fastdata/cs1mkg/smaug/spicule5_nob/zerospic1_asc_167501.ini'
+openw,1,'/data/cs1ngg/smaug/configs/zero1_ot_asc_256.ini'
 
 ;openw,1,'/data/ap1vf/3D_modif_200_100_100.ini',/f77_unf
 printf,1, FORMAT='(%"%s ")',headline

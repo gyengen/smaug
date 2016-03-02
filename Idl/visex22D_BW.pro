@@ -63,8 +63,8 @@ close,2
 
 ;openr,1,'/data/cs1mkg/VAC_NN_tests/zeroBW_p13.out',/f77_unf
 ;openr,1,'/home/mikeg/proj/sac2.5d-cuda/zero1_BW_bin.ini',/f77_unf
-;openr,1,'/home/mikeg/proj/sac2.5d-cuda/zero1_BW.ini',/f77_unf
-openr,1,'/home/mikeg/proj/sac2.5d-cuda/zeroOT.out',/SWAP_ENDIAN
+openr,1,'/home/cs1ngg/smaug/out/zeroOT_1300.out'
+;openr,1,'/home/cs1ngg/smaug/out/zeroOT_100.out',/SWAP_ENDIAN
 
 ;ndim=2
 ;n1=800

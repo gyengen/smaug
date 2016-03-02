@@ -10,8 +10,8 @@ int ngk=2;
 #ifdef USE_SAC
 //vac ozt
 int ni;
-ni=248;    //OZT tests
-ni=ni+2*ngi;
+ni=256;    //OZT tests
+//ni=ni+2*ngi;
 //ni=512;
 //real xmax = 6.2831853;  
 real xmax=1.0;
@@ -23,10 +23,10 @@ real dx = xmax/(ni);
 // Define the y domain
 #ifdef USE_SAC
 //vac ozt
-int nj = 248;  //OZT tests
+int nj = 256;  //OZT tests
 //int nj=2;  //BW test
-nj=nj+2*ngj;
-//nj=512;
+//nj=nj+2*ngj;
+//nj..=512;
 //real ymax = 6.2831853; 
 real ymax = 1.0;   
 real dy = ymax/(nj);    
@@ -69,8 +69,8 @@ int finishsteering=0;
 
 //char *cfgfile="zero1_np020203.ini";
 //char *cfgfile="zero1_np0201.ini";
-//char *cfgfile="configs/zero1_ot_asc.ini";
-char *cfgfile="configs/zero1_ot_asc_252.ini";
+char *cfgfile="configs/zero1_ot_asc_256.ini";
+//char *cfgfile="configs/zero1_ot_asc_252.ini";
 //char *cfgfile="zero1_BW_bin.ini";
 //char *cfgout="zero1_np010203."
 char *cfgout="out/zeroOT";
@@ -90,7 +90,7 @@ dt=0.0002;  //OZT test
 //nt=5000;
 //nt=200000;
 //nt=150000;
-nt=101;
+nt=12;
 
 
 real *t=(real *)calloc(nt,sizeof(real));
@@ -168,13 +168,15 @@ p->chyp3=0.00000;
 for(i=0;i<NVAR;i++)
   p->chyp[i]=0.0;
 
-p->chyp[rho]=0.2;
-p->chyp[energy]=0.2;
-p->chyp[b1]=0.2;
-p->chyp[b2]=0.2;
-p->chyp[mom1]=0.2;
-p->chyp[mom2]=0.2;
-p->chyp[rho]=0.2;
+p->chyp[rho]=0.045;
+//p->chyp[rho]=0;
+
+p->chyp[energy]=0.02;
+p->chyp[b1]=0.02;
+p->chyp[b2]=0.02;
+p->chyp[mom1]=0.4;
+p->chyp[mom2]=0.4;
+p->chyp[rho]=0.045;
 
 p->npe=1;
 

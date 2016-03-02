@@ -10,7 +10,7 @@ PRINT, 'n_colors   ', STRCOMPRESS(!D.N_COLORS,/REM)
 PRINT, 'table_size ', STRCOMPRESS(!D.TABLE_SIZE,/REM)
 
 window, 0,xsize=1200,ysize=700,XPOS = 1000, YPOS = 300 ; ZOOM
-ii=1
+ii=2
 
 if (ii eq 1) then begin
 loadct,4
@@ -64,7 +64,7 @@ close,2
 ;openr,1,'/data/cs1mkg/VAC_NN_tests/zeroBW_p13.out',/f77_unf
 ;openr,1,'/home/mikeg/proj/sac2.5d-cuda/zero1_BW_bin.ini',/f77_unf
 ;openr,1,'/home/mikeg/proj/sac2.5d-cuda/zero1_BW.ini',/f77_unf
-openr,1,'/home/mikeg/proj/sac2.5d-cuda/zeroOT.out'
+openr,1,'/data/cs1ngg/smaug/out/zeroOT_100.out'
 
 ndim=2
 ;n1=800
@@ -222,33 +222,33 @@ x2=399
 kk1=4
 kk2=4
 
-plot, (w(kk1:kk2,x1:x2,0)+w(kk1:kk2,x1:x2,7)),title='rho+rhoB', xtitle='x', ytitle='y',charsize=2.0, /ys  ,/xs,/ylog
-oplot,(w(kk1:kk2,x1:x2,0)+w(kk1:kk2,x1:x2,7)),psym=4,color=3
+;plot, (w(kk1:kk2,x1:x2,0)+w(kk1:kk2,x1:x2,7)),title='rho+rhoB', xtitle='x', ytitle='y',charsize=2.0, /ys  ,/xs,/ylog
+;oplot,(w(kk1:kk2,x1:x2,0)+w(kk1:kk2,x1:x2,7)),psym=4,color=3
 
-plot, (w(kk1:kk2,x1:x2,0)),title='rho', xtitle='x', ytitle='y',charsize=2.0, /ys  ,/xs
-oplot,(w(kk1:kk2,x1:x2,0)),psym=4,color=7
+;plot, (w(kk1:kk2,x1:x2,0)),title='rho', xtitle='x', ytitle='y',charsize=2.0, /ys  ,/xs
+;oplot,(w(kk1:kk2,x1:x2,0)),psym=4,color=7
 
 ;(w(kk1:kk2,x1:x2,1)/(w(kk1:kk2,x1:x2,0)+w(kk1:kk2,x1:x2,7)))
-plot, w(kk1:kk2,x1:x2,1)/(w(kk1:kk2,x1:x2,0)+w(kk1:kk2,x1:x2,7)),title='v1', xtitle='x', ytitle='y',charsize=2.0 ,/ys ,/xs
-oplot,w(kk1:kk2,x1:x2,1)/(w(kk1:kk2,x1:x2,0)+w(kk1:kk2,x1:x2,7)),psym=4,color=2
-plot, (w(kk1:kk2,x1:x2,2)/(w(kk1:kk2,x1:x2,0)+w(kk1:kk2,x1:x2,7))), title='v2',xtitle='x', ytitle='z',charsize=2.0 ,/ys,/xs
-oplot,(w(kk1:kk2,x1:x2,2)/(w(kk1:kk2,x1:x2,0)+w(kk1:kk2,x1:x2,7))),psym=4,color=6
+;plot, w(kk1:kk2,x1:x2,1)/(w(kk1:kk2,x1:x2,0)+w(kk1:kk2,x1:x2,7)),title='v1', xtitle='x', ytitle='y',charsize=2.0 ,/ys ,/xs
+;oplot,w(kk1:kk2,x1:x2,1)/(w(kk1:kk2,x1:x2,0)+w(kk1:kk2,x1:x2,7)),psym=4,color=2
+;plot, (w(kk1:kk2,x1:x2,2)/(w(kk1:kk2,x1:x2,0)+w(kk1:kk2,x1:x2,7))), title='v2',xtitle='x', ytitle='z',charsize=2.0 ,/ys,/xs
+;oplot,(w(kk1:kk2,x1:x2,2)/(w(kk1:kk2,x1:x2,0)+w(kk1:kk2,x1:x2,7))),psym=4,color=6
 
 
-plot, (w(kk1:kk2,x1:x2,3)),title='e', xtitle='x', ytitle='y',charsize=2.0,/xs ;,psym=3
-oplot,(w(kk1:kk2,x1:x2,3)),psym=4,color=6
+;plot, (w(kk1:kk2,x1:x2,3)),title='e', xtitle='x', ytitle='y',charsize=2.0,/xs ;,psym=3
+;oplot,(w(kk1:kk2,x1:x2,3)),psym=4,color=6
 
-plot, w(kk1:kk2,x1:x2,6)+w(kk1:kk2,x1:x2,3), title='eb+e', xtitle='x', ytitle='z', charsize=2.0   ,/xs 
-oplot, w(kk1:kk2,x1:x2,6)+w(kk1:kk2,x1:x2,3),psym=5,color=5
-
-
-plot, (w(kk1:kk2,x1:x2,7)), title='rhob', xtitle='x', ytitle='z', charsize=2.0, /ys    ,/xs
-
-plot, w(kk1:kk2,x1:x2,6)+w(kk1:kk2,x1:x2,3), title='e_T', xtitle='x', ytitle='z', charsize=2.0   ,/xs 
+;plot, w(kk1:kk2,x1:x2,6)+w(kk1:kk2,x1:x2,3), title='eb+e', xtitle='x', ytitle='z', charsize=2.0   ,/xs 
+;oplot, w(kk1:kk2,x1:x2,6)+w(kk1:kk2,x1:x2,3),psym=5,color=5
 
 
-plot, w(kk1:kk2,x1:x2,5),title='By', xtitle='x', ytitle='y',charsize=2.0, /ys  ,/xs
-oplot,w(kk1:kk2,x1:x2,5),psym=4,color=3
+;plot, (w(kk1:kk2,x1:x2,7)), title='rhob', xtitle='x', ytitle='z', charsize=2.0, /ys    ,/xs
+
+;plot, w(kk1:kk2,x1:x2,6)+w(kk1:kk2,x1:x2,3), title='e_T', xtitle='x', ytitle='z', charsize=2.0   ,/xs 
+
+
+;plot, w(kk1:kk2,x1:x2,5),title='By', xtitle='x', ytitle='y',charsize=2.0, /ys  ,/xs
+;oplot,w(kk1:kk2,x1:x2,5),psym=4,color=3
 print,'endelse'
 
 endelse

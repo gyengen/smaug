@@ -29,7 +29,7 @@ myt=dblarr(npic)
 et=dblarr(npic)
 rhot=dblarr(npic)
 
-;pic=5000L
+pic=5000L
 for ipic=pic,pic do begin
 ;for ipic=0L,1000L do begin
 
@@ -95,9 +95,12 @@ name='zeroOT_'
 ;picid=ipic*10
 picid=ipic
 outfile=directory+name+strtrim(string(picid),2)+'.out'
-openr,1,outfile
+openr,1,'/data/cs1ngg/smaug/out/zeroOT_2500.out'
+;openr,1,outfile
 readu,1,headline
 readu,1,it,time,ndim,neqpar,nw
+
+
 gencoord=(ndim lt 0)
 tarr=[tarr,time]
 ;ndim=abs(ndim)
@@ -441,8 +444,8 @@ case a of
  4:indexss='0'+indexs                                               
 endcase   
 
-image_p = TVRD_24()
-write_png,'/data/cs1mkg/smaug/Idl/imagesot512/'+indexss+'.png',image_p, red,green, blue
+;image_p = TVRD_24()
+write_png,'/data/cs1ngg/smaug/Idl/imagesot512/'+indexss+'.png',image_p, red,green, blue
 ;stop
 ;endwhile
 close,1

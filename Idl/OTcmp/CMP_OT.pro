@@ -168,7 +168,7 @@ Initialisation
 smaug_out=filaname_sort(SMAUG_FOLDER) ; Read SMAUG result files and sort them
 number_of_step=n_elements(smaug_out) ; number of simulation time steps
 openr, 1, SAC_FOLDER, /f77_unf ; open SAC output file
-SAC, B_SAC, sac_t ;ignore the first step
+;SAC, B_SAC, sac_t ;qqqignore the first step
 iter=0  ; iteration step
 cmp_energy=[] ; energy comparison between sac and smaug -2D plot, 4th subpanel
 cmp_rho=[] ; density comparison between sac and smaug, 4th subpanel
@@ -177,6 +177,7 @@ WHILE NOT(eof(1)) DO BEGIN
 	SAC, B_SAC, sac_t, sac_rho, sac_energy ;read one layer of SAC
 	SMAUG, smaug_out[iter], B_SMAUG, smaug_t, smaug_rho, smaug_energy ;read one layer of SMAUG
 	signal=ERROR_CHECK(B_SAC, B_SMAUG, smaug_t, sac_t, iter) ;check dimensions and time 
+	signal=0
 	IF signal EQ 0 THEN BEGIN 
 		x=[x,iter] ;fill up the 2D plot
 		cmp_energy=[cmp_energy, ABS(sac_energy-smaug_energy)] ;fill up the 2D plot

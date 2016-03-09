@@ -1,4 +1,4 @@
-edit from mike pushed to norbis rep
+dit from mike pushed to norbis rep
 Guidelines for Using SMAUG Sheffield Magnetohydrodynamics Accelerated Using GPUs
 
 Introduction
